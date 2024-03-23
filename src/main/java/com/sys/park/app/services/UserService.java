@@ -43,7 +43,7 @@ public class UserService {
                     .map(user -> modelMapper.map(user, UserDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar as Ações!", e.getErrorMessages());
+            throw new BusinessRuleException("Não é possível consultar os Usuários!", e.getErrorMessages());
         }
     }
 
@@ -54,14 +54,14 @@ public class UserService {
             Optional<UserModel> byLogin = userRepository.findByLogin(newUser.getLogin());
             
             if (byLogin.isPresent()) {
-                throw new DataIntegrityException("Login já registrado.");
+                throw new DataIntegrityException("Usuário já registrado.");
             }
             
             newUser = userRepository.save(newUser);
             return modelMapper.map(newUser, UserDto.class);
 
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) da Ação não foi(foram) preenchido(s).");
+            throw new DataIntegrityException("Campo(s) obrigatório(s) da Usuário não foi(foram) preenchido(s).");
         }
     }
 

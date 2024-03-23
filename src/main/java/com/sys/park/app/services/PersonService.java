@@ -51,6 +51,12 @@ public class PersonService {
         try {
             PersonModel newPerson = modelMapper.map(personForm, PersonModel.class);
             
+            Optional<PersonModel> byCpf = personRepository.findByCpf(newPerson.getCpf());
+            
+            if (byCpf.isPresent()) {
+                throw new DataIntegrityException("Usuário já registrado.");
+            }
+
             newPerson = personRepository.save(newPerson);
             return modelMapper.map(newPerson, PersonDto.class);
 
@@ -74,7 +80,7 @@ public class PersonService {
                 throw new DataIntegrityException("O Id da Pessoa não existe na base de dados!");
             }
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Usuário não foi(foram) preenchido(s).");
+            throw new DataIntegrityException("Campo(s) obrigatório(s) da Pessoa não foi(foram) preenchido(s).");
         }
     }
 
