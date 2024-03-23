@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerForm;
@@ -17,6 +18,7 @@ import com.sys.park.app.services.exceptions.BusinessRuleException;
 import com.sys.park.app.services.exceptions.DataIntegrityException;
 import com.sys.park.app.services.exceptions.NotFoundException;
 
+@Service
 public class CustomerService {
     @Autowired
     CustomerRepository customerRepository;
