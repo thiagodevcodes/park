@@ -47,13 +47,23 @@ public class PersonService {
         }
     }
 
-    public PersonDto insert(PersonDto personDto) {
+    public PersonDto insert(PersonDto personDto, Integer customerType) {
         try {
             PersonModel newPerson = modelMapper.map(personDto, PersonModel.class);
             
+            Optional<PersonModel> cpfExist = personRepository.findByCpf(personDto.getCpf());
+            Optional<PersonModel> emailExist = personRepository.findByEmail(personDto.getEmail());
+                
+            if(cpfExist.isPresent()) {
+                throw new DataIntegrityException("CPF já cadastrado!.");
+            }
+
+            if(emailExist.isPresent()) {
+                throw new DataIntegrityException("Email já cadastrado!.");
+            }
+            
             newPerson = personRepository.save(newPerson);
             return modelMapper.map(newPerson, PersonDto.class);
-
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Campo(s) obrigatório(s) da Pessoa não foi(foram) preenchido(s).");
         }
@@ -88,6 +98,15 @@ public class PersonService {
             }
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível excluir a Pessoa!");
+        }
+    }
+
+    public PersonDto findByCpf(String cpf) {
+        try {
+            PersonModel personModel = personRepository.findByCpf(cpf).get();
+            return modelMapper.map(personModel, PersonDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());
         }
     }
 }

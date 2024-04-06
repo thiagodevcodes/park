@@ -14,12 +14,10 @@ import org.springframework.stereotype.Service;
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerForm;
 import com.sys.park.app.dtos.Customer.CustomerMensalista;
+import com.sys.park.app.dtos.CustomerType.CustomerTypeDto;
+import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.models.CustomerModel;
-import com.sys.park.app.models.CustomerTypeModel;
-import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.CustomerRepository;
-import com.sys.park.app.repositories.CustomerTypeRepository;
-import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
 import com.sys.park.app.services.exceptions.DataIntegrityException;
 import com.sys.park.app.services.exceptions.NotFoundException;
@@ -31,13 +29,10 @@ public class CustomerService {
 
     @Autowired 
     PersonService personService;
-    
-    @Autowired
-    PersonRepository personRepository;
 
-    @Autowired 
-    CustomerTypeRepository customerTypeRepository;
-    
+    @Autowired
+    CustomerTypeService customerTypeService;
+       
     @Autowired
     private ModelMapper modelMapper;
 
@@ -112,16 +107,17 @@ public class CustomerService {
 
         for (CustomerModel customer : customers) {
             CustomerMensalista newDto = new CustomerMensalista();
-            Optional<PersonModel> personModel = personRepository.findById(customer.getIdPerson());
-            Optional<CustomerTypeModel> customerTypeModel = customerTypeRepository.findById(customer.getIdCustomerType());
-            
-            if(personModel.isPresent() && customerTypeModel.isPresent() && customer.getIsActive()) {
+
+            PersonDto personDto = personService.findById(customer.getIdPerson());
+            CustomerTypeDto customerTypeDto = customerTypeService.findById(customer.getIdCustomerType());
+
+            if(personDto != null && customerTypeDto != null && customer.getIsActive()) {
                 newDto.setId(customer.getId());
-                newDto.setCpf(personModel.get().getCpf());
-                newDto.setEmail(personModel.get().getEmail());
-                newDto.setName(personModel.get().getName());
-                newDto.setClientName(customerTypeModel.get().getName());
-                newDto.setPhone(personModel.get().getPhone());
+                newDto.setCpf(personDto.getCpf());
+                newDto.setEmail(personDto.getEmail());
+                newDto.setName(personDto.getName());
+                newDto.setClientType(customerType);
+                newDto.setPhone(personDto.getPhone());
                 newDto.setPaymentDay(customer.getPaymentDay());
                 newDto.setIsActive(true);
                 newDtoList.add(newDto);
@@ -133,30 +129,40 @@ public class CustomerService {
 
     public CustomerMensalista createNewCustomer(CustomerForm customerForm, Integer customerType) {
         try {
-            CustomerModel newCustomer = new CustomerModel();
-            PersonModel newPerson = new PersonModel();
             CustomerMensalista newDto = new CustomerMensalista();
+            PersonDto personDto = new PersonDto();
+            CustomerDto customerDto = new CustomerDto();
 
-            newPerson.setCpf(customerForm.getCpf());
-            newPerson.setEmail(customerForm.getEmail());
-            newPerson.setName(customerForm.getName());
-            newPerson.setPhone(customerForm.getPhone());
+            if(customerType == 2) {
+                personDto.setCpf(customerForm.getCpf());
+                personDto.setEmail(customerForm.getEmail());
+                personDto.setName(customerForm.getName());
+                personDto.setPhone(customerForm.getPhone());
 
-            newPerson = personRepository.save(newPerson);
-   
-            newCustomer.setIdPerson(newPerson.getId());
-            newCustomer.setIdCustomerType(customerType);
-            newCustomer.setPaymentDay(customerForm.getPaymentDay());
-            newCustomer.setIsActive(true);
+                personDto = personService.insert(personDto, customerType);
     
-            newCustomer = customerRepository.save(newCustomer);
+                customerDto.setIdPerson(personDto.getId());
+                customerDto.setIdCustomerType(customerType);
+                customerDto.setPaymentDay(customerForm.getPaymentDay());
+                customerDto.setIsActive(true);
+            } else if(customerType == 1) {
+                personDto.setName(customerForm.getName());
+                personDto = personService.insert(personDto, customerType);
+                
+                customerDto.setIdPerson(personDto.getId());
+                customerDto.setIdCustomerType(customerType);
+                customerDto.setPaymentDay(customerForm.getPaymentDay());
+                customerDto.setIsActive(true);
+            }
+
+            customerDto = this.insert(customerDto);
     
-            newDto.setCpf(newPerson.getCpf());
-            newDto.setEmail(newPerson.getEmail());
-            newDto.setName(newPerson.getName());
-            newDto.setPaymentDay(newCustomer.getPaymentDay());
-            newDto.setPhone(newPerson.getPhone());
-            newDto.setClientName("Mensalista");
+            newDto.setCpf(personDto.getCpf());
+            newDto.setEmail(personDto.getEmail());
+            newDto.setName(personDto.getName());
+            newDto.setPaymentDay(customerDto.getPaymentDay());
+            newDto.setPhone(personDto.getPhone());
+            newDto.setClientType(customerType);
         
             return newDto;
 

@@ -10,6 +10,6 @@ public class CustomerMensalista {
     private String email;
     private String cpf;
     private Integer paymentDay;
-    private String clientName;
+    private Integer clientType;
     private Boolean isActive;
 }

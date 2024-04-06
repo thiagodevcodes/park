@@ -110,75 +110,90 @@ public class TicketService {
     }
 
     public TicketDto createNewMov(MovimentacaoDto movimentacaoDto) {    
-        VehicleDto vehicleDto = new VehicleDto();
-        PersonDto personDto = new PersonDto();
-        CustomerDto customerDto = new CustomerDto();
-        VacancyDto vacancyDto = new VacancyDto();
+        try {
+            VehicleDto vehicleDto = new VehicleDto();
+            PersonDto personDto = new PersonDto();
+            CustomerDto customerDto = new CustomerDto();
+            VacancyDto vacancyDto = new VacancyDto();
         
-        TicketDto ticketDto = new TicketDto();
-        LocalDateTime time = LocalDateTime.now();
+            TicketDto ticketDto = new TicketDto();
+            LocalDateTime time = LocalDateTime.now();
 
-        vacancyDto = vacancyService.findById(movimentacaoDto.getVacancy());
+            vacancyDto = vacancyService.findById(movimentacaoDto.getVacancy());
 
-        if(vacancyDto != null) {
-            vacancyDto.setSituation(false);
-            vacancyService.updateById(vacancyDto, movimentacaoDto.getVacancy());
-        }
+            if(vacancyDto != null) {
+                vacancyDto.setSituation(false);
+                vacancyService.updateById(vacancyDto, movimentacaoDto.getVacancy());
+            }
        
-        if(movimentacaoDto.getIdCustomerType() == 1) {
-            personDto.setName(movimentacaoDto.getName());
-            personDto = personService.insert(personDto);
+            if(movimentacaoDto.getIdCustomerType() == 1) {
+                personDto.setName(movimentacaoDto.getName());
+                personDto = personService.insert(personDto, 1);
 
-            customerDto.setIdCustomerType(1);
-            customerDto.setIsActive(true);
-            customerDto.setIdPerson(personDto.getId());
-            customerDto = customerService.insert(customerDto);
+                customerDto.setIdCustomerType(1);
+                customerDto.setIsActive(true);
+                customerDto.setIdPerson(personDto.getId());
+                customerDto = customerService.insert(customerDto);
 
-            vehicleDto = vehicleService.findByPlate(movimentacaoDto.getPlate());
+                vehicleDto = vehicleService.findByPlate(movimentacaoDto.getPlate());
 
-            if(vehicleDto == null) {
-                movimentacaoDto.setIdCustomer(customerDto.getId());
-                vehicleDto = modelMapper.map(movimentacaoDto, VehicleDto.class);
-                vehicleDto = vehicleService.insert(vehicleDto); 
-            } 
-            
+                if(vehicleDto == null) {
+                    movimentacaoDto.setIdCustomer(customerDto.getId());
+                    vehicleDto = modelMapper.map(movimentacaoDto, VehicleDto.class);
+                    vehicleDto = vehicleService.insert(vehicleDto); 
+                } 
+            } else if(movimentacaoDto.getIdCustomerType() == 2) {
+                customerDto = customerService.findById(movimentacaoDto.getIdCustomer());
+                vehicleDto = vehicleService.findById(movimentacaoDto.getIdVehicle());
+            }
+
             ticketDto.setEntryTime(time);
             ticketDto.setExitTime(null);
             ticketDto.setIdCustomer(customerDto.getId());
             ticketDto.setIdVacancy(vacancyDto.getId());
             ticketDto.setIdVehicle(vehicleDto.getId());
-            
-            ticketDto = this.insert(ticketDto);
-        }
 
-        return ticketDto;
+            ticketDto = this.insert(ticketDto);
+
+            return ticketDto;    
+        } catch (DataIntegrityException e) {
+            throw new DataIntegrityException("Não é possível listar os Tickets!");
+        }
     }
 
     public List<MovimentacaoDto> findAllMov() {
-        List<TicketDto> ticketDto = this.findAll();
-        List<MovimentacaoDto> newDtoList = new ArrayList<>();
+        try {
+            List<TicketDto> ticketDto = this.findAll();
+            List<MovimentacaoDto> newDtoList = new ArrayList<>();       
 
-        for (TicketDto ticket : ticketDto) {
-            MovimentacaoDto newDto = new MovimentacaoDto();
+            for (TicketDto ticket : ticketDto) {
+                MovimentacaoDto newDto = new MovimentacaoDto();
 
-            CustomerDto customerDto = customerService.findById(ticket.getIdCustomer());
-            VehicleDto vehicleDto = vehicleService.findById(ticket.getIdVehicle());
-            PersonDto personDto = personService.findById(customerDto.getIdPerson());
+                CustomerDto customerDto = customerService.findById(ticket.getIdCustomer());
+                VehicleDto vehicleDto = vehicleService.findById(ticket.getIdVehicle());
+                PersonDto personDto = personService.findById(customerDto.getIdPerson());
+
             
-            if(personDto != null && vehicleDto != null && ticket.getExitTime() == null) {
-                newDto.setId(ticket.getId());
-                newDto.setEntryTime(ticket.getEntryTime());
-                newDto.setExitTime(ticket.getExitTime());
-                newDto.setName(personDto.getName());
-                newDto.setMake(vehicleDto.getMake());
-                newDto.setModel(vehicleDto.getModel());
-                newDto.setPlate(vehicleDto.getPlate());
-                newDto.setVacancy(ticket.getIdVacancy());
-                newDto.setIdCustomerType(customerDto.getIdCustomerType());
-                newDtoList.add(newDto);
-            }
+                if(personDto != null && vehicleDto != null && ticket.getExitTime() == null) {
+                    newDto.setId(ticket.getId());
+                    newDto.setEntryTime(ticket.getEntryTime());
+                    newDto.setExitTime(ticket.getExitTime());
+                    newDto.setName(personDto.getName());
+                    newDto.setMake(vehicleDto.getMake());
+                    newDto.setModel(vehicleDto.getModel());
+                    newDto.setPlate(vehicleDto.getPlate());
+                    newDto.setVacancy(ticket.getIdVacancy());
+                    newDto.setIdCustomerType(customerDto.getIdCustomerType());
+                    newDtoList.add(newDto);
+                }
+            } 
+            
+            return newDtoList;
+        } catch (DataIntegrityException e) {
+            throw new DataIntegrityException("Não é possível listar os Tickets!");
         }
+        
 
-        return newDtoList;
+        
     }
 }

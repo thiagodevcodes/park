@@ -47,6 +47,21 @@ public class VehicleController {
         return ResponseEntity.ok().body(vehicleDtoList);
     }
 
+    @PostMapping("/mensalistas")
+    public ResponseEntity<VehicleDto> addMensalVehicle(@Valid @RequestBody VehicleForm vehicleForm, BindingResult br) {
+    
+        if (br.hasErrors()) {
+            List<String> errors = br.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            throw new ConstraintException("Restrição de Dados", errors);
+        }
+
+        VehicleDto vehicleDto = vehicleService.createVehicleMensalista(modelMapper.map(vehicleForm, VehicleDto.class));
+        return ResponseEntity.ok().body(vehicleDto);
+    }
+
     @GetMapping
     public ResponseEntity<List<VehicleDto>> findAll() {
         List<VehicleDto> vehicleDtoList = vehicleService.findAll();

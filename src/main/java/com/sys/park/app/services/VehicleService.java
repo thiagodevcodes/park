@@ -122,4 +122,22 @@ public class VehicleService {
             throw new DataIntegrityException("O veículo não existe na base de dados!");
         }
     }
+
+    public VehicleDto createVehicleMensalista(VehicleDto vehicleDto) {
+        try {
+            VehicleDto vehicle = new VehicleDto();
+
+            vehicle.setPlate(vehicleDto.getPlate());
+            vehicle.setMake(vehicleDto.getMake());
+            vehicle.setModel(vehicleDto.getModel());
+            vehicle.setIsActive(true);
+            vehicle.setIdCustomer(vehicleDto.getIdCustomer());
+    
+            vehicle = this.insert(vehicleDto);
+            
+            return vehicle;
+        } catch (Exception e) {
+            throw new DataIntegrityException("Erro ao criar o veículo!");
+        }   
+    }
 }

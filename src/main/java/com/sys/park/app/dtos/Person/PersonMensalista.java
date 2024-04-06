@@ -18,14 +18,12 @@ public class PersonMensalista {
     private String name;
 
     @NotEmpty(message = "O cpf não pode ser vazio")
-    @NotNull(message = "O cpf não pode ser nulo")
     @NotBlank(message = "O cpf não pode estar em branco")
     @Size(max = 11, message = "O cpf pode ter no máximo 11 caracteres")
     @CPF(message = "CPF Inválido")
     private String cpf;
 
     @NotEmpty(message = "O email não pode ser vazio")
-    @NotNull(message = "O email não pode ser nulo")
     @NotBlank(message = "O email não pode estar em branco")
     @Size(max = 100, message = "O email pode ter no máximo 100 caracteres")
     @Email(message = "O email é inválido")
@@ -36,4 +34,6 @@ public class PersonMensalista {
     @NotBlank(message = "O telefone não pode estar em branco")
     @Size(max = 30, message = "O telefone pode ter no máximo 30 caracteres")
     private String phone;
+
+    private Integer clientType;
 }

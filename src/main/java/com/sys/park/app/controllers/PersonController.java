@@ -48,7 +48,6 @@ public class PersonController {
 
     @PostMapping
     public ResponseEntity<PersonDto> insert(@Valid @RequestBody PersonMensalista personForm, BindingResult br) {
-            
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -57,7 +56,7 @@ public class PersonController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        PersonDto personDto = personService.insert(modelMapper.map(personForm, PersonDto.class));
+        PersonDto personDto = personService.insert(modelMapper.map(personForm, PersonDto.class), personForm.getClientType());
         return ResponseEntity.ok().body(personDto);
     }
 

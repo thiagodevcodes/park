@@ -24,11 +24,5 @@ public class VehicleForm {
     @Size(message = "O tamanho não pode ultrapassar 20 caracteres")
     private String model;
 
-    @NotEmpty(message = "A marca não pode ser vazia")
-    @Size(max = 100, message = "O marca pode ter no máximo 100 caracteres")
-    private String type;
-
-    @NotEmpty(message = "A cor não pode ser vazia")
-    @Size(max = 100, message = "A cor pode ter no máximo 100 caracteres")
-    private String color;
+    private Integer idCustomer;
 }
