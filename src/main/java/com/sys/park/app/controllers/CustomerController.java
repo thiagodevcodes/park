@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerForm;
+import com.sys.park.app.dtos.Customer.CustomerMensalista;
 import com.sys.park.app.services.CustomerService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -35,15 +36,21 @@ public class CustomerController {
         CustomerDto customerDto = customerService.findById(id);
         return ResponseEntity.ok().body(customerDto);
     }
-
+    
     @GetMapping
     public ResponseEntity<List<CustomerDto>> findAll() {
         List<CustomerDto> customerDtoList = customerService.findAll();
         return ResponseEntity.ok().body(customerDtoList);
     }
 
+    @GetMapping("/mensalistas")
+    public ResponseEntity<List<CustomerMensalista>> findMensal() {
+        List<CustomerMensalista> customerDtoList = customerService.findByCustomerType(2);
+        return ResponseEntity.ok().body(customerDtoList);
+    }
+
     @PostMapping
-    public ResponseEntity<CustomerDto> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {
+    public ResponseEntity<CustomerMensalista> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -53,12 +60,35 @@ public class CustomerController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        CustomerDto customerDto = customerService.insert(customerForm);
+        CustomerMensalista customerDto = customerService.createNewCustomer(customerForm, 2);
         return ResponseEntity.ok().body(customerDto);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomerDto> update(@Valid @RequestBody
+        CustomerDto costumerForm, @PathVariable("id") Integer id, BindingResult br) {
+       
+        if (br.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            br.getAllErrors().forEach(e -> {
+                errors.add(e.getDefaultMessage());
+            });
+
+            throw new ConstraintException("Restrição de Dados", errors);
+        }
+     
+        CustomerDto costumerDto = customerService.finishCustomer(id);
+        return ResponseEntity.ok().body(costumerDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+        customerService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/finish/{id}")
+    public ResponseEntity<CustomerDto> finish(@Valid @RequestBody
         CustomerForm costumerForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
@@ -70,13 +100,7 @@ public class CustomerController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-        CustomerDto costumerDto = customerService.updateById(costumerForm, id);
+        CustomerDto costumerDto = customerService.finishCustomer(id);
         return ResponseEntity.ok().body(costumerDto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
-        customerService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

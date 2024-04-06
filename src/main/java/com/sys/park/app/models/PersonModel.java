@@ -24,13 +24,13 @@ public class PersonModel {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email", length = 255, nullable = false, unique = true)
+    @Column(name = "email", length = 255, nullable = true, unique = true)
     private String email;
 
-    @Column(name = "cpf", length = 255, nullable = false, unique = true)
+    @Column(name = "cpf", length = 255, nullable = true, unique = true)
     private String cpf;
 
-    @Column(name = "phone", length = 255, nullable = false)
+    @Column(name = "phone", length = 255, nullable = true)
     private String phone;
 
     @CreationTimestamp

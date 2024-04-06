@@ -6,5 +6,7 @@ import lombok.Data;
 public class CustomerDto {
     private Integer id;
     private Integer idPerson;
-    private Integer idCostumerType;
+    private Integer paymentDay;
+    private Integer idCustomerType;
+    private Boolean isActive;
 }

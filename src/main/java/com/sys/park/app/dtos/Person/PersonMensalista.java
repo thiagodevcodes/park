@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class PersonForm {
+public class PersonMensalista {
     @NotEmpty(message = "O nome não pode ser vazio")
     @NotBlank(message = "O nome não pode estar em branco")
     @Size(max = 100, message = "O nome pode ter no máximo 100 caracteres")

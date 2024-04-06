@@ -47,9 +47,9 @@ public class VehicleService {
         }
     }
 
-    public VehicleDto insert(VehicleForm vehicleForm) {
+    public VehicleDto insert(VehicleDto vehicleDto) {
         try {
-            VehicleModel newVehicle = modelMapper.map(vehicleForm, VehicleModel.class);
+            VehicleModel newVehicle = modelMapper.map(vehicleDto, VehicleModel.class);
             
             Optional<VehicleModel> byPlate = vehicleRepository.findByPlate(newVehicle.getPlate());
             
@@ -93,6 +93,33 @@ public class VehicleService {
             }
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível excluir a Pessoa!");
+        }
+    }
+
+    public List<VehicleDto> findByCustomer(Integer idCustomer) {
+        try {
+            List<VehicleModel> vehicles = vehicleRepository.findByIdCustomer(idCustomer);
+            
+            return vehicles.stream()
+            .map(vehicle -> modelMapper.map(vehicle, VehicleDto.class))
+            .collect(Collectors.toList());
+
+        } catch (NoSuchElementException e) {
+            throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
+        }
+    }
+
+    public VehicleDto findByPlate(String plate) {
+        try {
+            Optional<VehicleModel> vehicleModel = vehicleRepository.findByPlate(plate);
+
+            if(vehicleModel.isPresent()) {
+                return modelMapper.map(vehicleModel.get(), VehicleDto.class);
+            } else {
+                return null;
+            }
+        } catch (NoSuchElementException e) {
+            throw new DataIntegrityException("O veículo não existe na base de dados!");
         }
     }
 }

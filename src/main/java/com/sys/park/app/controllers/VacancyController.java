@@ -19,13 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Vacancy.VacancyDto;
 import com.sys.park.app.dtos.Vacancy.VacancyForm;
+import com.sys.park.app.dtos.Vacancy.VacancyResponse;
 import com.sys.park.app.services.VacancyService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/vacancys")
+@RequestMapping("/vacancies")
 public class VacancyController {
     @Autowired
     VacancyService vacancyService;
@@ -37,9 +38,18 @@ public class VacancyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VacancyDto>> findAll() {
+    public ResponseEntity<VacancyResponse> findAll() {
         List<VacancyDto> vacancyDtoList = vacancyService.findAll();
-        return ResponseEntity.ok().body(vacancyDtoList);
+        Integer vagasLivres = vacancyService.vacanciesNotOcuppuied();
+        Integer vagasOcupadas = vacancyService.vacanciesOcuppied();
+
+        VacancyResponse vacancyResponse = new VacancyResponse();
+
+        vacancyResponse.setVacanciesNotOccupied(vagasLivres);
+        vacancyResponse.setVacanciesOccupied(vagasOcupadas);
+        vacancyResponse.setVacanciesList(vacancyDtoList);
+
+        return ResponseEntity.ok().body(vacancyResponse);
     }
 
     @PostMapping
@@ -59,7 +69,7 @@ public class VacancyController {
 
     @PutMapping("/{id}")
     public ResponseEntity<VacancyDto> update(@Valid @RequestBody
-        VacancyForm vacancyForm, @PathVariable("id") Integer id, BindingResult br) {
+        VacancyDto vacancyDto, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -70,8 +80,8 @@ public class VacancyController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-        VacancyDto vacancyDto = vacancyService.updateById(vacancyForm, id);
-        return ResponseEntity.ok().body(vacancyDto);
+        VacancyDto vacancyUpdated = vacancyService.updateById(vacancyDto, id);
+        return ResponseEntity.ok().body(vacancyUpdated);
     }
 
     @DeleteMapping("/{id}")

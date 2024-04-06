@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class VacancyDto {
+    private Integer id;
     private Boolean situation;
 }

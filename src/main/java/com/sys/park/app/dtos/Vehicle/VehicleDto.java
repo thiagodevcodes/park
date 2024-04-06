@@ -12,5 +12,6 @@ public class VehicleDto {
     private String plate;
     private String make;
     private String model;
+    private Integer idCustomer;
     private Boolean isActive;
 }

@@ -60,14 +60,14 @@ public class VacancyService {
         }
     }
 
-    public VacancyDto updateById(VacancyForm vacancyForm, Integer id) {
+    public VacancyDto updateById(VacancyDto vacancyDto, Integer id) {
         try {
             Optional<VacancyModel> vacancyExist = vacancyRepository.findById(id);
 
             if (vacancyExist.isPresent()) {
                 VacancyModel vacancyUpdated = vacancyExist.get();
 
-                modelMapper.map(vacancyForm, vacancyUpdated);
+                modelMapper.map(vacancyDto, vacancyUpdated);
                 vacancyUpdated = vacancyRepository.save(vacancyUpdated);
 
                 return modelMapper.map(vacancyUpdated, VacancyDto.class);
@@ -90,5 +90,13 @@ public class VacancyService {
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível excluir a Vaga!");
         }
+    }
+
+    public Integer vacanciesOcuppied() {
+        return vacancyRepository.countBySituationFalse();
+    }
+
+    public Integer vacanciesNotOcuppuied() {
+        return vacancyRepository.countBySituationTrue();
     }
 }

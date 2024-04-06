@@ -28,6 +28,9 @@ public class TicketModel {
     @Column(name = "id_vacancy", nullable = false)
     private Integer idVacancy;
 
+    @Column(name = "id_customer", nullable = false)
+    private Integer idCustomer;
+
     @Column(name = "entry_time", nullable = false)
     private LocalDateTime entryTime;
 
@@ -35,7 +38,7 @@ public class TicketModel {
     private LocalDateTime exitTime;
 
     @Column(name = "total_price")
-    private Float totalPrice;
+    private Double totalPrice;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

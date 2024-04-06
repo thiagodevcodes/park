@@ -7,5 +7,6 @@ import com.sys.park.app.models.VacancyModel;
 
 @Repository
 public interface VacancyRepository extends JpaRepository<VacancyModel, Integer> {
-    
+    Integer countBySituationTrue();
+    Integer countBySituationFalse();
 }

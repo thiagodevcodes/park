@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleForm;
+import com.sys.park.app.models.VehicleModel;
 import com.sys.park.app.services.VehicleService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -30,10 +32,19 @@ public class VehicleController {
     @Autowired
     VehicleService vehicleService;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     @GetMapping("/{id}")
     public ResponseEntity<VehicleDto> find(@PathVariable("id") Integer id) {        
         VehicleDto vehicleDto = vehicleService.findById(id);
         return ResponseEntity.ok().body(vehicleDto);
+    }
+
+    @GetMapping("/mensalistas/{id}")
+    public ResponseEntity<List<VehicleDto>> findVehiclesByIdCustomer(@PathVariable("id") Integer idCustomer) {
+        List<VehicleDto> vehicleDtoList = vehicleService.findByCustomer(idCustomer);
+        return ResponseEntity.ok().body(vehicleDtoList);
     }
 
     @GetMapping
@@ -53,8 +64,8 @@ public class VehicleController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        VehicleDto vehicleDto = vehicleService.insert(vehicleForm);
-        return ResponseEntity.ok().body(vehicleDto);
+        VehicleModel vehicleModel = modelMapper.map(vehicleForm, VehicleModel.class);
+        return ResponseEntity.ok().body(modelMapper.map(vehicleModel, VehicleDto.class));
     }
 
     @PutMapping("/{id}")

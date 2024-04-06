@@ -11,7 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.dtos.Person.PersonForm;
+import com.sys.park.app.dtos.Person.PersonMensalista;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -47,16 +47,10 @@ public class PersonService {
         }
     }
 
-    public PersonDto insert(PersonForm personForm) {
+    public PersonDto insert(PersonDto personDto) {
         try {
-            PersonModel newPerson = modelMapper.map(personForm, PersonModel.class);
+            PersonModel newPerson = modelMapper.map(personDto, PersonModel.class);
             
-            Optional<PersonModel> byCpf = personRepository.findByCpf(newPerson.getCpf());
-            
-            if (byCpf.isPresent()) {
-                throw new DataIntegrityException("Usuário já registrado.");
-            }
-
             newPerson = personRepository.save(newPerson);
             return modelMapper.map(newPerson, PersonDto.class);
 
@@ -65,7 +59,7 @@ public class PersonService {
         }
     }
 
-    public PersonDto updateById(PersonForm userForm, Integer id) {
+    public PersonDto updateById(PersonMensalista userForm, Integer id) {
         try {
             Optional<PersonModel> personExist = personRepository.findById(id);
 

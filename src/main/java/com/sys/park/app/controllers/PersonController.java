@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.dtos.Person.PersonForm;
+import com.sys.park.app.dtos.Person.PersonMensalista;
 import com.sys.park.app.services.PersonService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -29,6 +30,9 @@ import jakarta.validation.Valid;
 public class PersonController {
     @Autowired
     PersonService personService;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> find(@PathVariable("id") Integer id) {        
@@ -43,7 +47,7 @@ public class PersonController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonDto> insert(@Valid @RequestBody PersonForm personForm, BindingResult br) {
+    public ResponseEntity<PersonDto> insert(@Valid @RequestBody PersonMensalista personForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -53,13 +57,13 @@ public class PersonController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        PersonDto personDto = personService.insert(personForm);
+        PersonDto personDto = personService.insert(modelMapper.map(personForm, PersonDto.class));
         return ResponseEntity.ok().body(personDto);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PersonDto> update(@Valid @RequestBody
-        PersonForm personForm, @PathVariable("id") Integer id, BindingResult br) {
+        PersonMensalista personForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
