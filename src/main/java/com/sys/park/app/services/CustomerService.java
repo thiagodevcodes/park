@@ -69,14 +69,14 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto updateById(CustomerForm customerForm, Integer id) {
+    public CustomerDto updateById(CustomerDto customerDto, Integer id) {
         try {
             Optional<CustomerModel> customerExist = customerRepository.findById(id);
 
             if (customerExist.isPresent()) {
                 CustomerModel customerUpdated = customerExist.get();
 
-                modelMapper.map(customerForm, customerUpdated);
+                modelMapper.map(customerDto, customerUpdated);
                 customerUpdated = customerRepository.save(customerUpdated);
 
                 return modelMapper.map(customerUpdated, CustomerDto.class);
@@ -102,29 +102,33 @@ public class CustomerService {
     }
 
     public List<CustomerMensalista> findByCustomerType(Integer customerType) {
-        List<CustomerModel> customers = customerRepository.findByIdCustomerType(customerType);
-        List<CustomerMensalista> newDtoList = new ArrayList<>();
-
-        for (CustomerModel customer : customers) {
-            CustomerMensalista newDto = new CustomerMensalista();
-
-            PersonDto personDto = personService.findById(customer.getIdPerson());
-            CustomerTypeDto customerTypeDto = customerTypeService.findById(customer.getIdCustomerType());
-
-            if(personDto != null && customerTypeDto != null && customer.getIsActive()) {
-                newDto.setId(customer.getId());
-                newDto.setCpf(personDto.getCpf());
-                newDto.setEmail(personDto.getEmail());
-                newDto.setName(personDto.getName());
-                newDto.setClientType(customerType);
-                newDto.setPhone(personDto.getPhone());
-                newDto.setPaymentDay(customer.getPaymentDay());
-                newDto.setIsActive(true);
-                newDtoList.add(newDto);
+        try {
+            List<CustomerModel> customers = customerRepository.findByIdCustomerType(customerType);
+            List<CustomerMensalista> newDtoList = new ArrayList<>();
+    
+            for (CustomerModel customer : customers) {
+                CustomerMensalista newDto = new CustomerMensalista();
+    
+                PersonDto personDto = personService.findById(customer.getIdPerson());
+                CustomerTypeDto customerTypeDto = customerTypeService.findById(customer.getIdCustomerType());
+    
+                if(personDto != null && customerTypeDto != null && customer.getIsActive()) {
+                    newDto.setId(customer.getId());
+                    newDto.setCpf(personDto.getCpf());
+                    newDto.setEmail(personDto.getEmail());
+                    newDto.setName(personDto.getName());
+                    newDto.setClientType(customerType);
+                    newDto.setPhone(personDto.getPhone());
+                    newDto.setPaymentDay(customer.getPaymentDay());
+                    newDto.setIsActive(true);
+                    newDtoList.add(newDto);
+                }
             }
-        }
 
-        return newDtoList;
+            return newDtoList; 
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não foi possível buscar os Clientes!");
+        }
     }
 
     public CustomerMensalista createNewCustomer(CustomerForm customerForm, Integer customerType) {
@@ -139,12 +143,25 @@ public class CustomerService {
                 personDto.setName(customerForm.getName());
                 personDto.setPhone(customerForm.getPhone());
 
-                personDto = personService.insert(personDto, customerType);
-    
-                customerDto.setIdPerson(personDto.getId());
-                customerDto.setIdCustomerType(customerType);
-                customerDto.setPaymentDay(customerForm.getPaymentDay());
-                customerDto.setIsActive(true);
+                if(personService.verifyCpfAndEmail(personDto.getCpf(), personDto.getEmail())) {
+                    personDto = personService.findByCpf(personDto.getCpf());
+                    customerDto = this.findByIdPerson(personDto.getId());
+
+                    if(customerDto.getIsActive() == false) {
+                        customerDto.setIsActive(true);
+                        customerDto = this.updateById(customerDto, customerDto.getId());
+                    } else {
+                        throw new DataIntegrityException("O cliente já existe!");
+                    }
+                } else {
+                    personDto = personService.insert(personDto, customerType);
+                    customerDto.setIdPerson(personDto.getId());
+                    customerDto.setIdCustomerType(customerType);
+                    customerDto.setPaymentDay(customerForm.getPaymentDay());
+                    customerDto.setIsActive(true);
+
+                    customerDto = this.insert(customerDto);
+                }
             } else if(customerType == 1) {
                 personDto.setName(customerForm.getName());
                 personDto = personService.insert(personDto, customerType);
@@ -153,10 +170,10 @@ public class CustomerService {
                 customerDto.setIdCustomerType(customerType);
                 customerDto.setPaymentDay(customerForm.getPaymentDay());
                 customerDto.setIsActive(true);
+
+                customerDto = this.insert(customerDto);
             }
 
-            customerDto = this.insert(customerDto);
-    
             newDto.setCpf(personDto.getCpf());
             newDto.setEmail(personDto.getEmail());
             newDto.setName(personDto.getName());
@@ -188,6 +205,15 @@ public class CustomerService {
             }
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).", e);
+        }
+    }
+
+    public CustomerDto findByIdPerson(Integer idPerson) {
+        try {
+            CustomerModel customerModel = customerRepository.findByIdPerson(idPerson).get();
+            return modelMapper.map(customerModel, CustomerDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id Person: " + idPerson + ", Tipo: " + CustomerDto.class.getName());
         }
     }
 }

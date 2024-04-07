@@ -1,6 +1,7 @@
 package com.sys.park.app.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -18,4 +19,5 @@ public interface CustomerRepository extends JpaRepository<CustomerModel, Integer
         List<CustomerModel> findCustomersMensal();
      */
     List<CustomerModel> findByIdCustomerType(Integer idCustomerType);
+    Optional<CustomerModel> findByIdPerson(Integer idPerson);
 }

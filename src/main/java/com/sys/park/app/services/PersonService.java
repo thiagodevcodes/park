@@ -109,5 +109,21 @@ public class PersonService {
             throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());
         }
     }
+
+    public Boolean verifyCpfAndEmail(String cpf, String email) {
+        try {
+            Optional<PersonModel> cpfExist = personRepository.findByCpf(cpf);
+            Optional<PersonModel> emailExist = personRepository.findByEmail(email);
+
+            if(cpfExist.isPresent() || emailExist.isPresent()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());
+        }
+    }
 }
 

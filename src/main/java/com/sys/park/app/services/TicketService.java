@@ -157,7 +157,7 @@ public class TicketService {
 
             return ticketDto;    
         } catch (DataIntegrityException e) {
-            throw new DataIntegrityException("Não é possível listar os Tickets!");
+            throw new DataIntegrityException("Não é possível criar o Ticket!");
         }
     }
 
@@ -192,8 +192,5 @@ public class TicketService {
         } catch (DataIntegrityException e) {
             throw new DataIntegrityException("Não é possível listar os Tickets!");
         }
-        
-
-        
     }
 }
