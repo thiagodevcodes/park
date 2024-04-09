@@ -3,7 +3,7 @@ package com.sys.park.app.dtos.Customer;
 import lombok.Data;
 
 @Data
-public class CustomerMensalista {
+public class CustomerMensalDto {
     private Integer id;
     private String name;
     private String phone;

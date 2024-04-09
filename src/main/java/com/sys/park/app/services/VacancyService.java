@@ -60,14 +60,16 @@ public class VacancyService {
         }
     }
 
-    public VacancyDto updateById(VacancyDto vacancyDto, Integer id) {
+    public VacancyDto updateById(VacancyForm vacancyForm, Integer id) {
         try {
+            System.out.println("Id vaga: " + id);
             Optional<VacancyModel> vacancyExist = vacancyRepository.findById(id);
+            System.out.println(vacancyExist);
 
             if (vacancyExist.isPresent()) {
                 VacancyModel vacancyUpdated = vacancyExist.get();
 
-                modelMapper.map(vacancyDto, vacancyUpdated);
+                modelMapper.map(vacancyForm, vacancyUpdated);
                 vacancyUpdated = vacancyRepository.save(vacancyUpdated);
 
                 return modelMapper.map(vacancyUpdated, VacancyDto.class);

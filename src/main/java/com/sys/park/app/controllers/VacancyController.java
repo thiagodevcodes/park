@@ -69,7 +69,7 @@ public class VacancyController {
 
     @PutMapping("/{id}")
     public ResponseEntity<VacancyDto> update(@Valid @RequestBody
-        VacancyDto vacancyDto, @PathVariable("id") Integer id, BindingResult br) {
+        VacancyForm vacancyForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -80,7 +80,7 @@ public class VacancyController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-        VacancyDto vacancyUpdated = vacancyService.updateById(vacancyDto, id);
+        VacancyDto vacancyUpdated = vacancyService.updateById(vacancyForm, id);
         return ResponseEntity.ok().body(vacancyUpdated);
     }
 

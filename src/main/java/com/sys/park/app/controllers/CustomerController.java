@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerForm;
-import com.sys.park.app.dtos.Customer.CustomerMensalista;
+import com.sys.park.app.dtos.Customer.CustomerMensalDto;
 import com.sys.park.app.services.CustomerService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -44,13 +44,13 @@ public class CustomerController {
     }
 
     @GetMapping("/mensalistas")
-    public ResponseEntity<List<CustomerMensalista>> findMensal() {
-        List<CustomerMensalista> customerDtoList = customerService.findByCustomerType(2);
+    public ResponseEntity<List<CustomerMensalDto>> findMensal() {
+        List<CustomerMensalDto> customerDtoList = customerService.findByCustomerType(2);
         return ResponseEntity.ok().body(customerDtoList);
     }
 
     @PostMapping
-    public ResponseEntity<CustomerMensalista> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {
+    public ResponseEntity<CustomerMensalDto> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -60,7 +60,7 @@ public class CustomerController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        CustomerMensalista customerDto = customerService.createNewCustomer(customerForm, 2);
+        CustomerMensalDto customerDto = customerService.createNewCustomer(customerForm, 2);
         return ResponseEntity.ok().body(customerDto);
     }
 

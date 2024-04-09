@@ -15,10 +15,12 @@ import org.springframework.stereotype.Service;
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.dtos.Ticket.MovimentacaoDto;
+import com.sys.park.app.dtos.Ticket.MovimentacaoForm;
 import com.sys.park.app.dtos.Ticket.TicketDto;
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Ticket.TicketForm;
 import com.sys.park.app.dtos.Vacancy.VacancyDto;
+import com.sys.park.app.dtos.Vacancy.VacancyForm;
 import com.sys.park.app.models.TicketModel;
 import com.sys.park.app.repositories.TicketRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -85,7 +87,7 @@ public class TicketService {
             if (ticketExist.isPresent()) {
                 TicketModel ticketUpdated = ticketExist.get();
 
-                modelMapper.map(ticketForm, ticketUpdated);
+                modelMapper.map(ticketForm, ticketUpdated);   
                 ticketUpdated = ticketRepository.save(ticketUpdated);
 
                 return modelMapper.map(ticketUpdated, TicketDto.class);
@@ -109,7 +111,7 @@ public class TicketService {
         }
     }
 
-    public TicketDto createNewMov(MovimentacaoDto movimentacaoDto) {    
+    public TicketDto createNewMov(MovimentacaoForm movimentacaoForm) {    
         try {
             VehicleDto vehicleDto = new VehicleDto();
             PersonDto personDto = new PersonDto();
@@ -119,15 +121,16 @@ public class TicketService {
             TicketDto ticketDto = new TicketDto();
             LocalDateTime time = LocalDateTime.now();
 
-            vacancyDto = vacancyService.findById(movimentacaoDto.getVacancy());
+            vacancyDto = vacancyService.findById(movimentacaoForm.getVacancy());
 
             if(vacancyDto != null) {
                 vacancyDto.setSituation(false);
-                vacancyService.updateById(vacancyDto, movimentacaoDto.getVacancy());
+                vacancyService.updateById(modelMapper.map(vacancyDto, VacancyForm.class), movimentacaoForm.getVacancy());
             }
        
-            if(movimentacaoDto.getIdCustomerType() == 1) {
-                personDto.setName(movimentacaoDto.getName());
+            if(movimentacaoForm.getIdCustomerType() == 1) {
+                personDto.setName(movimentacaoForm.getName());
+
                 personDto = personService.insert(personDto, 1);
 
                 customerDto.setIdCustomerType(1);
@@ -135,16 +138,16 @@ public class TicketService {
                 customerDto.setIdPerson(personDto.getId());
                 customerDto = customerService.insert(customerDto);
 
-                vehicleDto = vehicleService.findByPlate(movimentacaoDto.getPlate());
+                vehicleDto = vehicleService.findByPlate(movimentacaoForm.getPlate());
 
                 if(vehicleDto == null) {
-                    movimentacaoDto.setIdCustomer(customerDto.getId());
-                    vehicleDto = modelMapper.map(movimentacaoDto, VehicleDto.class);
+                    movimentacaoForm.setIdCustomer(customerDto.getId());
+                    vehicleDto = modelMapper.map(movimentacaoForm, VehicleDto.class);
                     vehicleDto = vehicleService.insert(vehicleDto); 
                 } 
-            } else if(movimentacaoDto.getIdCustomerType() == 2) {
-                customerDto = customerService.findById(movimentacaoDto.getIdCustomer());
-                vehicleDto = vehicleService.findById(movimentacaoDto.getIdVehicle());
+            } else if(movimentacaoForm.getIdCustomerType() == 2) {
+                customerDto = customerService.findById(movimentacaoForm.getIdCustomer());
+                vehicleDto = vehicleService.findById(movimentacaoForm.getIdVehicle());
             }
 
             ticketDto.setEntryTime(time);
@@ -156,8 +159,8 @@ public class TicketService {
             ticketDto = this.insert(ticketDto);
 
             return ticketDto;    
-        } catch (DataIntegrityException e) {
-            throw new DataIntegrityException("Não é possível criar o Ticket!");
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível criar o Ticket!", e);
         }
     }
 
@@ -189,8 +192,31 @@ public class TicketService {
             } 
             
             return newDtoList;
-        } catch (DataIntegrityException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível listar os Tickets!");
+        }
+    }
+
+    public TicketDto finishMovimentacao(TicketForm ticketForm, Integer id) {
+        try {
+            Optional<TicketModel> ticketExist = ticketRepository.findById(id);
+            LocalDateTime date = LocalDateTime.now();
+
+            if (ticketExist.isPresent()) {
+                ticketForm.setExitTime(date);
+                TicketDto ticketDto = this.updateById(ticketForm, id);
+
+                VacancyDto vacancyDto = vacancyService.findById(ticketDto.getIdVacancy());
+                VacancyForm vacancyForm = modelMapper.map(vacancyDto, VacancyForm.class);
+                vacancyForm.setSituation(true);
+                vacancyDto = vacancyService.updateById(vacancyForm, ticketDto.getIdVacancy());
+
+                return ticketDto;
+            }else {
+                throw new DataIntegrityException("O Id do Ticket não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).", e);
         }
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Ticket.MovimentacaoDto;
+import com.sys.park.app.dtos.Ticket.MovimentacaoForm;
 import com.sys.park.app.dtos.Ticket.TicketDto;
 import com.sys.park.app.dtos.Ticket.TicketForm;
 import com.sys.park.app.services.TicketService;
@@ -69,7 +70,7 @@ public class TicketController {
     }
 
     @PostMapping("/movimentacao")
-    public ResponseEntity<TicketDto> insert(@Valid @RequestBody MovimentacaoDto ticketForm, BindingResult br) {
+    public ResponseEntity<TicketDto> insert(@Valid @RequestBody MovimentacaoForm movForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -79,7 +80,7 @@ public class TicketController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        TicketDto ticketDto = ticketService.createNewMov(ticketForm);
+        TicketDto ticketDto = ticketService.createNewMov(movForm);
         
         return ResponseEntity.ok().body(ticketDto);
     }
@@ -97,6 +98,7 @@ public class TicketController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
+
         TicketDto ticketDto = ticketService.updateById(ticketForm, id);
         return ResponseEntity.ok().body(ticketDto);
     }
@@ -106,4 +108,22 @@ public class TicketController {
         ticketService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/finish/{id}")
+    public ResponseEntity<TicketDto> finish(@Valid @RequestBody
+        TicketForm ticketForm, @PathVariable("id") Integer id, BindingResult br) {
+       
+        if (br.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            br.getAllErrors().forEach(e -> {
+                errors.add(e.getDefaultMessage());
+            });
+
+            throw new ConstraintException("Restrição de Dados", errors);
+        }
+     
+        TicketDto ticketDto = ticketService.finishMovimentacao(ticketForm, id);
+        return ResponseEntity.ok().body(ticketDto);
+    }
 }
+

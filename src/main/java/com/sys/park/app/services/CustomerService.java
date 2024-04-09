@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerForm;
-import com.sys.park.app.dtos.Customer.CustomerMensalista;
+import com.sys.park.app.dtos.Customer.CustomerMensalDto;
 import com.sys.park.app.dtos.CustomerType.CustomerTypeDto;
 import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.models.CustomerModel;
@@ -101,13 +101,13 @@ public class CustomerService {
         }
     }
 
-    public List<CustomerMensalista> findByCustomerType(Integer customerType) {
+    public List<CustomerMensalDto> findByCustomerType(Integer customerType) {
         try {
             List<CustomerModel> customers = customerRepository.findByIdCustomerType(customerType);
-            List<CustomerMensalista> newDtoList = new ArrayList<>();
+            List<CustomerMensalDto> newDtoList = new ArrayList<>();
     
             for (CustomerModel customer : customers) {
-                CustomerMensalista newDto = new CustomerMensalista();
+                CustomerMensalDto newDto = new CustomerMensalDto();
     
                 PersonDto personDto = personService.findById(customer.getIdPerson());
                 CustomerTypeDto customerTypeDto = customerTypeService.findById(customer.getIdCustomerType());
@@ -131,9 +131,9 @@ public class CustomerService {
         }
     }
 
-    public CustomerMensalista createNewCustomer(CustomerForm customerForm, Integer customerType) {
+    public CustomerMensalDto createNewCustomer(CustomerForm customerForm, Integer customerType) {
         try {
-            CustomerMensalista newDto = new CustomerMensalista();
+            CustomerMensalDto newDto = new CustomerMensalDto();
             PersonDto personDto = new PersonDto();
             CustomerDto customerDto = new CustomerDto();
 

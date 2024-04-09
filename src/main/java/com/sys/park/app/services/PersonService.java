@@ -11,7 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.dtos.Person.PersonMensalista;
+import com.sys.park.app.dtos.Person.PersonForm;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -51,17 +51,19 @@ public class PersonService {
         try {
             PersonModel newPerson = modelMapper.map(personDto, PersonModel.class);
             
-            Optional<PersonModel> cpfExist = personRepository.findByCpf(personDto.getCpf());
-            Optional<PersonModel> emailExist = personRepository.findByEmail(personDto.getEmail());
-                
-            if(cpfExist.isPresent()) {
-                throw new DataIntegrityException("CPF já cadastrado!.");
+            if(customerType == 2) {
+                Optional<PersonModel> cpfExist = personRepository.findByCpf(personDto.getCpf());
+                Optional<PersonModel> emailExist = personRepository.findByEmail(personDto.getEmail());
+
+                if(cpfExist.isPresent()) {
+                    throw new DataIntegrityException("CPF já cadastrado!.");
+                }
+    
+                if(emailExist.isPresent()) {
+                    throw new DataIntegrityException("Email já cadastrado!.");
+                }
             }
 
-            if(emailExist.isPresent()) {
-                throw new DataIntegrityException("Email já cadastrado!.");
-            }
-            
             newPerson = personRepository.save(newPerson);
             return modelMapper.map(newPerson, PersonDto.class);
         } catch (DataIntegrityViolationException e) {
@@ -69,7 +71,7 @@ public class PersonService {
         }
     }
 
-    public PersonDto updateById(PersonMensalista userForm, Integer id) {
+    public PersonDto updateById(PersonForm userForm, Integer id) {
         try {
             Optional<PersonModel> personExist = personRepository.findById(id);
 

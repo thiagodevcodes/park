@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.dtos.Person.PersonMensalista;
+import com.sys.park.app.dtos.Person.PersonForm;
 import com.sys.park.app.services.PersonService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -47,7 +47,7 @@ public class PersonController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonDto> insert(@Valid @RequestBody PersonMensalista personForm, BindingResult br) {
+    public ResponseEntity<PersonDto> insert(@Valid @RequestBody PersonForm personForm, BindingResult br) {
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -62,7 +62,7 @@ public class PersonController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PersonDto> update(@Valid @RequestBody
-        PersonMensalista personForm, @PathVariable("id") Integer id, BindingResult br) {
+        PersonForm personForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();

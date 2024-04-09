@@ -37,4 +37,7 @@ public class CustomerForm {
     @Max(value = 31, message = "O dia do pagamento tem que ser no máximo é 31")
     @Min(value = 1, message = "O dia do pagamento tem que ser no mínimo é 01")
     private Integer paymentDay;
+
+    private Integer clientType;
+    private Boolean isActive;
 }

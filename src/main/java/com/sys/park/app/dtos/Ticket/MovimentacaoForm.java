@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class MovimentacaoDto {
+public class MovimentacaoForm {
     private Integer id;
     private String name;
     private String plate;
@@ -15,4 +15,6 @@ public class MovimentacaoDto {
     private LocalDateTime entryTime;
     private LocalDateTime exitTime;
     private Integer idCustomerType;
+    private Integer idVehicle;
+    private Integer idCustomer;
 }
