@@ -13,5 +13,5 @@ public class VehicleDto {
     private String make;
     private String model;
     private Integer idCustomer;
-    private Boolean isActive;
+    private Boolean monthlyVehicle;
 }

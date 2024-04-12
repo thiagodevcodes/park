@@ -35,5 +35,6 @@ public class PersonForm {
     @Size(max = 30, message = "O telefone pode ter no máximo 30 caracteres")
     private String phone;
 
+    @NotNull(message = "O tipo de cliente não pode ser nulo")
     private Integer clientType;
 }

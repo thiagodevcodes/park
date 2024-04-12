@@ -40,6 +40,9 @@ public class TicketModel {
     @Column(name = "total_price")
     private Double totalPrice;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

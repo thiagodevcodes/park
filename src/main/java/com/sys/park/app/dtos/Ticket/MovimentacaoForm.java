@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class MovimentacaoForm {
-    private Integer id;
     private String name;
     private String plate;
     private String make;

@@ -25,6 +25,7 @@ public class CustomerForm {
 
     @NotBlank(message = "O email não pode estar em branco")
     @NotNull(message = "O email não pode ser nulo")
+    @NotEmpty(message = "O email não pode estar vazio")
     @Email(message = "O email informado é inválido")
     private String email;
 
@@ -38,6 +39,8 @@ public class CustomerForm {
     @Min(value = 1, message = "O dia do pagamento tem que ser no mínimo é 01")
     private Integer paymentDay;
 
+    @NotNull(message = "O tipo de cliente não pode ser nulo")
     private Integer clientType;
+    
     private Boolean isActive;
 }

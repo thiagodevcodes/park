@@ -24,5 +24,6 @@ public class VehicleForm {
     @Size(message = "O tamanho não pode ultrapassar 20 caracteres")
     private String model;
 
+    private Boolean monthlyVehicle;
     private Integer idCustomer;
 }

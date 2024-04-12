@@ -12,4 +12,5 @@ import com.sys.park.app.models.VehicleModel;
 public interface VehicleRepository extends JpaRepository<VehicleModel, Integer> {
     Optional<VehicleModel> findByPlate(String plate);
     List<VehicleModel> findByIdCustomer(Integer idCustomer);
+    List<VehicleModel> findByIdCustomerAndMonthlyVehicle(Integer idCustomer, Boolean monthlyVehicle);
 }

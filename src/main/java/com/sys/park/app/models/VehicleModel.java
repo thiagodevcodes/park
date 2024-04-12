@@ -33,6 +33,9 @@ public class VehicleModel {
     @Column(name = "model", nullable = false)
     private String model;
 
+    @Column(name = "monthly_vehicle", nullable = false) 
+    private Boolean monthlyVehicle;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

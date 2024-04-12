@@ -45,59 +45,12 @@ public class CustomerService {
         }
     }
 
-    public List<CustomerDto> findAll() {
+    public CustomerDto findByIdPerson(Integer idPerson) {
         try {
-            List<CustomerModel> customerModelList = customerRepository.findAll();
-
-            return customerModelList.stream()
-                    .map(customer -> modelMapper.map(customer, CustomerDto.class))
-                    .collect(Collectors.toList());
-        } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar o Cliente!", e.getErrorMessages());
-        }
-    }
-
-    public CustomerDto insert(CustomerDto customerDto) {
-        try {
-            CustomerModel newCustomer = modelMapper.map(customerDto, CustomerModel.class);
-            
-            newCustomer = customerRepository.save(newCustomer);
-            return modelMapper.map(newCustomer, CustomerDto.class);
-
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
-        }
-    }
-
-    public CustomerDto updateById(CustomerDto customerDto, Integer id) {
-        try {
-            Optional<CustomerModel> customerExist = customerRepository.findById(id);
-
-            if (customerExist.isPresent()) {
-                CustomerModel customerUpdated = customerExist.get();
-
-                modelMapper.map(customerDto, customerUpdated);
-                customerUpdated = customerRepository.save(customerUpdated);
-
-                return modelMapper.map(customerUpdated, CustomerDto.class);
-            }else{
-                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
-        }
-    }
-
-    public void deleteById(Integer id) {
-        try {
-            if (customerRepository.existsById(id)) {
-                customerRepository.deleteById(id);
-
-            }else {
-                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não é possível excluir o Cliente!");
+            CustomerModel customerModel = customerRepository.findByIdPerson(idPerson).get();
+            return modelMapper.map(customerModel, CustomerDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id Person: " + idPerson + ", Tipo: " + CustomerDto.class.getName());
         }
     }
 
@@ -131,6 +84,63 @@ public class CustomerService {
         }
     }
 
+    public List<CustomerDto> findAll() {
+        try {
+            List<CustomerModel> customerModelList = customerRepository.findAll();
+
+            return customerModelList.stream()
+                    .map(customer -> modelMapper.map(customer, CustomerDto.class))
+                    .collect(Collectors.toList());
+        } catch (BusinessRuleException e) {
+            throw new BusinessRuleException("Não é possível consultar o Cliente!", e.getErrorMessages());
+        }
+    }
+
+    public CustomerDto insert(CustomerDto customerDto) {
+        try {
+            CustomerModel newCustomer = modelMapper.map(customerDto, CustomerModel.class);
+            
+            newCustomer = customerRepository.save(newCustomer);
+            return modelMapper.map(newCustomer, CustomerDto.class);
+
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
+        }
+    }
+
+    public CustomerDto updateById(CustomerForm customerForm, Integer id) {
+        try {
+            Optional<CustomerModel> customerExist = customerRepository.findById(id);
+
+            if (customerExist.isPresent()) {
+                CustomerModel customerUpdated = customerExist.get();
+                
+                modelMapper.map(customerForm, customerUpdated);
+                customerUpdated.setId(id);
+                customerUpdated = customerRepository.save(customerUpdated);
+
+                return modelMapper.map(customerUpdated, CustomerDto.class);
+            }else{
+                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
+        }
+    }
+
+    public void deleteById(Integer id) {
+        try {
+            if (customerRepository.existsById(id)) {
+                customerRepository.deleteById(id);
+
+            }else {
+                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível excluir o Cliente!");
+        }
+    }
+
     public CustomerMensalDto createNewCustomer(CustomerForm customerForm, Integer customerType) {
         try {
             CustomerMensalDto newDto = new CustomerMensalDto();
@@ -149,7 +159,7 @@ public class CustomerService {
 
                     if(customerDto.getIsActive() == false) {
                         customerDto.setIsActive(true);
-                        customerDto = this.updateById(customerDto, customerDto.getId());
+                        customerDto = this.updateById(customerForm, customerDto.getId());
                     } else {
                         throw new DataIntegrityException("O cliente já existe!");
                     }
@@ -196,7 +206,6 @@ public class CustomerService {
                 CustomerModel customerUpdated = customerExist.get();
 
                 customerUpdated.setIsActive(false);
-                System.out.println(customerUpdated);
                 customerUpdated = customerRepository.save(customerUpdated);
 
                 return modelMapper.map(customerUpdated, CustomerDto.class);
@@ -208,12 +217,5 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto findByIdPerson(Integer idPerson) {
-        try {
-            CustomerModel customerModel = customerRepository.findByIdPerson(idPerson).get();
-            return modelMapper.map(customerModel, CustomerDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id Person: " + idPerson + ", Tipo: " + CustomerDto.class.getName());
-        }
-    }
+
 }

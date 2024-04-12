@@ -13,4 +13,5 @@ public class TicketDto {
     private LocalDateTime entryTime;
     private LocalDateTime exitTime;
     private Double totalPrice;
+    private Boolean isActive;
 }

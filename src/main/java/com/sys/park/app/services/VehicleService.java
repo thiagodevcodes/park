@@ -73,6 +73,7 @@ public class VehicleService {
                 VehicleModel vehicleUpdated = vehicleExist.get();
 
                 modelMapper.map(vehicleForm, vehicleUpdated);
+                vehicleUpdated.setId(id);
                 vehicleUpdated = vehicleRepository.save(vehicleUpdated);
 
                 return modelMapper.map(vehicleUpdated, VehicleDto.class);
@@ -98,7 +99,7 @@ public class VehicleService {
 
     public List<VehicleDto> findByCustomer(Integer idCustomer) {
         try {
-            List<VehicleModel> vehicles = vehicleRepository.findByIdCustomer(idCustomer);
+            List<VehicleModel> vehicles = vehicleRepository.findByIdCustomerAndMonthlyVehicle(idCustomer, true);
             
             return vehicles.stream()
             .map(vehicle -> modelMapper.map(vehicle, VehicleDto.class))
@@ -127,17 +128,64 @@ public class VehicleService {
         try {
             VehicleDto vehicle = new VehicleDto();
 
-            vehicle.setPlate(vehicleDto.getPlate());
-            vehicle.setMake(vehicleDto.getMake());
-            vehicle.setModel(vehicleDto.getModel());
-            vehicle.setIsActive(true);
-            vehicle.setIdCustomer(vehicleDto.getIdCustomer());
-    
-            vehicle = this.insert(vehicleDto);
+            Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(vehicleDto.getPlate());
+
+            if(plateExist.isPresent()) {
+                VehicleModel vehicleModel = plateExist.get();
+
+                vehicleModel.setMonthlyVehicle(true);
+                vehicleModel.setIdCustomer(vehicleDto.getIdCustomer());
+                vehicleRepository.save(vehicleModel);
+                vehicle = modelMapper.map(vehicleModel, VehicleDto.class);
+            } else {
+                vehicle.setPlate(vehicleDto.getPlate());
+                vehicle.setMake(vehicleDto.getMake());
+                vehicle.setModel(vehicleDto.getModel());
+                vehicle.setMonthlyVehicle(true);
+                vehicle.setIdCustomer(vehicleDto.getIdCustomer());
+
+                vehicle = this.insert(vehicleDto);
+            }
             
             return vehicle;
-        } catch (Exception e) {
+        } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Erro ao criar o veículo!");
         }   
     }
+
+    public VehicleDto finishVehicle(VehicleForm vehicleForm, Integer id) {
+        try {
+            Optional<VehicleModel> vehicleExist = vehicleRepository.findById(id);
+
+            if (vehicleExist.isPresent()) {
+                VehicleModel vehicleModel = vehicleExist.get();
+                vehicleModel.setMonthlyVehicle(false);
+                VehicleForm vehicle = modelMapper.map(vehicleModel, VehicleForm.class);
+                VehicleDto vehicleDto = this.updateById(vehicle, id);
+
+                return vehicleDto;
+            }else {
+                throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).", e);
+        }
+    }
+
+    public Boolean verifyPlate(String plate) {
+        try {
+            Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(plate);
+
+
+            if(plateExist.isPresent()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + plate + ", Tipo: " + VehicleModel.class.getName());
+        }
+    }
+
 }
