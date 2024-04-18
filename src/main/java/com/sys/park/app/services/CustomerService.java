@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
@@ -54,9 +57,10 @@ public class CustomerService {
         }
     }
 
-    public List<CustomerMensalDto> findByCustomerType(Integer customerType) {
+    public Page<CustomerMensalDto> findByCustomerTypePage(Integer customerType, Optional<Pageable> optionalPage) {
         try {
-            List<CustomerModel> customers = customerRepository.findByIdCustomerType(customerType);
+            Pageable page = optionalPage.orElse(Pageable.unpaged());
+            Page<CustomerModel> customers = customerRepository.findByIdCustomerType(customerType, page);
             List<CustomerMensalDto> newDtoList = new ArrayList<>();
     
             for (CustomerModel customer : customers) {
@@ -78,7 +82,8 @@ public class CustomerService {
                 }
             }
 
-            return newDtoList; 
+            Page<CustomerMensalDto> pageableClient = new PageImpl<>(newDtoList, page, customers.getTotalElements());
+            return pageableClient; 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não foi possível buscar os Clientes!");
         }
