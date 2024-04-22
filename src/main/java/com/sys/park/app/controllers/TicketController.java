@@ -95,9 +95,25 @@ public class TicketController {
 
             throw new ConstraintException("Restrição de Dados", errors);
         }
-
-        TicketDto ticketDto = ticketService.createNewMov(movForm);
+    
+        TicketDto ticketDto = ticketService.createNewMov(modelMapper.map(movForm, MovimentacaoDto.class));
         
+        return ResponseEntity.ok().body(ticketDto);
+    }
+
+    @PutMapping("/movimentacao/{id}")
+    public ResponseEntity<TicketDto> updateMov(@Valid @RequestBody MovimentacaoForm movForm, 
+        @PathVariable("id") Integer id, BindingResult br) {
+            
+        if (br.hasErrors()) {
+            List<String> errors = br.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            throw new ConstraintException("Restrição de Dados", errors);
+        }
+    
+        TicketDto ticketDto = ticketService.updateMovimentacao(movForm, id);
         return ResponseEntity.ok().body(ticketDto);
     }
 
@@ -115,7 +131,7 @@ public class TicketController {
         }
      
 
-        TicketDto ticketDto = ticketService.updateById(ticketForm, id);
+        TicketDto ticketDto = ticketService.updateById(modelMapper.map(ticketForm, TicketDto.class), id);
         return ResponseEntity.ok().body(ticketDto);
     }
 
@@ -138,7 +154,7 @@ public class TicketController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-        TicketDto ticketDto = ticketService.finishMovimentacao(ticketForm, id);
+        TicketDto ticketDto = ticketService.finishMovimentacao(modelMapper.map(ticketForm, TicketDto.class), id);
         return ResponseEntity.ok().body(ticketDto);
     }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,9 @@ public class CustomerTypeController {
     @Autowired
     CustomerTypeService customerTypeService;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     @GetMapping("/{id}")
     public ResponseEntity<CustomerTypeDto> find(@PathVariable("id") Integer id) {        
         CustomerTypeDto customerTypeDto = customerTypeService.findById(id);
@@ -53,7 +57,7 @@ public class CustomerTypeController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        CustomerTypeDto customerTypeDto = customerTypeService.insert(customerTypeForm);
+        CustomerTypeDto customerTypeDto = customerTypeService.insert(modelMapper.map(customerTypeForm, CustomerTypeDto.class));
         return ResponseEntity.ok().body(customerTypeDto);
     }
 

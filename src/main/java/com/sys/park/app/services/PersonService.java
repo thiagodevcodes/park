@@ -11,7 +11,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.dtos.Person.PersonForm;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -71,14 +70,14 @@ public class PersonService {
         }
     }
 
-    public PersonDto updateById(PersonForm userForm, Integer id) {
+    public PersonDto updateById(PersonDto personDto, Integer id) {
         try {
             Optional<PersonModel> personExist = personRepository.findById(id);
 
             if (personExist.isPresent()) {
                 PersonModel personUpdated = personExist.get();
 
-                modelMapper.map(userForm, personUpdated);
+                modelMapper.map(personDto, personUpdated);
                 personUpdated = personRepository.save(personUpdated);
 
                 return modelMapper.map(personUpdated, PersonDto.class);

@@ -11,7 +11,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Vacancy.VacancyDto;
-import com.sys.park.app.dtos.Vacancy.VacancyForm;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.models.VacancyModel;
 import com.sys.park.app.repositories.VacancyRepository;
@@ -48,9 +47,9 @@ public class VacancyService {
         }
     }
 
-    public VacancyDto insert(VacancyForm vacancyForm) {
+    public VacancyDto insert(VacancyDto vacancyDto) {
         try {
-            VacancyModel newVacancy = modelMapper.map(vacancyForm, VacancyModel.class);
+            VacancyModel newVacancy = modelMapper.map(vacancyDto, VacancyModel.class);
             
             newVacancy = vacancyRepository.save(newVacancy);
             return modelMapper.map(newVacancy, VacancyDto.class);
@@ -60,7 +59,7 @@ public class VacancyService {
         }
     }
 
-    public VacancyDto updateById(VacancyForm vacancyForm, Integer id) {
+    public VacancyDto updateById(VacancyDto vacancyDto, Integer id) {
         try {
             System.out.println("Id vaga: " + id);
             Optional<VacancyModel> vacancyExist = vacancyRepository.findById(id);
@@ -69,7 +68,7 @@ public class VacancyService {
             if (vacancyExist.isPresent()) {
                 VacancyModel vacancyUpdated = vacancyExist.get();
 
-                modelMapper.map(vacancyForm, vacancyUpdated);
+                modelMapper.map(vacancyDto, vacancyUpdated);
                 vacancyUpdated = vacancyRepository.save(vacancyUpdated);
 
                 return modelMapper.map(vacancyUpdated, VacancyDto.class);

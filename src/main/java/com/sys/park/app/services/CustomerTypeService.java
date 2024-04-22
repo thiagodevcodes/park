@@ -47,9 +47,9 @@ public class CustomerTypeService {
         }
     }
 
-    public CustomerTypeDto insert(CustomerTypeForm customerTypeForm) {
+    public CustomerTypeDto insert(CustomerTypeDto customerTypeDto) {
         try {
-            CustomerTypeModel newCustomerType = modelMapper.map(customerTypeForm, CustomerTypeModel.class);
+            CustomerTypeModel newCustomerType = modelMapper.map(customerTypeDto, CustomerTypeModel.class);
             
             Optional<CustomerTypeModel> byName = customerTypeRepository.findByName(newCustomerType.getName());
         

@@ -60,7 +60,7 @@ public class CustomerService {
     public Page<CustomerMensalDto> findByCustomerTypePage(Integer customerType, Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
-            Page<CustomerModel> customers = customerRepository.findByIdCustomerType(customerType, page);
+            Page<CustomerModel> customers = customerRepository.findByIdCustomerTypeAndIsActive(customerType, true, page);
             List<CustomerMensalDto> newDtoList = new ArrayList<>();
     
             for (CustomerModel customer : customers) {

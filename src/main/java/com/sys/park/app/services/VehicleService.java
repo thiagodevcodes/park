@@ -65,14 +65,14 @@ public class VehicleService {
         }
     }
 
-    public VehicleDto updateById(VehicleForm vehicleForm, Integer id) {
+    public VehicleDto updateById(VehicleDto vehicleDto, Integer id) {
         try {
-            Optional<VehicleModel> vehicleExist = vehicleRepository.findById(id);
+            Optional<VehicleModel> byPlate = vehicleRepository.findByPlate(vehicleDto.getPlate());
 
-            if (vehicleExist.isPresent()) {
-                VehicleModel vehicleUpdated = vehicleExist.get();
+            if (byPlate.isPresent()) {
+                VehicleModel vehicleUpdated = byPlate.get();
 
-                modelMapper.map(vehicleForm, vehicleUpdated);
+                modelMapper.map(vehicleDto, vehicleUpdated);
                 vehicleUpdated.setId(id);
                 vehicleUpdated = vehicleRepository.save(vehicleUpdated);
 
@@ -124,7 +124,7 @@ public class VehicleService {
         }
     }
 
-    public VehicleDto createVehicleMensalista(VehicleDto vehicleDto) {
+    public VehicleDto createVehicle(VehicleDto vehicleDto, Boolean monthlyVehicle) {
         try {
             VehicleDto vehicle = new VehicleDto();
 
@@ -133,18 +133,20 @@ public class VehicleService {
             if(plateExist.isPresent()) {
                 VehicleModel vehicleModel = plateExist.get();
 
-                vehicleModel.setMonthlyVehicle(true);
-                vehicleModel.setIdCustomer(vehicleDto.getIdCustomer());
-                vehicleRepository.save(vehicleModel);
-                vehicle = modelMapper.map(vehicleModel, VehicleDto.class);
+                vehicle.setIdCustomer(vehicleDto.getIdCustomer());
+                vehicle.setMonthlyVehicle(monthlyVehicle);
+                
+                vehicle = this.updateById(vehicleDto, vehicleModel.getId());
+                
             } else {
+
                 vehicle.setPlate(vehicleDto.getPlate());
                 vehicle.setMake(vehicleDto.getMake());
                 vehicle.setModel(vehicleDto.getModel());
-                vehicle.setMonthlyVehicle(true);
+                vehicle.setMonthlyVehicle(monthlyVehicle);
                 vehicle.setIdCustomer(vehicleDto.getIdCustomer());
 
-                vehicle = this.insert(vehicleDto);
+                vehicle = this.insert(vehicle);
             }
             
             return vehicle;
@@ -160,8 +162,8 @@ public class VehicleService {
             if (vehicleExist.isPresent()) {
                 VehicleModel vehicleModel = vehicleExist.get();
                 vehicleModel.setMonthlyVehicle(false);
-                VehicleForm vehicle = modelMapper.map(vehicleModel, VehicleForm.class);
-                VehicleDto vehicleDto = this.updateById(vehicle, id);
+                
+                VehicleDto vehicleDto = this.updateById(modelMapper.map(vehicleModel, VehicleDto.class), id);
 
                 return vehicleDto;
             }else {

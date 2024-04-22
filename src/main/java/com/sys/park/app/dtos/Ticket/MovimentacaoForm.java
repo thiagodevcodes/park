@@ -6,11 +6,12 @@ import lombok.Data;
 
 @Data
 public class MovimentacaoForm {
+    private Integer id;
     private String name;
     private String plate;
     private String make;
     private String model;
-    private Integer vacancy;
+    private Integer idVacancy;
     private LocalDateTime entryTime;
     private LocalDateTime exitTime;
     private Integer idCustomerType;

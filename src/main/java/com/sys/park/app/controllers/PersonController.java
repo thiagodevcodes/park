@@ -73,7 +73,7 @@ public class PersonController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-        PersonDto personDto = personService.updateById(personForm, id);
+        PersonDto personDto = personService.updateById(modelMapper.map(personForm, PersonDto.class), id);
         return ResponseEntity.ok().body(personDto);
     }
 

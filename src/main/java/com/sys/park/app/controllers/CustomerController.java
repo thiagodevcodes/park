@@ -97,6 +97,23 @@ public class CustomerController {
         return ResponseEntity.ok().body(costumerDto);
     }
 
+    @PutMapping("/finish/{id}")
+    public ResponseEntity<CustomerDto> finishCustomer(@Valid @RequestBody
+        CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
+       
+        if (br.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            br.getAllErrors().forEach(e -> {
+                errors.add(e.getDefaultMessage());
+            });
+
+            throw new ConstraintException("Restrição de Dados", errors);
+        }
+     
+        CustomerDto costumerDto = customerService.finishCustomer(id);
+        return ResponseEntity.ok().body(costumerDto);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
         customerService.deleteById(id);

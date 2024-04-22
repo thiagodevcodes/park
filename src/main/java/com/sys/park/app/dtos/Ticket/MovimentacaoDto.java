@@ -11,8 +11,10 @@ public class MovimentacaoDto {
     private String plate;
     private String make;
     private String model;
-    private Integer vacancy;
+    private Integer idVacancy;
     private LocalDateTime entryTime;
     private LocalDateTime exitTime;
     private Integer idCustomerType;
+    private Integer idVehicle;
+    private Integer idCustomer;
 }

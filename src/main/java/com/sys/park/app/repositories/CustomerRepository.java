@@ -11,6 +11,6 @@ import com.sys.park.app.models.CustomerModel;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<CustomerModel, Integer> {
-    Page<CustomerModel> findByIdCustomerType(Integer idCustomerType, Pageable pageable);
+    Page<CustomerModel> findByIdCustomerTypeAndIsActive(Integer idCustomerType, Boolean isActive, Pageable pageable);
     Optional<CustomerModel> findByIdPerson(Integer idPerson);
 }

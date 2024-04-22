@@ -58,7 +58,7 @@ public class VehicleController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        VehicleDto vehicleDto = vehicleService.createVehicleMensalista(modelMapper.map(vehicleForm, VehicleDto.class));
+        VehicleDto vehicleDto = vehicleService.createVehicle(modelMapper.map(vehicleForm, VehicleDto.class), true);
         return ResponseEntity.ok().body(vehicleDto);
     }
 
@@ -96,7 +96,7 @@ public class VehicleController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-        VehicleDto vehicleDto = vehicleService.updateById(vehicleForm, id);
+        VehicleDto vehicleDto = vehicleService.updateById(modelMapper.map(vehicleForm, VehicleDto.class), id);
         return ResponseEntity.ok().body(vehicleDto);
     }
 

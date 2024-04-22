@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,9 @@ import jakarta.validation.Valid;
 public class VacancyController {
     @Autowired
     VacancyService vacancyService;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @GetMapping("/{id}")
     public ResponseEntity<VacancyDto> find(@PathVariable("id") Integer id) {        
@@ -63,7 +67,7 @@ public class VacancyController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        VacancyDto vacancyDto = vacancyService.insert(vacancyForm);
+        VacancyDto vacancyDto = vacancyService.insert(modelMapper.map(vacancyForm, VacancyDto.class));
         return ResponseEntity.ok().body(vacancyDto);
     }
 
@@ -80,7 +84,7 @@ public class VacancyController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-        VacancyDto vacancyUpdated = vacancyService.updateById(vacancyForm, id);
+        VacancyDto vacancyUpdated = vacancyService.updateById(modelMapper.map(vacancyForm, VacancyDto.class), id);
         return ResponseEntity.ok().body(vacancyUpdated);
     }
 
