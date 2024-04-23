@@ -35,7 +35,7 @@ public class PersonController {
     ModelMapper modelMapper;
 
     @GetMapping("/{id}")
-    public ResponseEntity<PersonDto> find(@PathVariable("id") Integer id) {        
+    public ResponseEntity<PersonDto> findById(@PathVariable("id") Integer id) {        
         PersonDto personDto = personService.findById(id);
         return ResponseEntity.ok().body(personDto);
     }
@@ -56,7 +56,7 @@ public class PersonController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        PersonDto personDto = personService.insert(modelMapper.map(personForm, PersonDto.class), personForm.getClientType());
+        PersonDto personDto = personService.insert(modelMapper.map(personForm, PersonDto.class));
         return ResponseEntity.ok().body(personDto);
     }
 

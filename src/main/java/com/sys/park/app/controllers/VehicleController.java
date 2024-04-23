@@ -36,29 +36,8 @@ public class VehicleController {
     ModelMapper modelMapper;
 
     @GetMapping("/{id}")
-    public ResponseEntity<VehicleDto> find(@PathVariable("id") Integer id) {        
+    public ResponseEntity<VehicleDto> findById(@PathVariable("id") Integer id) {        
         VehicleDto vehicleDto = vehicleService.findById(id);
-        return ResponseEntity.ok().body(vehicleDto);
-    }
-
-    @GetMapping("/mensalistas/{id}")
-    public ResponseEntity<List<VehicleDto>> findVehiclesByIdCustomer(@PathVariable("id") Integer idCustomer) {
-        List<VehicleDto> vehicleDtoList = vehicleService.findByCustomer(idCustomer);
-        return ResponseEntity.ok().body(vehicleDtoList);
-    }
-
-    @PostMapping("/mensalistas")
-    public ResponseEntity<VehicleDto> addMensalVehicle(@Valid @RequestBody VehicleForm vehicleForm, BindingResult br) {
-    
-        if (br.hasErrors()) {
-            List<String> errors = br.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-
-            throw new ConstraintException("Restrição de Dados", errors);
-        }
-
-        VehicleDto vehicleDto = vehicleService.createVehicle(modelMapper.map(vehicleForm, VehicleDto.class), true);
         return ResponseEntity.ok().body(vehicleDto);
     }
 
@@ -104,5 +83,26 @@ public class VehicleController {
     public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
         vehicleService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+     
+    @GetMapping("/mensalistas/{id}")
+    public ResponseEntity<List<VehicleDto>> findByIdCustomer(@PathVariable("id") Integer idCustomer) {
+        List<VehicleDto> vehicleDtoList = vehicleService.findByCustomer(idCustomer);
+        return ResponseEntity.ok().body(vehicleDtoList);
+    }
+
+    @PostMapping("/mensalistas")
+    public ResponseEntity<VehicleDto> addMensalVehicle(@Valid @RequestBody VehicleForm vehicleForm, BindingResult br) {
+    
+        if (br.hasErrors()) {
+            List<String> errors = br.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            throw new ConstraintException("Restrição de Dados", errors);
+        }
+
+        VehicleDto vehicleDto = vehicleService.createVehicle(modelMapper.map(vehicleForm, VehicleDto.class), true);
+        return ResponseEntity.ok().body(vehicleDto);
     }
 }

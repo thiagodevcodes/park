@@ -36,7 +36,7 @@ public class VacancyController {
     ModelMapper modelMapper;
 
     @GetMapping("/{id}")
-    public ResponseEntity<VacancyDto> find(@PathVariable("id") Integer id) {        
+    public ResponseEntity<VacancyDto> findById(@PathVariable("id") Integer id) {        
         VacancyDto vacancyDto = vacancyService.findById(id);
         return ResponseEntity.ok().body(vacancyDto);
     }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
@@ -37,8 +38,11 @@ public class CustomerController {
     @Autowired
     CustomerService customerService;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerDto> find(@PathVariable("id") Integer id) {        
+    public ResponseEntity<CustomerDto> findById(@PathVariable("id") Integer id) {        
         CustomerDto customerDto = customerService.findById(id);
         return ResponseEntity.ok().body(customerDto);
     }
@@ -47,22 +51,6 @@ public class CustomerController {
     public ResponseEntity<List<CustomerDto>> findAll() {
         List<CustomerDto> customerDtoList = customerService.findAll();
         return ResponseEntity.ok().body(customerDtoList);
-    }
-
-    @GetMapping("/mensalistas")
-    public ResponseEntity<Page<CustomerMensalDto>> findAllMov(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
-        try {
-            Pageable pageable = Pageable.unpaged();
-
-            if (page != null && size != null) {
-                pageable = PageRequest.of(page, size);
-            }
-
-            Page<CustomerMensalDto> ticketDtoPage = customerService.findByCustomerTypePage(2, Optional.of(pageable));
-            return ResponseEntity.ok().body(ticketDtoPage);     
-        } catch (DataIntegrityException e) {
-            throw new DataIntegrityException("Erro de paginação");
-        }
     }
 
     @PostMapping
@@ -76,7 +64,7 @@ public class CustomerController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
 
-        CustomerMensalDto customerDto = customerService.createNewCustomer(customerForm, 2);
+        CustomerMensalDto customerDto = customerService.createNewCustomer(modelMapper.map(customerForm, CustomerMensalDto.class), 2);
         return ResponseEntity.ok().body(customerDto);
     }
 
@@ -93,8 +81,14 @@ public class CustomerController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-        CustomerDto costumerDto = customerService.updateById(custumerForm, id);
+        CustomerDto costumerDto = customerService.updateById(modelMapper.map(custumerForm, CustomerDto.class), id);
         return ResponseEntity.ok().body(costumerDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+        customerService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/finish/{id}")
@@ -114,9 +108,20 @@ public class CustomerController {
         return ResponseEntity.ok().body(costumerDto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
-        customerService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/mensalistas")
+    public ResponseEntity<Page<CustomerMensalDto>> findAllMov(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+        try {
+            Pageable pageable = Pageable.unpaged();
+
+            if (page != null && size != null) {
+                pageable = PageRequest.of(page, size);
+            }
+
+            Page<CustomerMensalDto> ticketDtoPage = customerService.findByCustomerTypePage(2, Optional.of(pageable));
+            return ResponseEntity.ok().body(ticketDtoPage);     
+        } catch (DataIntegrityException e) {
+            throw new DataIntegrityException("Erro de paginação");
+        }
     }
 }
+

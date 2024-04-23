@@ -57,62 +57,6 @@ public class TicketService {
         }
     }
 
-    public Boolean verifyMovActiveByPlate(String plate) {
-        try {
-            VehicleDto vehicleDto = vehicleService.findByPlate(plate);
-
-            if(vehicleDto != null) {
-                Optional<TicketModel> ticketModel = ticketRepository.findByIdVehicleAndIsActive(vehicleDto.getId(), true);
-            
-                if(ticketModel.isPresent()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + plate + ", Tipo: " + TicketModel.class.getName());
-        }
-    }
-
-    public Page<MovimentacaoDto> findAllMov(Optional<Pageable> optionalPage) {
-        try {
-            Pageable page = optionalPage.orElse(Pageable.unpaged());
-            Page<TicketModel> pageableModel = ticketRepository.findByIsActive(true, page);
-            List<MovimentacaoDto> newDtoList = new ArrayList<>();           
-
-            for (TicketModel ticket : pageableModel) {
-                MovimentacaoDto newDto = new MovimentacaoDto();
-
-                CustomerDto customerDto = customerService.findById(ticket.getIdCustomer());
-                VehicleDto vehicleDto = vehicleService.findById(ticket.getIdVehicle());
-                PersonDto personDto = personService.findById(customerDto.getIdPerson());
- 
-                if(personDto != null && vehicleDto != null && ticket.getExitTime() == null) {
-                    newDto.setId(ticket.getId());
-                    newDto.setEntryTime(ticket.getEntryTime());
-                    newDto.setExitTime(ticket.getExitTime());
-                    newDto.setName(personDto.getName());
-                    newDto.setMake(vehicleDto.getMake());
-                    newDto.setModel(vehicleDto.getModel());
-                    newDto.setPlate(vehicleDto.getPlate());
-                    newDto.setIdVacancy(ticket.getIdVacancy());
-                    newDto.setIdCustomerType(customerDto.getIdCustomerType());
-                    newDto.setIdVehicle(vehicleDto.getId());
-                    newDto.setIdCustomer(customerDto.getId());
-                    newDtoList.add(newDto);
-                }
-            } 
-
-            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, pageableModel.getTotalElements());
-            return pageableMov;
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não é possível listar os Tickets!");
-        }
-    }
-
     public List<TicketDto> findAll() {
         try {
             List<TicketModel> ticketModelList = ticketRepository.findAll();
@@ -173,28 +117,79 @@ public class TicketService {
         }
     }
 
-    public TicketDto createNewMov(MovimentacaoDto movimentacaoDto) {
+    public Boolean verifyTicketActiveByPlate(String plate) {
         try {
-            if (movimentacaoDto.getIdVacancy() == null) {
-                throw new DataIntegrityException("Selecione uma vaga!");
+            VehicleDto vehicleDto = vehicleService.findByPlate(plate);
+
+            if(vehicleDto != null) {
+                Optional<TicketModel> ticketModel = ticketRepository.findByIdVehicleAndIsActive(vehicleDto.getId(), true);
+            
+                if(ticketModel.isPresent()) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
             }
-    
-            VehicleDto vehicleDto = vehicleService.findByPlate(movimentacaoDto.getPlate());
-    
-            if (vehicleDto != null && movimentacaoDto.getIdCustomerType() == 1 && vehicleDto.getMonthlyVehicle()) {
-                throw new DataIntegrityException("Este veículo é mensalista");
-            }
-    
-            if (movimentacaoDto.getIdCustomerType() == 1 && this.verifyMovActiveByPlate(movimentacaoDto.getPlate())) {
-                throw new DataIntegrityException("Movimentação já existe");
-            }
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + plate + ", Tipo: " + TicketModel.class.getName());
+        }
+    }
+
+    public Page<MovimentacaoDto> findAllTickets(Optional<Pageable> optionalPage) {
+        try {
+            Pageable page = optionalPage.orElse(Pageable.unpaged());
+            Page<TicketModel> pageableModel = ticketRepository.findByIsActive(true, page);
+            List<MovimentacaoDto> newDtoList = new ArrayList<>();           
+
+            for (TicketModel ticket : pageableModel) {
+                MovimentacaoDto newDto = new MovimentacaoDto();
+
+                CustomerDto customerDto = customerService.findById(ticket.getIdCustomer());
+                VehicleDto vehicleDto = vehicleService.findById(ticket.getIdVehicle());
+                PersonDto personDto = personService.findById(customerDto.getIdPerson());
+ 
+                if(personDto != null && vehicleDto != null && ticket.getExitTime() == null) {
+                    newDto.setId(ticket.getId());
+                    newDto.setEntryTime(ticket.getEntryTime());
+                    newDto.setExitTime(ticket.getExitTime());
+                    newDto.setName(personDto.getName());
+                    newDto.setMake(vehicleDto.getMake());
+                    newDto.setModel(vehicleDto.getModel());
+                    newDto.setPlate(vehicleDto.getPlate());
+                    newDto.setIdVacancy(ticket.getIdVacancy());
+                    newDto.setIdCustomerType(customerDto.getIdCustomerType());
+                    newDto.setIdVehicle(vehicleDto.getId());
+                    newDto.setIdCustomer(customerDto.getId());
+                    newDtoList.add(newDto);
+                }
+            } 
+
+            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, pageableModel.getTotalElements());
+            return pageableMov;
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível listar os Tickets!");
+        }
+    }
+
+    public TicketDto createNewTicket(MovimentacaoDto movimentacaoDto) {
+        try {
+            validTicket(movimentacaoDto);
     
             PersonDto personDto = new PersonDto();
             CustomerDto customerDto = new CustomerDto();
+            TicketDto ticketDto = new TicketDto();
+
+            VehicleDto vehicleDto = vehicleService.findByPlate(movimentacaoDto.getPlate());
+    
+            if (vehicleDto != null && vehicleDto.getMonthlyVehicle()) {
+                throw new DataIntegrityException("Este veículo é mensalista");
+            } 
 
             if (movimentacaoDto.getIdCustomerType() == 1) {
                 personDto.setName(movimentacaoDto.getName());
-                personDto = personService.insert(personDto, 1);
+                personDto = personService.insert(personDto);
     
                 customerDto.setIdCustomerType(1);
                 customerDto.setIsActive(true);
@@ -217,7 +212,7 @@ public class TicketService {
                 customerDto = customerService.findById(movimentacaoDto.getIdCustomer());
                 vehicleDto = vehicleService.findById(movimentacaoDto.getIdVehicle());
 
-                if(this.verifyMovActiveByPlate(vehicleDto.getPlate())) {
+                if(this.verifyTicketActiveByPlate(vehicleDto.getPlate())) {
                     throw new DataIntegrityException("Movimentação já existe");
                 }
 
@@ -230,8 +225,6 @@ public class TicketService {
                 vacancyDto.setSituation(false);
                 vacancyService.updateById(vacancyDto, movimentacaoDto.getIdVacancy());
             }
-            
-            TicketDto ticketDto = new TicketDto();
             
             ticketDto.setEntryTime(LocalDateTime.now());
             ticketDto.setExitTime(null);
@@ -247,7 +240,7 @@ public class TicketService {
         }
     }
 
-    public TicketDto finishMovimentacao(TicketDto ticketDto, Integer id) {
+    public TicketDto finishTicket(TicketDto ticketDto, Integer id) {
         try {
             Optional<TicketModel> ticketExist = ticketRepository.findById(id);
             LocalDateTime date = LocalDateTime.now();
@@ -273,12 +266,16 @@ public class TicketService {
         }
     }
 
-    public TicketDto updateMovimentacao(MovimentacaoForm movimentacaoForm, Integer id) {
+    public TicketDto updateTicket(MovimentacaoForm movimentacaoForm, Integer id) {
         TicketDto ticketDto = this.findById(id);
         VehicleDto vehicleDto = vehicleService.findById(ticketDto.getIdVehicle());
         CustomerDto customerDto = customerService.findById(ticketDto.getIdCustomer());
         PersonDto personDto = personService.findById(customerDto.getIdPerson());
         VacancyDto vacancyDto = vacancyService.findById(ticketDto.getIdVacancy());
+
+        if(this.verifyTicketActiveByPlate(vehicleDto.getPlate())) {
+            throw new DataIntegrityException("Movimentação já existe");
+        }
 
         if(movimentacaoForm.getIdCustomerType() == 1) {
             personDto.setName(movimentacaoForm.getName());
@@ -315,5 +312,15 @@ public class TicketService {
         this.updateById(ticketDto, ticketDto.getId());
         
         return ticketDto;
+    }
+
+    private void validTicket(MovimentacaoDto movimentacaoDto) {
+        if (movimentacaoDto.getIdVacancy() == null) {
+            throw new DataIntegrityException("Selecione uma vaga!");
+        }
+        
+        if (movimentacaoDto.getIdCustomerType() == 1 && verifyTicketActiveByPlate(movimentacaoDto.getPlate())) {
+            throw new DataIntegrityException("Movimentação já existe");
+        }
     }
 }

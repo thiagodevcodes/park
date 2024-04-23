@@ -46,21 +46,12 @@ public class PersonService {
         }
     }
 
-    public PersonDto insert(PersonDto personDto, Integer customerType) {
+    public PersonDto insert(PersonDto personDto) {
         try {
             PersonModel newPerson = modelMapper.map(personDto, PersonModel.class);
             
-            if(customerType == 2) {
-                Optional<PersonModel> cpfExist = personRepository.findByCpf(personDto.getCpf());
-                Optional<PersonModel> emailExist = personRepository.findByEmail(personDto.getEmail());
-
-                if(cpfExist.isPresent()) {
-                    throw new DataIntegrityException("CPF já cadastrado!.");
-                }
-    
-                if(emailExist.isPresent()) {
-                    throw new DataIntegrityException("Email já cadastrado!.");
-                }
+            if(personDto.getCpf() != null && personDto.getEmail() != null) {
+                this.validCpfAndEmail(personDto.getCpf(), personDto.getEmail());
             }
 
             newPerson = personRepository.save(newPerson);
@@ -121,6 +112,26 @@ public class PersonService {
             } else {
                 return false;
             }
+
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());
+        }
+    }
+
+    public Boolean validCpfAndEmail(String cpf, String email) {
+        try {
+            Optional<PersonModel> cpfExist = personRepository.findByCpf(cpf);
+            Optional<PersonModel> emailExist = personRepository.findByEmail(email);
+
+            if(cpfExist.isPresent()) {
+                throw new DataIntegrityException("CPF já cadastrado!.");
+            }
+
+            if(emailExist.isPresent()) {
+                throw new DataIntegrityException("Email já cadastrado!.");
+            }
+
+            return false;
 
         } catch (NoSuchElementException e) {
             throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());

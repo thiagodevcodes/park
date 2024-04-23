@@ -189,5 +189,4 @@ public class VehicleService {
             throw new NotFoundException("Objeto não encontrado! Id: " + plate + ", Tipo: " + VehicleModel.class.getName());
         }
     }
-
 }

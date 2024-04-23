@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
-import com.sys.park.app.dtos.Customer.CustomerForm;
 import com.sys.park.app.dtos.Customer.CustomerMensalDto;
 import com.sys.park.app.dtos.CustomerType.CustomerTypeDto;
 import com.sys.park.app.dtos.Person.PersonDto;
@@ -45,6 +44,63 @@ public class CustomerService {
             return modelMapper.map(customerModel, CustomerDto.class);
         } catch (NoSuchElementException e) {
             throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + CustomerDto.class.getName());
+        }
+    }
+
+    public List<CustomerDto> findAll() {
+        try {
+            List<CustomerModel> customerModelList = customerRepository.findAll();
+
+            return customerModelList.stream()
+                    .map(customer -> modelMapper.map(customer, CustomerDto.class))
+                    .collect(Collectors.toList());
+        } catch (BusinessRuleException e) {
+            throw new BusinessRuleException("Não é possível consultar o Cliente!", e.getErrorMessages());
+        }
+    }
+
+    public CustomerDto insert(CustomerDto customerDto) {
+        try {
+            CustomerModel newCustomer = modelMapper.map(customerDto, CustomerModel.class);
+            
+            newCustomer = customerRepository.save(newCustomer);
+            return modelMapper.map(newCustomer, CustomerDto.class);
+
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
+        }
+    }
+
+    public CustomerDto updateById(CustomerDto customerDto, Integer id) {
+        try {
+            Optional<CustomerModel> customerExist = customerRepository.findById(id);
+
+            if (customerExist.isPresent()) {
+                CustomerModel customerUpdated = customerExist.get();
+                
+                modelMapper.map(customerDto, customerUpdated);
+                customerUpdated.setId(id);
+                customerUpdated = customerRepository.save(customerUpdated);
+
+                return modelMapper.map(customerUpdated, CustomerDto.class);
+            }else{
+                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
+        }
+    }
+
+    public void deleteById(Integer id) {
+        try {
+            if (customerRepository.existsById(id)) {
+                customerRepository.deleteById(id);
+
+            }else {
+                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível excluir o Cliente!");
         }
     }
 
@@ -89,101 +145,44 @@ public class CustomerService {
         }
     }
 
-    public List<CustomerDto> findAll() {
-        try {
-            List<CustomerModel> customerModelList = customerRepository.findAll();
-
-            return customerModelList.stream()
-                    .map(customer -> modelMapper.map(customer, CustomerDto.class))
-                    .collect(Collectors.toList());
-        } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar o Cliente!", e.getErrorMessages());
-        }
-    }
-
-    public CustomerDto insert(CustomerDto customerDto) {
-        try {
-            CustomerModel newCustomer = modelMapper.map(customerDto, CustomerModel.class);
-            
-            newCustomer = customerRepository.save(newCustomer);
-            return modelMapper.map(newCustomer, CustomerDto.class);
-
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
-        }
-    }
-
-    public CustomerDto updateById(CustomerForm customerForm, Integer id) {
-        try {
-            Optional<CustomerModel> customerExist = customerRepository.findById(id);
-
-            if (customerExist.isPresent()) {
-                CustomerModel customerUpdated = customerExist.get();
-                
-                modelMapper.map(customerForm, customerUpdated);
-                customerUpdated.setId(id);
-                customerUpdated = customerRepository.save(customerUpdated);
-
-                return modelMapper.map(customerUpdated, CustomerDto.class);
-            }else{
-                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
-        }
-    }
-
-    public void deleteById(Integer id) {
-        try {
-            if (customerRepository.existsById(id)) {
-                customerRepository.deleteById(id);
-
-            }else {
-                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não é possível excluir o Cliente!");
-        }
-    }
-
-    public CustomerMensalDto createNewCustomer(CustomerForm customerForm, Integer customerType) {
+    public CustomerMensalDto createNewCustomer(CustomerMensalDto newCustomerDto, Integer customerType) {
         try {
             CustomerMensalDto newDto = new CustomerMensalDto();
             PersonDto personDto = new PersonDto();
             CustomerDto customerDto = new CustomerDto();
 
             if(customerType == 2) {
-                personDto.setCpf(customerForm.getCpf());
-                personDto.setEmail(customerForm.getEmail());
-                personDto.setName(customerForm.getName());
-                personDto.setPhone(customerForm.getPhone());
+                personDto.setCpf(newCustomerDto.getCpf());
+                personDto.setEmail(newCustomerDto.getEmail());
+                personDto.setName(newCustomerDto.getName());
+                personDto.setPhone(newCustomerDto.getPhone());
 
                 if(personService.verifyCpfAndEmail(personDto.getCpf(), personDto.getEmail())) {
                     personDto = personService.findByCpf(personDto.getCpf());
                     customerDto = this.findByIdPerson(personDto.getId());
 
-                    if(customerDto.getIsActive() == false) {
+                    if(!customerDto.getIsActive()) {
                         customerDto.setIsActive(true);
-                        customerDto = this.updateById(customerForm, customerDto.getId());
+                        customerDto = this.updateById(customerDto, customerDto.getId());
                     } else {
                         throw new DataIntegrityException("O cliente já existe!");
                     }
                 } else {
-                    personDto = personService.insert(personDto, customerType);
+                    personDto = personService.insert(personDto);
                     customerDto.setIdPerson(personDto.getId());
                     customerDto.setIdCustomerType(customerType);
-                    customerDto.setPaymentDay(customerForm.getPaymentDay());
+                    customerDto.setPaymentDay(newCustomerDto.getPaymentDay());
                     customerDto.setIsActive(true);
 
                     customerDto = this.insert(customerDto);
                 }
             } else if(customerType == 1) {
-                personDto.setName(customerForm.getName());
-                personDto = personService.insert(personDto, customerType);
+                personDto.setName(newCustomerDto.getName());
+                personDto = personService.insert(personDto);
                 
                 customerDto.setIdPerson(personDto.getId());
                 customerDto.setIdCustomerType(customerType);
-                customerDto.setPaymentDay(customerForm.getPaymentDay());
+                customerDto.setPaymentDay(newCustomerDto.getPaymentDay());
                 customerDto.setIsActive(true);
 
                 customerDto = this.insert(customerDto);
@@ -221,6 +220,5 @@ public class CustomerService {
             throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).", e);
         }
     }
-
 
 }
