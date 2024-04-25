@@ -55,7 +55,7 @@ public class CustomerService {
                     .map(customer -> modelMapper.map(customer, CustomerDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar o Cliente!", e.getErrorMessages());
+            throw new BusinessRuleException("Não é possível consultar o Cliente!");
         }
     }
 
@@ -93,9 +93,10 @@ public class CustomerService {
 
     public void deleteById(Integer id) {
         try {
+            Optional<CustomerModel> customerModel = customerRepository.findById(id);
             if (customerRepository.existsById(id)) {
                 customerRepository.deleteById(id);
-
+                personService.deleteById(customerModel.get().getIdPerson());
             }else {
                 throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
             }
@@ -145,60 +146,64 @@ public class CustomerService {
         }
     }
 
-    public CustomerMensalDto createNewCustomer(CustomerMensalDto newCustomerDto, Integer customerType) {
+    public CustomerMensalDto createNewCustomer(CustomerMensalDto customerMensalDto, Integer customerType) {
         try {
-            CustomerMensalDto newDto = new CustomerMensalDto();
+            CustomerMensalDto newCustomer = new CustomerMensalDto();
             PersonDto personDto = new PersonDto();
             CustomerDto customerDto = new CustomerDto();
 
             if(customerType == 2) {
-                personDto.setCpf(newCustomerDto.getCpf());
-                personDto.setEmail(newCustomerDto.getEmail());
-                personDto.setName(newCustomerDto.getName());
-                personDto.setPhone(newCustomerDto.getPhone());
+                personDto.setCpf(customerMensalDto.getCpf());
+                personDto.setEmail(customerMensalDto.getEmail());
+                personDto.setName(customerMensalDto.getName());
+                personDto.setPhone(customerMensalDto.getPhone());
+                
+                if(personService.verifyCpf(personDto.getCpf())) {
+                    System.out.println(personDto.getCpf());
+                    personDto = personService.findByCpf(customerMensalDto.getCpf());
+                    System.out.println(personDto);
 
-                if(personService.verifyCpfAndEmail(personDto.getCpf(), personDto.getEmail())) {
-                    personDto = personService.findByCpf(personDto.getCpf());
                     customerDto = this.findByIdPerson(personDto.getId());
-
+                    
                     if(!customerDto.getIsActive()) {
                         customerDto.setIsActive(true);
                         customerDto = this.updateById(customerDto, customerDto.getId());
                     } else {
-                        throw new DataIntegrityException("O cliente já existe!");
+                        throw new BusinessRuleException("O cliente já existe!");
                     }
                 } else {
                     personDto = personService.insert(personDto);
                     customerDto.setIdPerson(personDto.getId());
                     customerDto.setIdCustomerType(customerType);
-                    customerDto.setPaymentDay(newCustomerDto.getPaymentDay());
+                    customerDto.setPaymentDay(customerMensalDto.getPaymentDay());
                     customerDto.setIsActive(true);
 
                     customerDto = this.insert(customerDto);
                 }
             } else if(customerType == 1) {
-                personDto.setName(newCustomerDto.getName());
+                personDto.setName(customerMensalDto.getName());
                 personDto = personService.insert(personDto);
                 
                 customerDto.setIdPerson(personDto.getId());
                 customerDto.setIdCustomerType(customerType);
-                customerDto.setPaymentDay(newCustomerDto.getPaymentDay());
+                customerDto.setPaymentDay(customerMensalDto.getPaymentDay());
                 customerDto.setIsActive(true);
 
                 customerDto = this.insert(customerDto);
             }
 
-            newDto.setCpf(personDto.getCpf());
-            newDto.setEmail(personDto.getEmail());
-            newDto.setName(personDto.getName());
-            newDto.setPaymentDay(customerDto.getPaymentDay());
-            newDto.setPhone(personDto.getPhone());
-            newDto.setClientType(customerType);
+            newCustomer.setId(customerDto.getId());
+            newCustomer.setCpf(personDto.getCpf());
+            newCustomer.setEmail(personDto.getEmail());
+            newCustomer.setName(personDto.getName());
+            newCustomer.setPaymentDay(customerDto.getPaymentDay());
+            newCustomer.setPhone(personDto.getPhone());
+            newCustomer.setClientType(customerType);
         
-            return newDto;
+            return newCustomer;
 
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).", e);
+            throw new DataIntegrityException("Não foi possível criar o cliente!", e);
         }
     }
 
@@ -206,19 +211,52 @@ public class CustomerService {
         try {
             Optional<CustomerModel> customerExist = customerRepository.findById(id);
 
-            if (customerExist.isPresent()) {
-                CustomerModel customerUpdated = customerExist.get();
-
-                customerUpdated.setIsActive(false);
-                customerUpdated = customerRepository.save(customerUpdated);
-
-                return modelMapper.map(customerUpdated, CustomerDto.class);
-            }else {
+            if(!customerExist.isPresent()) 
                 throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
-            }
+
+            CustomerModel customerUpdated = customerExist.get();
+
+            customerUpdated.setIsActive(false);
+            customerUpdated = customerRepository.save(customerUpdated);
+
+            return modelMapper.map(customerUpdated, CustomerDto.class);  
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).", e);
+            throw new DataIntegrityException("Não foi possível finalizar o cliente!", e);
         }
     }
 
+    public CustomerMensalDto updateCustomer(CustomerMensalDto customerMensalDto, Integer id) {
+        try {
+            CustomerDto customerDto = this.findById(id);
+            PersonDto personDto = personService.findById(customerDto.getIdPerson());
+            
+            if(!customerMensalDto.getCpf().equals(personDto.getCpf()) && !customerMensalDto.getEmail().equals(personDto.getEmail())) {
+                personService.validCpfAndEmail(customerMensalDto.getCpf(), customerMensalDto.getEmail());
+            }
+        
+            personDto.setName(customerMensalDto.getName());
+            personDto.setCpf(customerMensalDto.getCpf());
+            personDto.setEmail(customerMensalDto.getEmail());
+            personDto.setPhone(customerMensalDto.getPhone());
+            customerDto.setIdCustomerType(customerMensalDto.getClientType());
+            customerDto.setPaymentDay(customerMensalDto.getPaymentDay());
+
+            personDto = personService.updateById(personDto, personDto.getId());
+            customerDto = this.updateById(customerDto, id);
+
+            CustomerMensalDto updatedCustomer = new CustomerMensalDto();
+
+            updatedCustomer.setClientType(customerDto.getIdCustomerType());
+            updatedCustomer.setCpf(personDto.getCpf());
+            updatedCustomer.setEmail(personDto.getEmail());
+            updatedCustomer.setName(personDto.getName());
+            updatedCustomer.setPaymentDay(customerDto.getPaymentDay());
+            updatedCustomer.setIsActive(customerDto.getIsActive());
+            updatedCustomer.setPhone(personDto.getPhone());
+
+            return updatedCustomer;
+        } catch (BusinessRuleException e) {
+            throw new BusinessRuleException("Não foi possível atualizar o cliente", e);
+        }
+    }
 }

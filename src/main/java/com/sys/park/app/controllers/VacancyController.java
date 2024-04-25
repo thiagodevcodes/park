@@ -64,7 +64,7 @@ public class VacancyController {
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
 
         VacancyDto vacancyDto = vacancyService.insert(modelMapper.map(vacancyForm, VacancyDto.class));
@@ -81,7 +81,7 @@ public class VacancyController {
                 errors.add(e.getDefaultMessage());
             });
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
      
         VacancyDto vacancyUpdated = vacancyService.updateById(modelMapper.map(vacancyForm, VacancyDto.class), id);

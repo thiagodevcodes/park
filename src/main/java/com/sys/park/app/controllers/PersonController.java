@@ -53,7 +53,7 @@ public class PersonController {
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
 
         PersonDto personDto = personService.insert(modelMapper.map(personForm, PersonDto.class));
@@ -70,7 +70,7 @@ public class PersonController {
                 errors.add(e.getDefaultMessage());
             });
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
      
         PersonDto personDto = personService.updateById(modelMapper.map(personForm, PersonDto.class), id);

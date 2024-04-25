@@ -24,12 +24,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Ticket.MovimentacaoDto;
-import com.sys.park.app.dtos.Ticket.MovimentacaoForm;
 import com.sys.park.app.dtos.Ticket.TicketDto;
 import com.sys.park.app.dtos.Ticket.TicketForm;
+import com.sys.park.app.dtos.Ticket.TicketMensalForm;
+import com.sys.park.app.dtos.Ticket.TicketRotativoForm;
 import com.sys.park.app.services.TicketService;
+import com.sys.park.app.services.exceptions.BusinessRuleException;
 import com.sys.park.app.services.exceptions.ConstraintException;
-import com.sys.park.app.services.exceptions.DataIntegrityException;
 
 import jakarta.validation.Valid;
 
@@ -67,7 +68,6 @@ public class TicketController {
             throw new ConstraintException("Restrição de Dados", errors);
         }
      
-
         TicketDto ticketDto = ticketService.updateById(modelMapper.map(ticketForm, TicketDto.class), id);
         return ResponseEntity.ok().body(ticketDto);
     }
@@ -93,7 +93,7 @@ public class TicketController {
         return ResponseEntity.ok().body(ticketDto);
     }
 
-    @GetMapping("/movimentacao")
+    @GetMapping("/movimentacoes")
     public ResponseEntity<Page<MovimentacaoDto>> findAllTicket(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
         try {
             Pageable pageable = Pageable.unpaged();
@@ -104,20 +104,20 @@ public class TicketController {
 
             Page<MovimentacaoDto> ticketDtoPage = ticketService.findAllTickets(Optional.of(pageable));
             return ResponseEntity.ok().body(ticketDtoPage);     
-        } catch (DataIntegrityException e) {
-            throw new DataIntegrityException("Erro de paginação");
+        } catch (BusinessRuleException e) {
+            throw new BusinessRuleException("Erro de paginação");
         }
     }
 
-    @PostMapping("/movimentacao")
-    public ResponseEntity<TicketDto> insertNewTicket(@Valid @RequestBody MovimentacaoForm movForm, BindingResult br) {
+    @PostMapping("/mensalistas")
+    public ResponseEntity<TicketDto> insertNewMensalista(@Valid @RequestBody TicketMensalForm movForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
     
         TicketDto ticketDto = ticketService.createNewTicket(modelMapper.map(movForm, MovimentacaoDto.class));
@@ -125,8 +125,24 @@ public class TicketController {
         return ResponseEntity.ok().body(ticketDto);
     }
 
-    @PutMapping("/movimentacao/{id}")
-    public ResponseEntity<TicketDto> updateMov(@Valid @RequestBody MovimentacaoForm movForm, 
+    @PostMapping("/rotativos")
+    public ResponseEntity<TicketDto> insertNewRotativo(@Valid @RequestBody TicketRotativoForm movForm, BindingResult br) {
+            
+        if (br.hasErrors()) {
+            List<String> errors = br.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            throw new ConstraintException("Dados incorretos!", errors);
+        }
+    
+        TicketDto ticketDto = ticketService.createNewTicket(modelMapper.map(movForm, MovimentacaoDto.class));
+        
+        return ResponseEntity.ok().body(ticketDto);
+    }
+
+    @PutMapping("/mensalistas/{id}")
+    public ResponseEntity<TicketDto> updateMensalista(@Valid @RequestBody TicketMensalForm movForm, 
         @PathVariable("id") Integer id, BindingResult br) {
             
         if (br.hasErrors()) {
@@ -134,10 +150,26 @@ public class TicketController {
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
     
-        TicketDto ticketDto = ticketService.updateTicket(movForm, id);
+        TicketDto ticketDto = ticketService.updateTicket(modelMapper.map(movForm, MovimentacaoDto.class), id);
+        return ResponseEntity.ok().body(ticketDto);
+    }
+
+    @PutMapping("/rotativos/{id}")
+    public ResponseEntity<TicketDto> updateRotativo(@Valid @RequestBody TicketRotativoForm movForm, 
+        @PathVariable("id") Integer id, BindingResult br) {
+            
+        if (br.hasErrors()) {
+            List<String> errors = br.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            throw new ConstraintException("Dados incorretos!", errors);
+        }
+    
+        TicketDto ticketDto = ticketService.updateTicket(modelMapper.map(movForm, MovimentacaoDto.class), id);
         return ResponseEntity.ok().body(ticketDto);
     }
 
@@ -151,7 +183,7 @@ public class TicketController {
                 errors.add(e.getDefaultMessage());
             });
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
      
         TicketDto ticketDto = ticketService.finishTicket(modelMapper.map(ticketForm, TicketDto.class), id);

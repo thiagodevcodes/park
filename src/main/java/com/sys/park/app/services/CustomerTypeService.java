@@ -43,7 +43,7 @@ public class CustomerTypeService {
                     .map(customerType -> modelMapper.map(customerType, CustomerTypeDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar o Tipo do Cliente!", e.getErrorMessages());
+            throw new BusinessRuleException("Não é possível consultar o Tipo do Cliente!");
         }
     }
 

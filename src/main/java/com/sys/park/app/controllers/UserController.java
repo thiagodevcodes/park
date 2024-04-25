@@ -50,7 +50,7 @@ public class UserController {
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
 
         UserDto userDto = userService.insert(userForm);
@@ -67,7 +67,7 @@ public class UserController {
                 errors.add(e.getDefaultMessage());
             });
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
      
         UserDto userDto = userService.updateById(userForm, id);

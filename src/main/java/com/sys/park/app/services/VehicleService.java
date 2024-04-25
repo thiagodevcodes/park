@@ -43,7 +43,7 @@ public class VehicleService {
                     .map(vehicle -> modelMapper.map(vehicle, VehicleDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar o Veiculo!", e.getErrorMessages());
+            throw new BusinessRuleException("Não é possível consultar o Veiculo!");
         }
     }
 
@@ -51,11 +51,7 @@ public class VehicleService {
         try {
             VehicleModel newVehicle = modelMapper.map(vehicleDto, VehicleModel.class);
             
-            Optional<VehicleModel> byPlate = vehicleRepository.findByPlate(newVehicle.getPlate());
-            
-            if (byPlate.isPresent()) {
-                throw new DataIntegrityException("Veiculo já registrado.");
-            }
+            validPlate(vehicleDto.getPlate());
 
             newVehicle = vehicleRepository.save(newVehicle);
             return modelMapper.map(newVehicle, VehicleDto.class);
@@ -67,7 +63,11 @@ public class VehicleService {
 
     public VehicleDto updateById(VehicleDto vehicleDto, Integer id) {
         try {
-            Optional<VehicleModel> byPlate = vehicleRepository.findByPlate(vehicleDto.getPlate());
+            Optional<VehicleModel> byPlate = vehicleRepository.findById(id);
+
+            if(!byPlate.get().getPlate().equals(vehicleDto.getPlate())) {
+                validPlate(vehicleDto.getPlate());
+            }
 
             if (byPlate.isPresent()) {
                 VehicleModel vehicleUpdated = byPlate.get();
@@ -130,6 +130,10 @@ public class VehicleService {
 
             Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(vehicleDto.getPlate());
 
+            if(plateExist.get().getMonthlyVehicle().equals(true)) {
+                throw new BusinessRuleException("Veículo pertence a outro mensalista!");
+            }
+
             if(plateExist.isPresent()) {
                 VehicleModel vehicleModel = plateExist.get();
 
@@ -170,14 +174,13 @@ public class VehicleService {
                 throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
             }
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).", e);
+            throw new DataIntegrityException("Erro ao finalizar o veículo!", e);
         }
     }
 
     public Boolean verifyPlate(String plate) {
         try {
             Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(plate);
-
 
             if(plateExist.isPresent()) {
                 return true;
@@ -187,6 +190,21 @@ public class VehicleService {
 
         } catch (NoSuchElementException e) {
             throw new NotFoundException("Objeto não encontrado! Id: " + plate + ", Tipo: " + VehicleModel.class.getName());
+        }
+    }
+
+    public Boolean validPlate(String plate) {
+        try {
+            Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(plate);
+
+            if(plateExist.isPresent()) {
+                throw new DataIntegrityException("Veículo já cadastrado!.");
+            }
+
+            return false;
+
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Placa: " + plate + ", Tipo: " + VehicleModel.class.getName());
         }
     }
 }

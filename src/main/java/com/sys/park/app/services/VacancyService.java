@@ -43,7 +43,7 @@ public class VacancyService {
                     .map(user -> modelMapper.map(user, VacancyDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar a Vaga!", e.getErrorMessages());
+            throw new BusinessRuleException("Não é possível consultar a Vaga!");
         }
     }
 

@@ -43,7 +43,7 @@ public class UserService {
                     .map(user -> modelMapper.map(user, UserDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar os Usuários!", e.getErrorMessages());
+            throw new BusinessRuleException("Não é possível consultar os Usuários!");
         }
     }
 

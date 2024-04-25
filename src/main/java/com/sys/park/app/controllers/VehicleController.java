@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleForm;
-import com.sys.park.app.models.VehicleModel;
 import com.sys.park.app.services.VehicleService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -55,11 +54,11 @@ public class VehicleController {
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        VehicleModel vehicleModel = modelMapper.map(vehicleForm, VehicleModel.class);
-        return ResponseEntity.ok().body(modelMapper.map(vehicleModel, VehicleDto.class));
+        VehicleDto vehicleDto = vehicleService.createVehicle(modelMapper.map(vehicleForm, VehicleDto.class), vehicleForm.getMonthlyVehicle());
+        return ResponseEntity.ok().body(vehicleDto);
     }
 
     @PutMapping("/{id}")
@@ -72,7 +71,7 @@ public class VehicleController {
                 errors.add(e.getDefaultMessage());
             });
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
      
         VehicleDto vehicleDto = vehicleService.updateById(modelMapper.map(vehicleForm, VehicleDto.class), id);
@@ -89,20 +88,5 @@ public class VehicleController {
     public ResponseEntity<List<VehicleDto>> findByIdCustomer(@PathVariable("id") Integer idCustomer) {
         List<VehicleDto> vehicleDtoList = vehicleService.findByCustomer(idCustomer);
         return ResponseEntity.ok().body(vehicleDtoList);
-    }
-
-    @PostMapping("/mensalistas")
-    public ResponseEntity<VehicleDto> addMensalVehicle(@Valid @RequestBody VehicleForm vehicleForm, BindingResult br) {
-    
-        if (br.hasErrors()) {
-            List<String> errors = br.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-
-            throw new ConstraintException("Restrição de Dados", errors);
-        }
-
-        VehicleDto vehicleDto = vehicleService.createVehicle(modelMapper.map(vehicleForm, VehicleDto.class), true);
-        return ResponseEntity.ok().body(vehicleDto);
     }
 }

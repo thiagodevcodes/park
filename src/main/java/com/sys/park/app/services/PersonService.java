@@ -42,7 +42,7 @@ public class PersonService {
                     .map(user -> modelMapper.map(user, PersonDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar a Pessoa!", e.getErrorMessages());
+            throw new BusinessRuleException("Não é possível consultar a Pessoa!");
         }
     }
 
@@ -98,16 +98,16 @@ public class PersonService {
             PersonModel personModel = personRepository.findByCpf(cpf).get();
             return modelMapper.map(personModel, PersonDto.class);
         } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());
+            throw new NotFoundException("Objeto não encontrado! Cpf: " + cpf + ", Tipo: " + PersonModel.class.getName());
         }
     }
 
-    public Boolean verifyCpfAndEmail(String cpf, String email) {
+    public Boolean verifyCpf(String cpf) {
         try {
             Optional<PersonModel> cpfExist = personRepository.findByCpf(cpf);
-            Optional<PersonModel> emailExist = personRepository.findByEmail(email);
+            //Optional<PersonModel> emailExist = personRepository.findByEmail(email);
 
-            if(cpfExist.isPresent() || emailExist.isPresent()) {
+            if(cpfExist.isPresent()) {
                 return true;
             } else {
                 return false;

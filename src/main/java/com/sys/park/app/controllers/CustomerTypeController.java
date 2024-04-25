@@ -54,7 +54,7 @@ public class CustomerTypeController {
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
 
         CustomerTypeDto customerTypeDto = customerTypeService.insert(modelMapper.map(customerTypeForm, CustomerTypeDto.class));
@@ -71,7 +71,7 @@ public class CustomerTypeController {
                 errors.add(e.getDefaultMessage());
             });
 
-            throw new ConstraintException("Restrição de Dados", errors);
+            throw new ConstraintException("Dados incorretos!", errors);
         }
      
         CustomerTypeDto costumerTypeDto = customerTypeService.updateById(costumerTypeForm, id);

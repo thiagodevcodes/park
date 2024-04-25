@@ -22,7 +22,6 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<StandardError> objectNotFound(NotFoundException e, HttpServletRequest request) {
         List<String> listErrors = new ArrayList<>();
-
         listErrors.add(e.getMessage());
 
         StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.NOT_FOUND.value(), "Não encontrado", listErrors, request.getRequestURI());
@@ -32,7 +31,6 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(DataIntegrityException.class)
     public ResponseEntity<StandardError> dataIntegrity(DataIntegrityException e, HttpServletRequest request) {
         List<String> listErrors = new ArrayList<>();
-
         listErrors.add(e.getMessage());
 
         StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.BAD_REQUEST.value(), "Integridade de dados", listErrors, request.getRequestURI());
@@ -41,13 +39,19 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(ConstraintException.class)
     public ResponseEntity<StandardError> constraint(ConstraintException e, HttpServletRequest request) {
-        StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.BAD_REQUEST.value(), "Restrição de Dados", e.getErrorMessages(), request.getRequestURI());
+        List<String> listErrors = new ArrayList<>();
+        listErrors.add(e.getMessage());
+        
+        StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.BAD_REQUEST.value(), "Restrição de Dados", listErrors, request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<StandardError> businessRule(BusinessRuleException e, HttpServletRequest request) {       
-        StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.CONFLICT.value(), "Regra de negócio", e.getErrorMessages(), request.getRequestURI());
+        List<String> listErrors = new ArrayList<>();
+        listErrors.add(e.getMessage());
+        
+        StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.CONFLICT.value(), "Regra de negócio", listErrors, request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(err);
     }
 
