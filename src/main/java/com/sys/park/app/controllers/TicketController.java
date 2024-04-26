@@ -102,7 +102,7 @@ public class TicketController {
                 pageable = PageRequest.of(page, size);
             }
 
-            Page<MovimentacaoDto> ticketDtoPage = ticketService.findAllTickets(Optional.of(pageable));
+            Page<MovimentacaoDto> ticketDtoPage = ticketService.getAllTickets(Optional.of(pageable));
             return ResponseEntity.ok().body(ticketDtoPage);     
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Erro de paginação");
@@ -110,7 +110,7 @@ public class TicketController {
     }
 
     @PostMapping("/mensalistas")
-    public ResponseEntity<TicketDto> insertNewMensalista(@Valid @RequestBody TicketMensalForm movForm, BindingResult br) {
+    public ResponseEntity<TicketDto> insertNewMensalista(@RequestBody @Valid TicketMensalForm movForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()

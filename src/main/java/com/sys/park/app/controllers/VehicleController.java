@@ -2,11 +2,15 @@ package com.sys.park.app.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
@@ -85,8 +90,14 @@ public class VehicleController {
     }
      
     @GetMapping("/mensalistas/{id}")
-    public ResponseEntity<List<VehicleDto>> findByIdCustomer(@PathVariable("id") Integer idCustomer) {
-        List<VehicleDto> vehicleDtoList = vehicleService.findByCustomer(idCustomer);
+    public ResponseEntity<Page<VehicleDto>> findByIdCustomer(@PathVariable("id") Integer idCustomer, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+        Pageable pageable = Pageable.unpaged();
+
+        if (page != null && size != null) {
+            pageable = PageRequest.of(page, size);
+        }
+
+        Page<VehicleDto> vehicleDtoList = vehicleService.getByIdCustomer(idCustomer, Optional.of(pageable));
         return ResponseEntity.ok().body(vehicleDtoList);
     }
 }

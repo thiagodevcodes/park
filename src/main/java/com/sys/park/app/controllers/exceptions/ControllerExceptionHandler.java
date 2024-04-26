@@ -42,7 +42,7 @@ public class ControllerExceptionHandler {
         List<String> listErrors = new ArrayList<>();
         listErrors.add(e.getMessage());
         
-        StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.BAD_REQUEST.value(), "Restrição de Dados", listErrors, request.getRequestURI());
+        StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.BAD_REQUEST.value(), "Restrição de Dados", e.getErrorMessages(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 

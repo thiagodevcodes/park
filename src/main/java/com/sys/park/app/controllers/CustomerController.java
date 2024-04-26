@@ -117,7 +117,7 @@ public class CustomerController {
                 pageable = PageRequest.of(page, size);
             }
 
-            Page<CustomerMensalDto> ticketDtoPage = customerService.findByCustomerTypePage(2, Optional.of(pageable));
+            Page<CustomerMensalDto> ticketDtoPage = customerService.getCustomersByCustomerType(2, Optional.of(pageable));
             return ResponseEntity.ok().body(ticketDtoPage);     
         } catch (DataIntegrityException e) {
             throw new DataIntegrityException("Erro de paginação");

@@ -47,6 +47,15 @@ public class CustomerService {
         }
     }
 
+    public CustomerDto findByIdPerson(Integer idPerson) {
+        try {
+            CustomerModel customerModel = customerRepository.findByIdPerson(idPerson).get();
+            return modelMapper.map(customerModel, CustomerDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id Person: " + idPerson + ", Tipo: " + CustomerDto.class.getName());
+        }
+    }
+
     public List<CustomerDto> findAll() {
         try {
             List<CustomerModel> customerModelList = customerRepository.findAll();
@@ -55,7 +64,7 @@ public class CustomerService {
                     .map(customer -> modelMapper.map(customer, CustomerDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar o Cliente!");
+            throw new BusinessRuleException("Não é possível consultar os Clientes!");
         }
     }
 
@@ -67,7 +76,7 @@ public class CustomerService {
             return modelMapper.map(newCustomer, CustomerDto.class);
 
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
+            throw new DataIntegrityException("Erro ao tentar inserir um cliente!");
         }
     }
 
@@ -87,7 +96,7 @@ public class CustomerService {
                 throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
             }
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).");
+            throw new DataIntegrityException("Não foi possível atualizar o cliente!");
         }
     }
 
@@ -105,16 +114,7 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto findByIdPerson(Integer idPerson) {
-        try {
-            CustomerModel customerModel = customerRepository.findByIdPerson(idPerson).get();
-            return modelMapper.map(customerModel, CustomerDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id Person: " + idPerson + ", Tipo: " + CustomerDto.class.getName());
-        }
-    }
-
-    public Page<CustomerMensalDto> findByCustomerTypePage(Integer customerType, Optional<Pageable> optionalPage) {
+    public Page<CustomerMensalDto> getCustomersByCustomerType(Integer customerType, Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
             Page<CustomerModel> customers = customerRepository.findByIdCustomerTypeAndIsActive(customerType, true, page);

@@ -34,6 +34,15 @@ public class PersonService {
         }
     }
 
+    public PersonDto findByCpf(String cpf) {
+        try {
+            PersonModel personModel = personRepository.findByCpf(cpf).get();
+            return modelMapper.map(personModel, PersonDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Cpf: " + cpf + ", Tipo: " + PersonModel.class.getName());
+        }
+    }
+
     public List<PersonDto> findAll() {
         try {
             List<PersonModel> personModelList = personRepository.findAll();
@@ -90,15 +99,6 @@ public class PersonService {
             }
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível excluir a Pessoa!");
-        }
-    }
-
-    public PersonDto findByCpf(String cpf) {
-        try {
-            PersonModel personModel = personRepository.findByCpf(cpf).get();
-            return modelMapper.map(personModel, PersonDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Cpf: " + cpf + ", Tipo: " + PersonModel.class.getName());
         }
     }
 
