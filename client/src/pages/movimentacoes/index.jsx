@@ -8,66 +8,17 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { formatDate } from "@/services/utils";
 import Image from "next/image";
-import { handleUpdate, handleCreate, handleDelete, fetchData, fetchDataPage } from "@/services/axios";
-import { useRouter } from "next/router";
+import { handleUpdate, fetchData, fetchDataPage } from "@/services/axios";
 import Pagination from "@/components/Pagination";
 import InputForm from "@/components/InputForm";
 
 export default function Movimentacoes() {
-    const router = useRouter()
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [width, setWidth] = useState(0)
     const [modalOpen, setModalOpen] = useState({ post: false, update: false, delete: false });
     const [models, setModels] = useState({ tickets: [], clients: [], vehicles: [], vacancys: [] })
     const [formData, setFormData] = useState({ name: null, plate: null, make: null, model: null, idVacancy: null, idCustomerType: 1, idCustomer: null, idVehicle: null })
-
-    const handleSubmit = (e, path, data) => {
-        e.preventDefault();
-        try {
-            handleCreate(data, path).then(() => {
-                setModalOpen({ ...modalOpen, post: false })
-                setTimeout(() => {
-                    router.reload();
-                }, 3000);
-            });
-        } catch (error) {
-            console.error("Erro ao criar:", error);
-        }
-
-    };
-
-    const submitUpdated = (e, id, path, data) => {
-        e.preventDefault();
-        if (id) {
-            try {
-                handleUpdate(id, path, data).then(() => {
-                    setModalOpen({ ...modalOpen, update: false })
-                    setTimeout(() => {
-                        router.reload();
-                    }, 3000);
-                });
-            } catch (error) {
-                console.error("Erro ao criar:", error);
-            }
-        }
-    };
-
-    const submitDelete = (e, id, path) => {
-        e.preventDefault();
-        if (id) {
-            try {
-                handleDelete(id, path).then(() => {
-                    setModalOpen({ ...modalOpen, delete: false })
-                    setTimeout(() => {
-                        router.reload();
-                    }, 3000);
-                });
-            } catch (error) {
-                console.error("Erro ao criar:", error);
-            }
-        }
-    }
 
     const handleInputChange = (column, event) => {
         setFormData({
@@ -78,7 +29,7 @@ export default function Movimentacoes() {
     };
 
     useEffect(() => {
-        const fetchDataAndUpdateModels = async () => {
+        const fetchDataModels = async () => {
             try {
                 const [clientsResponse, ticketsResponse, vacanciesResponse] = await Promise.all([
                     fetchData("customers/mensalistas"),
@@ -91,23 +42,27 @@ export default function Movimentacoes() {
                     tickets: ticketsResponse.content,
                     vacancys: vacanciesResponse
                 }));
-
                 setTotalPages(ticketsResponse.totalPages)
-
-                if (formData.idCustomerType == "2") {
-                    const vehiclesResponse = await fetchData(`vehicles/mensalistas/${formData.idCustomer}`);
-                    setModels(prevValues => ({
-                        ...prevValues,
-                        vehicles: vehiclesResponse.content
-                    }));
-                    console.log(vehiclesResponse);
-                }
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
             }
         };
-        fetchDataAndUpdateModels();
-    }, [formData.idCustomer, currentPage]);
+        fetchDataModels();
+    }, [currentPage]);
+
+    useEffect(() => {
+        const fetchDataVehicles = async () => {
+            if (formData.idCustomerType == "2") {
+                const vehiclesResponse = await fetchData(`vehicles/mensalistas/${formData.idCustomer}`);
+                setModels(prevValues => ({
+                    ...prevValues,
+                    vehicles: vehiclesResponse.content
+                }));
+            }
+        }
+
+        fetchDataVehicles()
+    }, [formData.idCustomer])
 
     useEffect(() => {
         const handleResize = () => {
@@ -143,7 +98,8 @@ export default function Movimentacoes() {
                 </div>
 
                 {modalOpen.post &&
-                    <Modal handleSubmit={(e) => handleSubmit(e, `tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`, formData)} title={"Adicionar"} setModalOpen={setModalOpen}>
+                    <Modal action={"post"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`} data={formData} modalOpen={modalOpen} 
+                        title={"Adicionar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
                             <div className={styles.modalInputContainer}>
                                 <label htmlFor="">Tipo de Cliente</label>
@@ -213,7 +169,8 @@ export default function Movimentacoes() {
                 }
 
                 {modalOpen.update &&
-                    <Modal handleSubmit={(e) => submitUpdated(e, formData.id, `tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`, formData)} title={"Editar"} setModalOpen={setModalOpen}>
+                    <Modal action={"update"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`} 
+                        data={formData} modalOpen={modalOpen} title={"Editar"} setModalOpen={setModalOpen}>
                         {formData.idCustomerType == 2 && models.clients.length > 0 ?
                             <div className={styles.modalContainer}>
                                 <div className={styles.modalInputContainer}>
@@ -274,7 +231,7 @@ export default function Movimentacoes() {
                 }
 
                 {modalOpen.delete &&
-                    <Modal setModalOpen={setModalOpen} handleSubmit={(e) => submitDelete(e, formData.id, "tickets")} title={"Excluir"}>
+                    <Modal action={"delete"} path={"tickets"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Excluir"}>
                         <p>Tem certeza que deseja excluir a movimentacão?</p>
                     </Modal>
                 }

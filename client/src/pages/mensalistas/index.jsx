@@ -4,13 +4,13 @@ import styles from "../../styles/Mensalistas.module.css";
 import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
-import { fetchDataPage, handleCreate, handleUpdate, handleDelete } from "@/services/axios";
+import { fetchDataPage, handleUpdate } from "@/services/axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import Pagination from "@/components/Pagination";
+import InputForm from "@/components/InputForm";
 
 
 export default function Mensalistas() {
@@ -20,54 +20,6 @@ export default function Mensalistas() {
     const [totalPages, setTotalPages] = useState(0);
     const [models, setModels] = useState({ mensal: [] })
     const [formData, setFormData] = useState({ name: null, cpf: null, email: null, phone: null, paymentDay: null, clientType: 2 })
-    const router = useRouter()
-
-    const submitUpdated = (e, id, path, data) => {
-        e.preventDefault();
-        if (id) {
-            try {
-                handleUpdate(id, path, data).then(() => {
-                    setModalOpen({ ...modalOpen, update: false })
-                    setTimeout(() => {
-                        router.reload(); 
-                    }, 3000);
-                });
-            } catch (error) {
-                console.error("Erro ao criar:", error);
-            }
-        }
-    };
-
-    const handleSubmit = (e, path, data) => {
-        e.preventDefault();
-        try {
-            handleCreate(data, path).then(() => {
-                setModalOpen({ ...modalOpen, post: false })
-                setTimeout(() => {
-                    router.reload(); 
-                }, 3000);
-            });
-        } catch (error) {
-            console.error("Erro ao criar:", error);
-        }
-
-    };
-
-    const submitDelete = (e, id, path) => {
-        e.preventDefault();
-        if (id) {
-            try {
-                handleDelete(id, path).then(() => {
-                    setModalOpen({...modalOpen, delete: false})
-                    setTimeout(() => {
-                        router.reload(); 
-                    }, 3000);
-                });
-            } catch (error) {
-                console.error("Erro ao criar:", error);
-            }
-        }
-    }
 
     const handleInputChange = (column, event) => {
         setFormData({
@@ -127,7 +79,8 @@ export default function Mensalistas() {
                 </div>
 
                 {modalOpen.post &&
-                    <Modal handleSubmit={(e) => handleSubmit(e, "customers", formData)} title={"Adicionar"} setModalOpen={setModalOpen}>
+                    <Modal action={"post"} path={"customers"} data={formData} modalOpen={modalOpen}
+                    title={"Adicionar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
                             <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name}/>
                             <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.cpf}/>
@@ -144,7 +97,8 @@ export default function Mensalistas() {
                 }
 
                 {modalOpen.update &&
-                    <Modal handleSubmit={(e) => submitUpdated(e, formData.id, "customers/mensalistas", formData)} title={"Adicionar"} setModalOpen={setModalOpen}>
+                    <Modal path={"customers/mensalistas"} data={formData} modalOpen={modalOpen} 
+                        action={"update"} title={"Adicionar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
                             <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name}/>
                             <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.cpf}/>
@@ -161,57 +115,60 @@ export default function Mensalistas() {
                 }
 
                 {modalOpen.delete &&
-                    <Modal setModalOpen={setModalOpen} handleSubmit={(e) => submitDelete(e, formData.id, "customers")} title={"Excluir"}>
+                    <Modal path={"customers"} action={"delete"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} 
+                        title={"Excluir"}>
                         <p>Tem certeza que deseja excluir o cliente mensalista?</p>
                     </Modal>
                 }
 
-                <Table columns={["Nome", "Telefone", "Email", "CPF", "Dia Pagamento"]}>
-                    <tbody>
-                        {models.mensal && models.mensal.length > 0 ? (
-                            models.mensal.map((item) => (
-                                <tr key={item.id}>
-                                    <>
-                                        <td>{item.name}</td>
-                                        <td>{item.phone}</td>
-                                        <td>{item.email}</td>
-                                        <td>{item.cpf}</td>
-                                        <td>{item.paymentDay}</td>
-                                    </>
 
-                                    <td>
-                                        <div className={styles.buttonContainer}>
-                                            <button onClick={() => {
-                                                setModalOpen({ ...modalOpen, update: true })
-                                                setFormData({ ...item })
-                                            }} className={`${styles.bgYellow} ${styles.actionButton}`}>
-                                                <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
-                                            </button>
-                                            <button onClick={() => handleUpdate(item.id, "customers/finish", { ...item, isActive: false })} className={`${styles.bgGreen} ${styles.actionButton}`}>
-                                                <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Remove" />
-                                            </button>
-                                            <button onClick={() => {
-                                                setModalOpen({ ...modalOpen, delete: true })
-                                                setFormData({...item})
-                                            }} className={`${styles.bgRed} ${styles.actionButton}`}>
-                                                <Image src={"/icons/Remove.svg"} width={30} height={30} alt="Icone Remove" />
-                                            </button>
-                                            <Link href={`/mensalistas/vehicles/${item.id}`} className={`${styles.bgBlue} ${styles.actionButton}`}>
-                                                <Image src={"/icons/Cars.svg"} width={30} height={30} alt="Icone Cars" />
-                                            </Link>
-                                        </div>
-                                    </td>
+                <div className={styles.box}>
+                    <Table columns={["Nome", "Telefone", "Email", "CPF", "Dia Pagamento"]}>
+                        <tbody>
+                            {models.mensal && models.mensal.length > 0 ? (
+                                models.mensal.map((item) => (
+                                    <tr key={item.id}>
+                                        <>
+                                            <td>{item.name}</td>
+                                            <td>{item.phone}</td>
+                                            <td>{item.email}</td>
+                                            <td>{item.cpf}</td>
+                                            <td>{item.paymentDay}</td>
+                                        </>
+
+                                        <td>
+                                            <div className={styles.buttonContainer}>
+                                                <button onClick={() => {
+                                                    setModalOpen({ ...modalOpen, update: true })
+                                                    setFormData({ ...item })
+                                                }} className={`${styles.bgYellow} ${styles.actionButton}`}>
+                                                    <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
+                                                </button>
+                                                <button onClick={() => handleUpdate(item.id, "customers/finish", { ...item, isActive: false })} className={`${styles.bgGreen} ${styles.actionButton}`}>
+                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Remove" />
+                                                </button>
+                                                <button onClick={() => {
+                                                    setModalOpen({ ...modalOpen, delete: true })
+                                                    setFormData({...item})
+                                                }} className={`${styles.bgRed} ${styles.actionButton}`}>
+                                                    <Image src={"/icons/Remove.svg"} width={30} height={30} alt="Icone Remove" />
+                                                </button>
+                                                <Link href={`/mensalistas/vehicles/${item.id}`} className={`${styles.bgBlue} ${styles.actionButton}`}>
+                                                    <Image src={"/icons/Cars.svg"} width={30} height={30} alt="Icone Cars" />
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={7}>Não possui dados!</td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={7}>Não possui dados!</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </Table>
-                <ToastContainer />
-                {models.mensal.length > 0 ?
+                            )}
+                        </tbody>
+                    </Table>
+
+                    {models.mensal.length > 0 ?
                     <Pagination
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
@@ -219,6 +176,9 @@ export default function Mensalistas() {
                     /> :
                     null
                 }
+                </div>
+                <ToastContainer />
+
             </Layout>
         </>
     );

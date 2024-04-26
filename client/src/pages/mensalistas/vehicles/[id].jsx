@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 import Modal from "@/components/Modal";
 import styles from "../../../styles/Mensalistas.module.css"
 import Image from "next/image";
-import { handleUpdate, handleCreate } from "@/services/axios";
+import { handleUpdate } from "@/services/axios";
 import Pagination from "@/components/Pagination";
 import InputForm from "@/components/InputForm";
 
@@ -22,37 +22,6 @@ export default function VehicleById() {
     const [vehicles, setVehicles] = useState([]);
     const [modalOpen, setModalOpen] = useState({ post: false, update: false, delete: false });
     const [formData, setFormData] = useState({ plate: null, model: null, make: null, idCustomer: null, monthlyVehicle: true })
-
-    const submitUpdated = (e, id, path, data) => {
-        e.preventDefault();
-        if (id) {
-            try {
-                handleUpdate(id, path, data).then(() => {
-                    setModalOpen({ ...modalOpen, update: false })
-                    setTimeout(() => {
-                        router.reload(); 
-                    }, 3000);
-                });
-            } catch (error) {
-                console.error("Erro ao criar:", error);
-            }
-        }
-    };
-
-    const handleSubmit = (e, path, data) => {
-        e.preventDefault();
-        try {
-            handleCreate(data, path).then(() => {
-                setModalOpen({ ...modalOpen, post: false })
-                setTimeout(() => {
-                    router.reload(); 
-                }, 3000); 
-            });
-        } catch (error) {
-            console.error("Erro ao criar:", error);
-        }
-
-    };
 
     const handleInputChange = (column, event) => {
         setFormData({
@@ -101,7 +70,7 @@ export default function VehicleById() {
 
             {modalOpen.post &&
 
-                <Modal handleSubmit={(e) => handleSubmit(e, "vehicles", formData)} title={"Adicionar"} setModalOpen={setModalOpen} modalOpen={modalOpen}>
+                <Modal action={"post"} data={formData} path={"vehicles"} title={"Adicionar"} setModalOpen={setModalOpen} modalOpen={modalOpen}>
                     <div className={styles.modalContainer}>
                         <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} value={formData.make}/>
                     </div>
@@ -115,7 +84,7 @@ export default function VehicleById() {
 
             {modalOpen.update &&
 
-                <Modal handleSubmit={(e) => submitUpdated(e, formData.id, "vehicles", formData)} title={"Adicionar"} setModalOpen={setModalOpen} modalOpen={modalOpen}>
+                <Modal action={"update"} data={formData} path={"vehicles"} title={"Adicionar"} setModalOpen={setModalOpen} modalOpen={modalOpen}>
                     <div className={styles.modalContainer}>
                         <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} value={formData.make}/>
                     </div>
@@ -127,48 +96,54 @@ export default function VehicleById() {
                 </Modal>
             }
 
-            <Table tableName={"Veiculos"} columns={["Placa", "Marca", "Modelo"]} model={vehicles} colSpan={6}>
-                <tbody>
-                    {vehicles && vehicles.length > 0 ? (
-                        vehicles.map((item) => (
-                            <tr key={item.id}>
-                                <td>{item.plate}</td>
-                                <td>{item.make}</td>
-                                <td>{item.model}</td>
+            <div className={styles.box}>
+                <Table tableName={"Veiculos"} columns={["Placa", "Marca", "Modelo"]} model={vehicles} colSpan={6}>
+                    <tbody>
+                        {vehicles && vehicles.length > 0 ? (
+                            vehicles.map((item) => (
+                                <tr key={item.id}>
+                                    <td>{item.plate}</td>
+                                    <td>{item.make}</td>
+                                    <td>{item.model}</td>
 
-                                <td>
-                                    <div className={styles.buttonContainer}>
-                                        <button onClick={() => {
-                                            setModalOpen({ ...modalOpen, update: true })
-                                            setFormData({ ...item })
-                                        }} className={`${styles.bgYellow} ${styles.actionButton}`}>
-                                            <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
-                                        </button>
-                                        <button onClick={(e) => {                     
-                                            submitUpdated(e, item.id, "vehicles", { ...item, monthlyVehicle: false })
-                                        } } className={`${styles.bgRed} ${styles.actionButton}`}>
-                                            <Image src={"/icons/Remove.svg"} width={30} height={30} alt="Icone Remove" />
-                                        </button>
-                                    </div>
-                                </td>
+                                    <td>
+                                        <div className={styles.buttonContainer}>
+                                            <button onClick={() => {
+                                                setModalOpen({ ...modalOpen, update: true })
+                                                setFormData({ ...item })
+                                            }} className={`${styles.bgYellow} ${styles.actionButton}`}>
+                                                <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
+                                            </button>
+                                            <button onClick={(e) => {      
+                                                e.preventDefault();
+                                                handleUpdate(item.id, "vehicles", { ...item, monthlyVehicle: false }).then(() => {
+                                                    setModalOpen({ ...modalOpen, update: false })
+                                                    setTimeout(() => router.reload(), 3000);
+                                                })
+                                            } } className={`${styles.bgRed} ${styles.actionButton}`}>
+                                                <Image src={"/icons/Remove.svg"} width={30} height={30} alt="Icone Remove" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={6}>Não possui dados!</td>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan={6}>Não possui dados!</td>
-                        </tr>
-                    )}
-                </tbody>
-            </Table>
+                        )}
+                    </tbody>
+                </Table>
 
-            {vehicles.length > 0 ?
-                    <Pagination
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        totalPages={totalPages}
-                    /> :
-                    null
+                {vehicles.length > 0 ?
+                        <Pagination
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            totalPages={totalPages}
+                        /> :
+                        null
                 }
+            </div>
             <ToastContainer />
         </Layout>
     );
