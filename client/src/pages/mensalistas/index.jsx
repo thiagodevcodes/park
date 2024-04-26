@@ -35,7 +35,7 @@ export default function Mensalistas() {
         ]).then(([mensalResponse]) => {
             setModels(prevModels => ({
                 ...prevModels,
-                mensal: mensalResponse.content,
+                mensal: mensalResponse.content
             }));
             setTotalPages(mensalResponse.totalPages);
         }).catch(error => {
