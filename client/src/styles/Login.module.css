@@ -1,0 +1,62 @@
+.logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.loginSection {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loginSection a {
+  text-decoration: none;
+  color: black;
+  font-size: 11pt;
+  text-align: center;
+}
+
+.loginContainer button {
+  width: 100%;
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: 300ms ease-in-out;
+}
+
+.loginContainer button:hover {
+  box-shadow: 0px 0px 10px 0px rgb(0, 0, 0);
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inputContainer div {
+  display: flex;
+  flex-direction: column;
+}
+
+.inputContainer input {
+  width: 300px;
+  border-radius: 18px;
+  border: 1px solid black;
+  padding: 10px;
+  background-color: #CECECE;
+}

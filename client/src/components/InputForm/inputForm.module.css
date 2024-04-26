@@ -1,0 +1,12 @@
+.modalInputContainer {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
+.modalInputContainer input {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid black;
+
+}

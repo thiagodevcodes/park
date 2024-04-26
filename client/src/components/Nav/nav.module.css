@@ -1,0 +1,44 @@
+.nav {
+    margin-right: 30px;
+    display: flex;
+    height: 60px;
+}
+
+.nav ul {
+    display: flex;
+    list-style-type: none;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.nav li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    border-bottom: 5px solid rgba(0, 0, 0, 0);
+    border-top: 5px solid rgba(0, 0, 0, 0);
+    transition: 300ms ease-in-out;
+
+
+}
+
+.nav li:hover {
+    border-bottom: 5px solid rgb(255, 255, 255);
+    cursor: pointer;
+}
+
+.navOptions img {
+    margin-left: 10px;
+}
+
+.nav a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    height: 100%;
+    cursor: pointer;
+}

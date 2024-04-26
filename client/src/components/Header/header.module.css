@@ -1,0 +1,22 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    grid-area: header;
+    background-color: #000000;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+}
+
+.header > div > img {
+    filter: invert(100%);
+    margin-left: 30px;
+}
+
+.flexCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+

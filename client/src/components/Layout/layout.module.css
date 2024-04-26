@@ -1,0 +1,25 @@
+.root {
+    display: grid;
+    grid-template-areas:
+      "header header header"
+      "aside main main"
+      "aside footer footer";
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: 60px 1fr;
+}
+
+.main {
+    grid-area: main;
+    background-color: #ffffff;
+    min-height: calc(100vh - 160px);
+   
+}
+
+@media only screen and (max-width: 944px) {
+  .root {
+    grid-template-areas:
+    "header header header"
+    "main main main"
+    "footer footer footer";
+  }
+}
