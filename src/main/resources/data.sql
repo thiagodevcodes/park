@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS ticket (
     id INTEGER AUTO_INCREMENT NOT NULL,
     id_customer_vehicle INTEGER NOT NULL,
     id_vacancy INTEGER NOT NULL,
+    register_date DATE NOT NULL,
     entry_time DATETIME NOT NULL,
     exit_time DATETIME NULL,
     is_active BOOLEAN NOT NULL,

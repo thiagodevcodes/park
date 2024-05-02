@@ -1,5 +1,6 @@
 package com.sys.park.app.models;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,6 +28,9 @@ public class TicketModel {
 
     @Column(name = "id_customer_vehicle", nullable = false)
     private Integer idCustomerVehicle;
+
+    @Column(name ="register_date", nullable = false)
+    private LocalDate registerDate;
 
     @Column(name = "entry_time", nullable = false)
     private LocalDateTime entryTime;

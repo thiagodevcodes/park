@@ -55,6 +55,12 @@ public class TicketController {
         return ResponseEntity.ok().body(userDtoList);
     }
 
+    @GetMapping("/registerdate")
+    public ResponseEntity<List<TicketDto>> findByExitTime() {
+        List<TicketDto> userDtoList = ticketService.findByRegisterDateAndIsActive();
+        return ResponseEntity.ok().body(userDtoList);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TicketDto> update(@Valid @RequestBody
         TicketForm ticketForm, @PathVariable("id") Integer id, BindingResult br) {

@@ -1,5 +1,6 @@
 package com.sys.park.app.services;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +125,7 @@ public class TicketService {
     public Page<MovimentacaoDto> getAllTickets(Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
-            List<TicketModel> tickets = ticketRepository.findByIsActive(true);
+            Page<TicketModel> tickets = ticketRepository.findByIsActive(true, page);
             List<MovimentacaoDto> newDtoList = new ArrayList<>();           
 
             for (TicketModel ticket : tickets) {
@@ -152,7 +153,7 @@ public class TicketService {
                 }
             } 
 
-            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, tickets.size());
+            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, tickets.getTotalElements());
             return pageableMov;
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível listar os Tickets!");
@@ -172,7 +173,6 @@ public class TicketService {
 
             Boolean vehicleIsPresent = vehicleService.verifyPlate(movimentacaoDto.getPlate());
             
-
             if(vehicleIsPresent) {
                 vehicleDto = vehicleService.findByPlate(movimentacaoDto.getPlate());      
             }           
@@ -218,6 +218,7 @@ public class TicketService {
                 customerVehicleDto = customerVehicleService.insert(customerVehicleDto);
             }
 
+            ticketDto.setRegisterDate(LocalDate.now());
             ticketDto.setEntryTime(LocalDateTime.now());
             ticketDto.setExitTime(null);
             ticketDto.setIdVacancy(vacancyDto.getId());
@@ -235,13 +236,14 @@ public class TicketService {
         try {
             Optional<TicketModel> ticketExist = ticketRepository.findById(id);
             LocalDateTime date = LocalDateTime.now();
-            
+
             if (ticketExist.isPresent()) {
                 TicketModel ticket = ticketExist.get();
+                ticket.setTotalPrice(ticketDto.getTotalPrice());
+                ticket.setExitTime(date);
+                ticket.setIsActive(false);
                 ticketDto = modelMapper.map(ticket, TicketDto.class);
 
-                ticketDto.setExitTime(date);
-                ticketDto.setIsActive(false);
                 ticketDto = this.updateById(ticketDto, id);
                 
                 VacancyDto vacancyDto = vacancyService.findById(ticketDto.getIdVacancy());
@@ -329,22 +331,38 @@ public class TicketService {
 
     private Boolean ticketIsActive(String plate) {
         try {
-            Boolean vehicleIsExist = vehicleService.verifyPlate(plate);
+                List<TicketModel> ticketModels = ticketRepository.findByIsActive(true);
+                Boolean isPresent = false;
 
-            if(vehicleIsExist) {
-                VehicleDto vehicleDto = vehicleService.findByPlate(plate);
-                 
-                Optional<TicketModel> ticOptional = ticketRepository.findByIdCustomerVehicle(vehicleDto.getId());
-                if(ticOptional.isPresent() && ticOptional.get().getIsActive()) {
-                    return true;
-                } else {
-                    return false;
-                }    
-            } else {
-                return false;
-            }
+                for (TicketModel ticket: ticketModels) {
+                    CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(ticket.getIdCustomerVehicle());
+                    VehicleDto vehicle = vehicleService.findById(customerVehicleDto.getIdVehicle());
+
+                    System.out.println(vehicle);
+                    System.out.println(plate);
+
+                    if(vehicle.getPlate().equals(plate)) {
+                        isPresent = true;
+                    } 
+                }
+    
+                return isPresent;
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Erro ao verificar se o ticket está ativo!", e);
         }
     }
+
+    public List<TicketDto> findByRegisterDateAndIsActive() {
+        try {
+            List<TicketModel> ticketModelList = ticketRepository.findByRegisterDateAndIsActive(LocalDate.now(), false);
+            
+            return ticketModelList.stream()
+                .map(ticket -> modelMapper.map(ticket, TicketDto.class))
+                .collect(Collectors.toList());
+            
+        } catch (BusinessRuleException e) {
+            throw new BusinessRuleException("Não foi possível buscar os dados!");
+        }
+    }
+
 }
