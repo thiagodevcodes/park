@@ -21,9 +21,6 @@ public class VehicleModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "id_customer", nullable = false)
-    private Integer idCustomer;
-
     @Column(name = "plate", nullable = false, unique = true)
     private String plate;
 

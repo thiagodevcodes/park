@@ -1,4 +1,4 @@
-CREATE TABLE person (
+CREATE TABLE IF NOT EXISTS person (
     id INTEGER AUTO_INCREMENT NOT NULL,
     name VARCHAR(30) NULL,
     email VARCHAR(50) NULL,
@@ -12,7 +12,7 @@ CREATE TABLE person (
     CONSTRAINT UK_personPhone UNIQUE (phone)
 );
 
-CREATE TABLE customer_type (
+CREATE TABLE IF NOT EXISTS customer_type (
     id INTEGER AUTO_INCREMENT NOT NULL,
     name VARCHAR(30) NOT NULL,
     created_at DATETIME NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE customer_type (
     CONSTRAINT PK_customerType PRIMARY KEY (id)
 );
 
-CREATE TABLE customer (
+CREATE TABLE IF NOT EXISTS customer (
     id INTEGER AUTO_INCREMENT NOT NULL,
     id_person INTEGER NOT NULL,
     id_customer_type INTEGER NOT NULL,
@@ -30,11 +30,11 @@ CREATE TABLE customer (
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     CONSTRAINT PK_customer PRIMARY KEY (id),
-    CONSTRAINT FK_customerPerson FOREIGN KEY (id_person) REFERENCES person (id),
-    CONSTRAINT FK_customerCustomerType FOREIGN KEY (id_customer_type) REFERENCES customer_type (id)
+    CONSTRAINT FK_customer_person FOREIGN KEY (id_person) REFERENCES person (id),
+    CONSTRAINT FK_customer_customerType FOREIGN KEY (id_customer_type) REFERENCES customer_type (id)
 );
 
-CREATE TABLE vacancy (
+CREATE TABLE IF NOT EXISTS vacancy (
     id INTEGER AUTO_INCREMENT NOT NULL,
     situation BOOLEAN NOT NULL,
     created_at DATETIME NOT NULL,
@@ -42,9 +42,8 @@ CREATE TABLE vacancy (
     CONSTRAINT PK_vacancy PRIMARY KEY (id)
 );
 
-CREATE TABLE vehicle (
+CREATE TABLE IF NOT EXISTS vehicle (
     id INTEGER AUTO_INCREMENT NOT NULL,
-    id_customer INTEGER NOT NULL,
     plate VARCHAR(30) NOT NULL,
     make VARCHAR(30) NULL,
     model VARCHAR(30) NOT NULL,
@@ -52,24 +51,35 @@ CREATE TABLE vehicle (
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     CONSTRAINT PK_vehicle PRIMARY KEY (id),
-    CONSTRAINT UK_vehiclePlate UNIQUE (plate),
-    CONSTRAINT FK_vehicleCustomer FOREIGN KEY (id_customer) REFERENCES vehicle (id)
+    CONSTRAINT UK_vehiclePlate UNIQUE (plate)
 );
-CREATE TABLE ticket (
+
+CREATE TABLE IF NOT EXISTS vehicle_customer (
     id INTEGER AUTO_INCREMENT NOT NULL,
     id_customer INTEGER NOT NULL,
-    id_vacancy INTEGER NOT NULL,
     id_vehicle INTEGER NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    CONSTRAINT PK_customer_vehicle PRIMARY KEY (id),
+    CONSTRAINT FK_vehicleCustomer_vehicle FOREIGN KEY (id_vehicle) REFERENCES vehicle (id),
+    CONSTRAINT FK_vehicleCustomer_customer FOREIGN KEY (id_customer) REFERENCES customer (id)
+);
+
+CREATE TABLE IF NOT EXISTS ticket (
+    id INTEGER AUTO_INCREMENT NOT NULL,
+    id_customer_vehicle INTEGER NOT NULL,
+    id_vacancy INTEGER NOT NULL,
     entry_time DATETIME NOT NULL,
     exit_time DATETIME NULL,
+    is_active BOOLEAN NOT NULL,
     total_price FLOAT NULL,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     CONSTRAINT PK_ticket PRIMARY KEY (id),
-    CONSTRAINT FK_ticketVehicle FOREIGN KEY (id_vehicle) REFERENCES vehicle (id),
     CONSTRAINT FK_ticketVacancy FOREIGN KEY (id_vacancy) REFERENCES vacancy (id),
-    CONSTRAINT FK_ticketCustomer FOREIGN KEY (id_customer) REFERENCES customer (id)
+    CONSTRAINT FK_ticket_customerVehicle FOREIGN KEY (id_customer_vehicle) REFERENCES vehicle_customer (id)
 );
+
 
 INSERT INTO vacancy(`id`, `created_at`, `situation`, `updated_at`)
 VALUES(1, current_timestamp(), true,current_timestamp());
@@ -112,4 +122,3 @@ VALUES(1, current_timestamp(), true, 'Rotativo', current_timestamp());
 
 INSERT INTO customer_type(`id`, `created_at`, `is_active`, `name`, `updated_at`)
 VALUES(2, current_timestamp(), true, 'Mensalista', current_timestamp());
-

@@ -13,32 +13,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-
 @Entity
 @Data
-@Table(name="ticket")
-public class TicketModel {
-    @Id 
+@Table(name = "vehicle_customer")
+public class CustomerVehicleModel {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "id_vacancy", nullable = false)
-    private Integer idVacancy;
+    @Column(name = "id_vehicle")
+    private Integer idVehicle;
 
-    @Column(name = "id_customer_vehicle", nullable = false)
-    private Integer idCustomerVehicle;
-
-    @Column(name = "entry_time", nullable = false)
-    private LocalDateTime entryTime;
-
-    @Column(name = "exit_time")
-    private LocalDateTime exitTime;
-
-    @Column(name = "total_price")
-    private Double totalPrice;
-
-    @Column(name = "is_active")
-    private Boolean isActive;
+    @Column(name = "id_customer")
+    private Integer idCustomer;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerMensalDto;
+import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.dtos.Ticket.MovimentacaoDto;
 import com.sys.park.app.dtos.Ticket.TicketDto;
@@ -44,6 +45,9 @@ public class TicketService {
 
     @Autowired
     PersonService personService;
+
+    @Autowired
+    CustomerVehicleService customerVehicleService;
    
     @Autowired
     private ModelMapper modelMapper;
@@ -120,14 +124,16 @@ public class TicketService {
     public Page<MovimentacaoDto> getAllTickets(Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
-            Page<TicketModel> tickets = ticketRepository.findByIsActive(true, page);
+            List<TicketModel> tickets = ticketRepository.findByIsActive(true);
             List<MovimentacaoDto> newDtoList = new ArrayList<>();           
 
             for (TicketModel ticket : tickets) {
                 MovimentacaoDto newDto = new MovimentacaoDto();
 
-                CustomerDto customerDto = customerService.findById(ticket.getIdCustomer());
-                VehicleDto vehicleDto = vehicleService.findById(ticket.getIdVehicle());
+                CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(ticket.getIdCustomerVehicle());
+
+                CustomerDto customerDto = customerService.findById(customerVehicleDto.getIdCustomer());
+                VehicleDto vehicleDto = vehicleService.findById(customerVehicleDto.getIdVehicle());
                 PersonDto personDto = personService.findById(customerDto.getIdPerson());
  
                 if(ticket.getExitTime() == null) {
@@ -140,13 +146,13 @@ public class TicketService {
                     newDto.setPlate(vehicleDto.getPlate());
                     newDto.setIdVacancy(ticket.getIdVacancy());
                     newDto.setIdCustomerType(customerDto.getIdCustomerType());
-                    newDto.setIdVehicle(vehicleDto.getId());
-                    newDto.setIdCustomer(customerDto.getId());
+                    newDto.setIdCustomer(null);
+                    newDto.setIdVehicle(null);
                     newDtoList.add(newDto);
                 }
             } 
 
-            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, tickets.getTotalElements());
+            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, tickets.size());
             return pageableMov;
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível listar os Tickets!");
@@ -155,15 +161,18 @@ public class TicketService {
 
     public TicketDto createNewTicket(MovimentacaoDto movimentacaoDto) {
         try {
+            System.out.println(movimentacaoDto);
             validTicket(movimentacaoDto);
-    
+            System.out.println("Passei aqui!");
             CustomerDto customerDto = new CustomerDto();
             TicketDto ticketDto = new TicketDto();
             VehicleDto vehicleDto = new VehicleDto();
             CustomerMensalDto customerNew = new CustomerMensalDto();
+            CustomerVehicleDto customerVehicleDto = new CustomerVehicleDto();
 
             Boolean vehicleIsPresent = vehicleService.verifyPlate(movimentacaoDto.getPlate());
-           
+            
+
             if(vehicleIsPresent) {
                 vehicleDto = vehicleService.findByPlate(movimentacaoDto.getPlate());      
             }           
@@ -184,9 +193,8 @@ public class TicketService {
                     vehicleDto.setMake(movimentacaoDto.getMake());
                     vehicleDto.setModel(movimentacaoDto.getModel());
                     vehicleDto.setPlate(movimentacaoDto.getPlate());
-                    vehicleDto.setIdCustomer(customerNew.getId());
     
-                    vehicleDto = vehicleService.createVehicle(vehicleDto, false);        
+                    vehicleDto = vehicleService.createVehicle(vehicleDto, false, customerDto.getId());        
                 } else {
                     vehicleDto.setMonthlyVehicle(false);
                     vehicleDto = vehicleService.updateById(vehicleDto, vehicleDto.getId());
@@ -202,11 +210,18 @@ public class TicketService {
             vacancyDto.setSituation(false);
             vacancyService.updateById(vacancyDto, movimentacaoDto.getIdVacancy());
             
+            if(customerVehicleService.vehicleCustomerExist(customerDto.getId(), vehicleDto.getId())) {
+                customerVehicleDto = customerVehicleService.findByIdCustomerAndIdVehicle(customerDto.getId(), vehicleDto.getId());
+            } else {
+                customerVehicleDto.setIdCustomer(customerDto.getId());
+                customerVehicleDto.setIdVehicle(vehicleDto.getId());
+                customerVehicleDto = customerVehicleService.insert(customerVehicleDto);
+            }
+
             ticketDto.setEntryTime(LocalDateTime.now());
             ticketDto.setExitTime(null);
-            ticketDto.setIdCustomer(customerDto.getId());
             ticketDto.setIdVacancy(vacancyDto.getId());
-            ticketDto.setIdVehicle(vehicleDto.getId());
+            ticketDto.setIdCustomerVehicle(customerVehicleDto.getId());
             ticketDto.setIsActive(true);
             ticketDto = this.insert(ticketDto);
     
@@ -222,6 +237,9 @@ public class TicketService {
             LocalDateTime date = LocalDateTime.now();
             
             if (ticketExist.isPresent()) {
+                TicketModel ticket = ticketExist.get();
+                ticketDto = modelMapper.map(ticket, TicketDto.class);
+
                 ticketDto.setExitTime(date);
                 ticketDto.setIsActive(false);
                 ticketDto = this.updateById(ticketDto, id);
@@ -229,9 +247,6 @@ public class TicketService {
                 VacancyDto vacancyDto = vacancyService.findById(ticketDto.getIdVacancy());
                 vacancyDto.setSituation(true);
                 vacancyDto = vacancyService.updateById(vacancyDto, ticketDto.getIdVacancy());
-                VehicleDto vehicleDto = vehicleService.findById(ticketDto.getIdVehicle());
-        
-                vehicleDto = vehicleService.updateById(vehicleDto, ticketDto.getIdVehicle());
                 
                 return ticketDto;
             }else {
@@ -245,11 +260,12 @@ public class TicketService {
     public TicketDto updateTicket(MovimentacaoDto movimentacaoDto, Integer id) {
         try {
             TicketDto ticketDto = this.findById(id);
-            VehicleDto vehicleDto = vehicleService.findById(ticketDto.getIdVehicle());
-            CustomerDto customerDto = customerService.findById(ticketDto.getIdCustomer());
+            CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(ticketDto.getIdCustomerVehicle());
+            VehicleDto vehicleDto = vehicleService.findById(customerVehicleDto.getIdVehicle());
+            CustomerDto customerDto = customerService.findById(customerVehicleDto.getIdCustomer());
             PersonDto personDto = personService.findById(customerDto.getIdPerson());
             VacancyDto vacancyDto = vacancyService.findById(ticketDto.getIdVacancy());
-
+            
             if(movimentacaoDto.getIdCustomerType() == 1) {
                 personDto.setName(movimentacaoDto.getName());
                 personService.updateById(personDto, personDto.getId());
@@ -260,24 +276,20 @@ public class TicketService {
                     }
                 }
 
-                if(vehicleService.verifyPlate(movimentacaoDto.getPlate())) {
-                    vehicleDto = vehicleService.findByPlate(movimentacaoDto.getPlate());
-                    vehicleDto.setMake(movimentacaoDto.getMake());
-                    vehicleDto.setModel(movimentacaoDto.getModel());
-                    vehicleDto.setPlate(movimentacaoDto.getPlate());
-                    vehicleService.updateById(vehicleDto, vehicleDto.getId()); 
-                } else {
-                    vehicleDto = vehicleService.createVehicle(vehicleDto, false);   
-                }
+                vehicleDto.setMake(movimentacaoDto.getMake());
+                vehicleDto.setModel(movimentacaoDto.getModel());
+                vehicleDto.setPlate(movimentacaoDto.getPlate());
+
+                vehicleDto = vehicleService.updateById(vehicleDto, customerDto.getId());   
 
             } else if(movimentacaoDto.getIdCustomerType() == 2) {
                 vehicleDto = vehicleService.findById(movimentacaoDto.getIdVehicle());
                 customerDto = customerService.findById(movimentacaoDto.getIdCustomer());
-                ticketDto.setIdCustomer(customerDto.getId());
-
-                if(this.ticketIsActive(vehicleDto.getPlate()) && !vehicleDto.getId().equals(ticketDto.getIdVehicle())) {
+                customerVehicleDto = customerVehicleService.findByIdCustomerAndIdVehicle(customerDto.getId(), vehicleDto.getId());
+                
+                if(this.ticketIsActive(vehicleDto.getPlate()) && !vehicleDto.getId().equals(customerVehicleDto.getIdVehicle())) {
                     throw new BusinessRuleException("Movimentação já existe!");
-                }
+                }  
             }
 
             if(movimentacaoDto.getIdVacancy() != null) {
@@ -290,8 +302,8 @@ public class TicketService {
             }
 
             ticketDto.setIdVacancy(movimentacaoDto.getIdVacancy());
-            ticketDto.setIdVehicle(vehicleDto.getId());
-            System.out.println(movimentacaoDto.getIdVacancy());
+            ticketDto.setIdCustomerVehicle(customerVehicleDto.getId());
+
             this.updateById(ticketDto, ticketDto.getId());
             
             return ticketDto;
@@ -317,15 +329,20 @@ public class TicketService {
 
     private Boolean ticketIsActive(String plate) {
         try {
-            VehicleDto veOptional = vehicleService.findByPlate(plate);
+            Boolean vehicleIsExist = vehicleService.verifyPlate(plate);
 
-            Optional<TicketModel> ticOptional = ticketRepository.findByIdVehicle(veOptional.getId());
-
-            if(ticOptional.isPresent() && ticOptional.get().getIsActive()) {
-                return true;
+            if(vehicleIsExist) {
+                VehicleDto vehicleDto = vehicleService.findByPlate(plate);
+                 
+                Optional<TicketModel> ticOptional = ticketRepository.findByIdCustomerVehicle(vehicleDto.getId());
+                if(ticOptional.isPresent() && ticOptional.get().getIsActive()) {
+                    return true;
+                } else {
+                    return false;
+                }    
             } else {
                 return false;
-            }     
+            }
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Erro ao verificar se o ticket está ativo!", e);
         }

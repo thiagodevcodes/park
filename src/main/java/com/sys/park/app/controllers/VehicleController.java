@@ -62,7 +62,7 @@ public class VehicleController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        VehicleDto vehicleDto = vehicleService.createVehicle(modelMapper.map(vehicleForm, VehicleDto.class), vehicleForm.getMonthlyVehicle());
+        VehicleDto vehicleDto = vehicleService.createVehicle(modelMapper.map(vehicleForm, VehicleDto.class), vehicleForm.getMonthlyVehicle(), vehicleForm.getIdCustomer());
         return ResponseEntity.ok().body(vehicleDto);
     }
 
@@ -97,7 +97,7 @@ public class VehicleController {
             pageable = PageRequest.of(page, size);
         }
 
-        Page<VehicleDto> vehicleDtoList = vehicleService.getByIdCustomer(idCustomer, Optional.of(pageable));
+        Page<VehicleDto> vehicleDtoList = vehicleService.getMensalByIdCustomer(idCustomer, Optional.of(pageable));
         return ResponseEntity.ok().body(vehicleDtoList);
     }
 }

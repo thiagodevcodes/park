@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleForm;
 import com.sys.park.app.models.VehicleModel;
@@ -26,6 +27,9 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 public class VehicleService {
     @Autowired
     VehicleRepository vehicleRepository;
+
+    @Autowired
+    CustomerVehicleService customerVehicleService;
     
     @Autowired
     private ModelMapper modelMapper;
@@ -111,24 +115,30 @@ public class VehicleService {
         }
     }
 
-    public Page<VehicleDto> getByIdCustomer(Integer idCustomer, Optional<Pageable> optionalPage) {
+    public Page<VehicleDto> getMensalByIdCustomer(Integer idCustomer, Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
-            Page<VehicleModel> vehicles = vehicleRepository.findByIdCustomerAndMonthlyVehicle(idCustomer, true, page);
-            List<VehicleDto> newDtoList = new ArrayList<>();  
+            List<CustomerVehicleDto> customerVehicleModels = customerVehicleService.findByIdCustomer(idCustomer);
+            List<VehicleDto> vehicleDtos = new ArrayList<>();
 
-            newDtoList = vehicles.stream()
-                .map(vehicle -> modelMapper.map(vehicle, VehicleDto.class))
-                .collect(Collectors.toList());
+            for (CustomerVehicleDto customerVehicleDto : customerVehicleModels) {
+                VehicleDto vehicleDto = this.findById(customerVehicleDto.getIdVehicle());
 
-            Page<VehicleDto> pageVehicleDto =  new PageImpl<>(newDtoList, page, vehicles.getTotalElements());
+                if(vehicleDto.getMonthlyVehicle()) {
+                    vehicleDtos.add(vehicleDto);
+                }
+            }
+
+            System.out.println(vehicleDtos);
+
+            Page<VehicleDto> pageVehicleDto =  new PageImpl<>(vehicleDtos, page, vehicleDtos.size());
             return pageVehicleDto;
         } catch (NoSuchElementException e) {
             throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
         }
     }
 
-    public VehicleDto createVehicle(VehicleDto vehicleDto, Boolean monthlyVehicle) {
+    public VehicleDto createVehicle(VehicleDto vehicleDto, Boolean monthlyVehicle, Integer idCustomer) {
         try {
             VehicleDto vehicle = new VehicleDto();
 
@@ -140,8 +150,7 @@ public class VehicleService {
                 if(vehicleModel.getMonthlyVehicle().equals(true)) {
                     throw new BusinessRuleException("Veículo pertence a um mensalista!");
                 }
-
-                vehicle.setIdCustomer(vehicleDto.getIdCustomer());
+                
                 vehicle.setMonthlyVehicle(monthlyVehicle);
                 
                 vehicle = this.updateById(vehicleDto, vehicleModel.getId());
@@ -152,11 +161,15 @@ public class VehicleService {
                 vehicle.setMake(vehicleDto.getMake());
                 vehicle.setModel(vehicleDto.getModel());
                 vehicle.setMonthlyVehicle(monthlyVehicle);
-                vehicle.setIdCustomer(vehicleDto.getIdCustomer());
 
                 vehicle = this.insert(vehicle);
             }
             
+            CustomerVehicleDto customerVehicleDto = new CustomerVehicleDto();
+            customerVehicleDto.setIdCustomer(idCustomer);
+            customerVehicleDto.setIdVehicle(vehicle.getId());
+            customerVehicleDto = customerVehicleService.insert(customerVehicleDto);
+
             return vehicle;
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Erro ao criar o veículo!");
@@ -202,7 +215,7 @@ public class VehicleService {
             Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(plate);
 
             if(plateExist.isPresent()) {
-                throw new DataIntegrityException("Veículo já cadastrado!.");
+                throw new DataIntegrityException("Veículo já cadastrado!");
             }
 
             return false;

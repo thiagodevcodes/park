@@ -117,7 +117,7 @@ public class CustomerService {
     public Page<CustomerMensalDto> getCustomersByCustomerType(Integer customerType, Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
-            Page<CustomerModel> customers = customerRepository.findByIdCustomerTypeAndIsActive(customerType, true, page);
+            List<CustomerModel> customers = customerRepository.findByIdCustomerTypeAndIsActive(customerType, true);
             List<CustomerMensalDto> newDtoList = new ArrayList<>();
     
             for (CustomerModel customer : customers) {
@@ -139,7 +139,7 @@ public class CustomerService {
                 }
             }
 
-            Page<CustomerMensalDto> pageableClient = new PageImpl<>(newDtoList, page, customers.getTotalElements());
+            Page<CustomerMensalDto> pageableClient = new PageImpl<>(newDtoList, page, customers.size());
             return pageableClient; 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não foi possível buscar os Clientes!");

@@ -136,11 +136,12 @@ public class TicketController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
     
+        System.out.println(movForm);
         TicketDto ticketDto = ticketService.createNewTicket(modelMapper.map(movForm, MovimentacaoDto.class));
         
         return ResponseEntity.ok().body(ticketDto);
     }
-
+ 
     @PutMapping("/mensalistas/{id}")
     public ResponseEntity<TicketDto> updateMensalista(@Valid @RequestBody TicketMensalForm movForm, 
         @PathVariable("id") Integer id, BindingResult br) {
