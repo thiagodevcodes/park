@@ -1,31 +1,32 @@
-import Head from "next/head";
-import { useState, useEffect } from "react";
+import "react-toastify/dist/ReactToastify.css";
 import styles from "../../styles/Mensalistas.module.css";
+import { useState, useEffect } from "react";
+import Head from "next/head";
+import Image from "next/image";
+
+import { ToastContainer } from "react-toastify";
+import { formatDate } from "@/services/utils";
+import { handleUpdate, fetchData, fetchDataPage } from "@/services/axios";
+
+import Pagination from "@/components/Pagination";
+import InputForm from "@/components/InputForm";
 import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { formatDate } from "@/services/utils";
-import Image from "next/image";
-import { handleUpdate, fetchData, fetchDataPage } from "@/services/axios";
-import Pagination from "@/components/Pagination";
-import InputForm from "@/components/InputForm";
 
 export default function Movimentacoes() {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [width, setWidth] = useState(0)
-    const [modalOpen, setModalOpen] = useState({ post: false, update: false, delete: false });
+    const [modalOpen, setModalOpen] = useState({ post: false, update: false, delete: false, finish: false });
     const [models, setModels] = useState({ tickets: [], clients: [], vehicles: [], vacancys: [] })
-    const [formData, setFormData] = useState({ name: null, plate: null, make: null, model: null, idVacancy: null, idCustomerType: 1, idCustomer: null, idVehicle: null })
+    const [formData, setFormData] = useState({ name: null, plate: null, make: null, model: null, idVacancy: null, idCustomerType: 1, idCustomer: null, idVehicle: null, totalPrice: null })
 
     const handleInputChange = (column, event) => {
         setFormData({
             ...formData,
             [column]: event.target.value,
         });
-        console.log(formData);
     };
 
     useEffect(() => {
@@ -48,21 +49,24 @@ export default function Movimentacoes() {
             }
         };
         fetchDataModels();
-    }, [currentPage]);
+    }, [currentPage, fetchData, fetchDataPage]);
 
     useEffect(() => {
         const fetchDataVehicles = async () => {
             if (formData.idCustomerType == "2") {
-                const vehiclesResponse = await fetchData(`vehicles/mensalistas/${formData.idCustomer}`);
-                setModels(prevValues => ({
-                    ...prevValues,
-                    vehicles: vehiclesResponse.content
-                }));
+                try {
+                    const vehiclesResponse = await fetchData(`vehicles/mensalistas/${formData.idCustomer}`);
+                    setModels(prevValues => ({
+                        ...prevValues,
+                        vehicles: vehiclesResponse.content
+                    }));
+                } catch (error) {
+                    console.error("Erro ao carregar dados dos veículos:", error);
+                }
             }
-        }
-
-        fetchDataVehicles()
-    }, [formData.idCustomer])
+        };
+        fetchDataVehicles();
+    }, [formData.idCustomer, fetchData]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -110,15 +114,15 @@ export default function Movimentacoes() {
                             </div>
                         </div>
 
-                        {formData.idCustomerType == 2 && models.clients.length > 0 ?
+                        {formData.idCustomerType == 2 &&
                             <div className={styles.modalContainer}>
                                 <div className={styles.modalInputContainer}>
-                                    <label htmlFor="">Cliente</label>
+                                    <label htmlFor="">Cliente</label> 
                                     <select value={formData.idCustomer} name="" id="" onChange={(e) => handleInputChange("idCustomer", e)}>
                                         <option value={null} key={0}>Nenhum Cliente Selecionado</option>
-                                        {models.clients.map((item) => (
+                                        {models.clients.length > 0 && models.clients.map((item) => (
                                             <option key={item.id} value={item.id}>{item.id} - {item.name}</option>
-                                        ))}
+                                        ))} 
                                     </select>
                                 </div>
                                 <div className={styles.modalInputContainer}>
@@ -134,11 +138,9 @@ export default function Movimentacoes() {
                                 </div>
 
                             </div>
-                            :
-                            null
                         }
 
-                        {formData.idCustomerType == 1 ?
+                        {formData.idCustomerType == 1 &&
                             <div>
                                 <div className={styles.modalContainer}>
                                     <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} />
@@ -149,8 +151,6 @@ export default function Movimentacoes() {
                                     <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} />
                                 </div>
                             </div>
-                            :
-                            null
                         }
 
                         <div className={styles.modalContainer}>
@@ -171,13 +171,13 @@ export default function Movimentacoes() {
                 {modalOpen.update &&
                     <Modal action={"update"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`} 
                         data={formData} modalOpen={modalOpen} title={"Editar"} setModalOpen={setModalOpen}>
-                        {formData.idCustomerType == 2 && models.clients.length > 0 ?
+                        {formData.idCustomerType == 2 &&
                             <div className={styles.modalContainer}>
                                 <div className={styles.modalInputContainer}>
                                     <label htmlFor="">Cliente</label>
                                     <select value={formData.idCustomer} name="" id="" onChange={(e) => handleInputChange("idCustomer", e)}>
                                         <option value={0} key={0}>Nenhum Cliente Selecionado</option>
-                                        {models.clients.map((item) => (
+                                        {models.clients.length > 0 && models.clients.map((item) => (
                                             <option key={item.id} value={item.id}>{item.id} - {item.name}</option>
                                         ))}
                                     </select>
@@ -194,11 +194,9 @@ export default function Movimentacoes() {
                                     </select>
                                 </div>
                             </div>
-                            :
-                            null
                         }
 
-                        {formData.idCustomerType == 1 ?
+                        {formData.idCustomerType == 1 &&
                             <div>
                                 <div className={styles.modalContainer}>
                                     <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name} />
@@ -210,8 +208,6 @@ export default function Movimentacoes() {
                                     <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} value={formData.plate} />
                                 </div>
                             </div>
-                            :
-                            null
                         }
 
                         <div className={styles.modalContainer}>
@@ -233,6 +229,12 @@ export default function Movimentacoes() {
                 {modalOpen.delete &&
                     <Modal action={"delete"} path={"tickets"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Excluir"}>
                         <p>Tem certeza que deseja excluir a movimentacão?</p>
+                    </Modal>
+                }
+
+                {modalOpen.finish &&
+                    <Modal action={"update"} path={"tickets/finish"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Finalizar"}>
+                        <InputForm type="number" title="Valor pago R$:" onChange={(e) => handleInputChange("totalPrice", e)} value={formData.totalPrice}/>
                     </Modal>
                 }
                 <div className={styles.box}>
@@ -257,9 +259,19 @@ export default function Movimentacoes() {
                                                     className={`${styles.bgYellow} ${styles.actionButton}`}>
                                                     <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
                                                 </button>
+                                                { item.idCustomerType == 1 ?
+                                                <button onClick={() => {
+                                                    setModalOpen({ ...modalOpen, finish: true })
+                                                    setFormData({ ...item })
+                                                }}
+                                                    className={`${styles.bgRed} ${styles.actionButton}`}>
+                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Edit" />
+                                                </button>
+                                                :
                                                 <button onClick={() => handleUpdate(item.id, "tickets/finish", { ...item })} className={`${styles.bgGreen} ${styles.actionButton}`}>
                                                     <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Remove" />
                                                 </button>
+                                                }
                                                 <button onClick={() => {
                                                     setModalOpen({ ...modalOpen, delete: true })
                                                     setFormData({ ...item })
@@ -277,6 +289,7 @@ export default function Movimentacoes() {
                             )}
                         </tbody>
                     </Table>
+
                     {models.tickets.length > 0 ?
                         <Pagination
                             currentPage={currentPage}

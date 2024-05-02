@@ -11,7 +11,7 @@ export default function Modal({ children, setModalOpen, modalOpen, title, action
         if (id) {
             try {
                 handleUpdate(id, path, data).then(() => {
-                    setModalOpen({ ...modalOpen, update: false })
+                    setModalOpen({ ...modalOpen, update: false, finish: false })
                     setTimeout(() => {
                         router.reload(); 
                     }, 3000);
@@ -65,12 +65,13 @@ export default function Modal({ children, setModalOpen, modalOpen, title, action
                         if (action == "post") {
                             handleSubmit(e, path, data);
                         } else if(action == "update") {
+                            console.log(data)
                             submitUpdated(e, data.id, path, data)
                         } else if(action == "delete") {
                             submitDelete(e, data.id, path)
                         }
                     }}>Salvar</button>
-                    <button type="button" onClick={() => setModalOpen({post: false, update: false, delete: false})}>Voltar</button>
+                    <button type="button" onClick={() => setModalOpen({post: false, update: false, delete: false, finish: false})}>Voltar</button>
                 </div>
             </form>
         </div>

@@ -1,17 +1,19 @@
+import "react-toastify/dist/ReactToastify.css";
+import styles from "../../../styles/Mensalistas.module.css"
 import { useEffect, useState } from "react";
 import Head from "next/head";
+import Image from "next/image";
 import { useRouter } from "next/router";
-import { fetchData } from "@/services/axios";
-import "react-toastify/dist/ReactToastify.css";
+
+import { ToastContainer } from "react-toastify";
+import { fetchData, handleUpdate } from "@/services/axios";
+
+import Modal from "@/components/Modal";
 import Table from "@/components/Table";
 import Layout from "@/components/Layout";
-import { ToastContainer } from "react-toastify";
-import Modal from "@/components/Modal";
-import styles from "../../../styles/Mensalistas.module.css"
-import Image from "next/image";
-import { handleUpdate } from "@/services/axios";
 import Pagination from "@/components/Pagination";
 import InputForm from "@/components/InputForm";
+
 
 export default function VehicleById() {
     const router = useRouter();
@@ -41,12 +43,16 @@ export default function VehicleById() {
 
     useEffect(() => {
         if (id) {
-            fetchData(`vehicles/mensalistas/${id}`).then((response) => {
-                setVehicles(response.content);
-                setTotalPages(response.totalPages);
-            })
+            fetchData(`vehicles/mensalistas/${id}`)
+                .then((response) => {
+                    setVehicles(response.content);
+                    setTotalPages(response.totalPages);
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar dados dos veículos:", error);
+                });
         }
-    }, [id])
+    }, [id, fetchData]);
 
     if (!vehicles) {
         return <div>Ação não encontrada</div>;
@@ -72,12 +78,12 @@ export default function VehicleById() {
 
                 <Modal action={"post"} data={formData} path={"vehicles"} title={"Adicionar"} setModalOpen={setModalOpen} modalOpen={modalOpen}>
                     <div className={styles.modalContainer}>
-                        <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} value={formData.make}/>
+                        <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} value={formData.make} />
                     </div>
 
                     <div className={styles.modalContainer}>
-                        <InputForm title={"Modelo: "} onChange={(e) => handleInputChange("model", e)} value={formData.model}/>
-                        <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} value={formData.plate}/>
+                        <InputForm title={"Modelo: "} onChange={(e) => handleInputChange("model", e)} value={formData.model} />
+                        <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} value={formData.plate} />
                     </div>
                 </Modal>
             }
@@ -86,12 +92,12 @@ export default function VehicleById() {
 
                 <Modal action={"update"} data={formData} path={"vehicles"} title={"Adicionar"} setModalOpen={setModalOpen} modalOpen={modalOpen}>
                     <div className={styles.modalContainer}>
-                        <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} value={formData.make}/>
+                        <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} value={formData.make} />
                     </div>
 
                     <div className={styles.modalContainer}>
-                        <InputForm title={"Modelo: "} onChange={(e) => handleInputChange("model", e)} value={formData.model}/>
-                        <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} value={formData.plate}/>
+                        <InputForm title={"Modelo: "} onChange={(e) => handleInputChange("model", e)} value={formData.model} />
+                        <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} value={formData.plate} />
                     </div>
                 </Modal>
             }
@@ -114,13 +120,13 @@ export default function VehicleById() {
                                             }} className={`${styles.bgYellow} ${styles.actionButton}`}>
                                                 <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
                                             </button>
-                                            <button onClick={(e) => {      
+                                            <button onClick={(e) => {
                                                 e.preventDefault();
                                                 handleUpdate(item.id, "vehicles", { ...item, monthlyVehicle: false }).then(() => {
                                                     setModalOpen({ ...modalOpen, update: false })
                                                     setTimeout(() => router.reload(), 3000);
                                                 })
-                                            } } className={`${styles.bgRed} ${styles.actionButton}`}>
+                                            }} className={`${styles.bgRed} ${styles.actionButton}`}>
                                                 <Image src={"/icons/Remove.svg"} width={30} height={30} alt="Icone Remove" />
                                             </button>
                                         </div>
@@ -135,13 +141,12 @@ export default function VehicleById() {
                     </tbody>
                 </Table>
 
-                {vehicles.length > 0 ?
-                        <Pagination
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                            totalPages={totalPages}
-                        /> :
-                        null
+                {vehicles.length > 0 &&
+                    <Pagination
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        totalPages={totalPages}
+                    />
                 }
             </div>
             <ToastContainer />

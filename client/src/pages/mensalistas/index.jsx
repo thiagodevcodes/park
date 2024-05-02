@@ -1,16 +1,19 @@
-import Head from "next/head";
-import { useState, useEffect } from "react";
+import "react-toastify/dist/ReactToastify.css";
 import styles from "../../styles/Mensalistas.module.css";
+import { useState, useEffect } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import Image from "next/image";
+
+
+import { ToastContainer } from "react-toastify";
+import { fetchDataPage, handleUpdate } from "@/services/axios";
+
+import Pagination from "@/components/Pagination";
+import InputForm from "@/components/InputForm";
 import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
-import { fetchDataPage, handleUpdate } from "@/services/axios";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import Link from "next/link";
-import Image from "next/image";
-import Pagination from "@/components/Pagination";
-import InputForm from "@/components/InputForm";
 
 
 export default function Mensalistas() {
@@ -26,22 +29,21 @@ export default function Mensalistas() {
             ...formData,
             [column]: event.target.value,
         });
-
     };
 
     useEffect(() => {
-        Promise.all([
-            fetchDataPage(5, currentPage, "customers/mensalistas")
-        ]).then(([mensalResponse]) => {
-            setModels(prevModels => ({
-                ...prevModels,
-                mensal: mensalResponse.content
-            }));
-            setTotalPages(mensalResponse.totalPages);
-        }).catch(error => {
-            console.error("Erro ao carregar dados:", error);
-        });
-    }, [currentPage]);
+        fetchDataPage(5, currentPage, "customers/mensalistas")
+            .then(({ content, totalPages }) => {
+                setModels(prevModels => ({
+                    ...prevModels,
+                    mensal: content
+                }));
+                setTotalPages(totalPages);
+            })
+            .catch(error => {
+                console.error("Erro ao carregar dados:", error);
+            });
+    }, [currentPage, fetchDataPage]);
 
     useEffect(() => {
         const handleResize = () => {

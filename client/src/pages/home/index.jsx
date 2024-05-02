@@ -9,6 +9,7 @@ export default function Home() {
   const [model, setModel] = useState([])
   const [ocuppied, setOcuppied] = useState(0)
   const [notOcuppied, setNotOcuppied] = useState(0)
+  const [totalPrice, setTotalPrice] = useState(0)
   
   useEffect(() => {
     fetchData("vacancies").then((response) => {
@@ -17,6 +18,18 @@ export default function Home() {
       setNotOcuppied(response.vacanciesNotOccupied);
     })
   }, [notOcuppied, ocuppied])
+
+  useEffect(() => {
+    fetchData("tickets/registerdate").then((res) => {
+        let totalPriceSum = 0;
+        
+        res.forEach(element => {
+            totalPriceSum += element.totalPrice;
+        });
+
+        setTotalPrice(totalPriceSum);
+    });
+}, []);
 
   useEffect(() => {
       const handleResize = () => {
@@ -63,8 +76,11 @@ export default function Home() {
 
                 <div className={styles.infoChild}>
                   <div className={styles.textContainer}>
-                    <h2>Total Diário</h2>
-                    <p>R$10,00</p>
+                    <h2>Total Diário Rotativo</h2>
+                    <p>{totalPrice.toLocaleString("pt-br", {
+                        style: "currency",
+                        currency: "BRL"
+                    })}</p>
                   </div>
 
                 </div>
