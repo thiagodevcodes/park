@@ -264,12 +264,12 @@ export default function Movimentacoes() {
                                                     setModalOpen({ ...modalOpen, finish: true })
                                                     setFormData({ ...item })
                                                 }}
-                                                    className={`${styles.bgRed} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Edit" />
+                                                    className={`${styles.bgGreen} ${styles.actionButton}`}>
+                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Finish" />
                                                 </button>
                                                 :
                                                 <button onClick={() => handleUpdate(item.id, "tickets/finish", { ...item })} className={`${styles.bgGreen} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Remove" />
+                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Finish" />
                                                 </button>
                                                 }
                                                 <button onClick={() => {
