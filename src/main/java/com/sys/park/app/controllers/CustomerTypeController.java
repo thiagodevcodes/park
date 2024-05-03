@@ -34,16 +34,16 @@ public class CustomerTypeController {
     @Autowired
     ModelMapper modelMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CustomerTypeDto> find(@PathVariable("id") Integer id) {        
-        CustomerTypeDto customerTypeDto = customerTypeService.findById(id);
-        return ResponseEntity.ok().body(customerTypeDto);
-    }
-
     @GetMapping
     public ResponseEntity<List<CustomerTypeDto>> findAll() {
         List<CustomerTypeDto> customerTypeDtoList = customerTypeService.findAll();
         return ResponseEntity.ok().body(customerTypeDtoList);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerTypeDto> find(@PathVariable("id") Integer id) {        
+        CustomerTypeDto customerTypeDto = customerTypeService.findById(id);
+        return ResponseEntity.ok().body(customerTypeDto);
     }
 
     @PostMapping
@@ -62,7 +62,7 @@ public class CustomerTypeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerTypeDto> update(@Valid @RequestBody
+    public ResponseEntity<CustomerTypeDto> updateById(@Valid @RequestBody
         CustomerTypeForm costumerTypeForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
@@ -79,7 +79,7 @@ public class CustomerTypeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
         customerTypeService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

@@ -34,16 +34,17 @@ public class PersonController {
     @Autowired
     ModelMapper modelMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PersonDto> findById(@PathVariable("id") Integer id) {        
-        PersonDto personDto = personService.findById(id);
-        return ResponseEntity.ok().body(personDto);
-    }
-
+    
     @GetMapping
     public ResponseEntity<List<PersonDto>> findAll() {
         List<PersonDto> userDtoList = personService.findAll();
         return ResponseEntity.ok().body(userDtoList);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PersonDto> findById(@PathVariable("id") Integer id) {        
+        PersonDto personDto = personService.findById(id);
+        return ResponseEntity.ok().body(personDto);
     }
 
     @PostMapping
@@ -61,7 +62,7 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDto> update(@Valid @RequestBody
+    public ResponseEntity<PersonDto> updateById(@Valid @RequestBody
         PersonForm personForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
@@ -78,7 +79,7 @@ public class PersonController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
         personService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

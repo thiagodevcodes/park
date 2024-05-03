@@ -33,34 +33,25 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 @Service
 public class TicketService {
     @Autowired
-    TicketRepository ticketRepository;
+    private TicketRepository ticketRepository;
 
     @Autowired
-    VehicleService vehicleService;
+    private VehicleService vehicleService;
 
     @Autowired
-    CustomerService customerService;
+    private CustomerService customerService;
 
     @Autowired
-    VacancyService vacancyService;
+    private VacancyService vacancyService;
 
     @Autowired
-    PersonService personService;
+    private PersonService personService;
 
     @Autowired
-    CustomerVehicleService customerVehicleService;
+    private CustomerVehicleService customerVehicleService;
    
     @Autowired
     private ModelMapper modelMapper;
-
-    public TicketDto findById(Integer id) {
-        try {
-            TicketModel ticketModel = ticketRepository.findById(id).get();
-            return modelMapper.map(ticketModel, TicketDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + TicketModel.class.getName());
-        }
-    }
 
     public List<TicketDto> findAll() {
         try {
@@ -71,6 +62,15 @@ public class TicketService {
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Não é possível consultar o Ticket!");
+        }
+    }
+
+    public TicketDto findById(Integer id) {
+        try {
+            TicketModel ticketModel = ticketRepository.findById(id).get();
+            return modelMapper.map(ticketModel, TicketDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + TicketModel.class.getName());
         }
     }
 
@@ -86,85 +86,10 @@ public class TicketService {
         }
     }
 
-    public TicketDto updateById(TicketDto ticketDto, Integer id) {
-        try {
-            Optional<TicketModel> ticketExist = ticketRepository.findById(id);
-
-            if (ticketExist.isPresent()) {
-                TicketModel ticketUpdated = ticketExist.get();
-                
-                modelMapper.map(ticketDto, ticketUpdated);   
-                ticketUpdated.setId(id);
-                ticketUpdated = ticketRepository.save(ticketUpdated);
-
-                return modelMapper.map(ticketUpdated, TicketDto.class);
-            }else{
-                throw new DataIntegrityException("O Id do Ticket não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Ticket não foi(foram) preenchido(s).");
-        }
-    }
-
-    public void deleteById(Integer id) {
-        try {
-            if (ticketRepository.existsById(id)) {
-                TicketDto ticketDto = this.findById(id);
-                VacancyDto vacancyDto = vacancyService.findById(ticketDto.getIdVacancy());
-                vacancyDto.setSituation(true);
-                vacancyService.updateById(vacancyDto, vacancyDto.getId());
-                ticketRepository.deleteById(id);
-            }else {
-                throw new DataIntegrityException("O Id do Ticket não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não é possível excluir a Ticket!");
-        }
-    }
-
-    public Page<MovimentacaoDto> getAllTickets(Optional<Pageable> optionalPage) {
-        try {
-            Pageable page = optionalPage.orElse(Pageable.unpaged());
-            Page<TicketModel> tickets = ticketRepository.findByIsActive(true, page);
-            List<MovimentacaoDto> newDtoList = new ArrayList<>();           
-
-            for (TicketModel ticket : tickets) {
-                MovimentacaoDto newDto = new MovimentacaoDto();
-
-                CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(ticket.getIdCustomerVehicle());
-
-                CustomerDto customerDto = customerService.findById(customerVehicleDto.getIdCustomer());
-                VehicleDto vehicleDto = vehicleService.findById(customerVehicleDto.getIdVehicle());
-                PersonDto personDto = personService.findById(customerDto.getIdPerson());
- 
-                if(ticket.getExitTime() == null) {
-                    newDto.setId(ticket.getId());
-                    newDto.setEntryTime(ticket.getEntryTime());
-                    newDto.setExitTime(ticket.getExitTime());
-                    newDto.setName(personDto.getName());
-                    newDto.setMake(vehicleDto.getMake());
-                    newDto.setModel(vehicleDto.getModel());
-                    newDto.setPlate(vehicleDto.getPlate());
-                    newDto.setIdVacancy(ticket.getIdVacancy());
-                    newDto.setIdCustomerType(customerDto.getIdCustomerType());
-                    newDto.setIdCustomer(null);
-                    newDto.setIdVehicle(null);
-                    newDtoList.add(newDto);
-                }
-            } 
-
-            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, tickets.getTotalElements());
-            return pageableMov;
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não é possível listar os Tickets!");
-        }
-    }
-
     public TicketDto createNewTicket(MovimentacaoDto movimentacaoDto) {
         try {
-            System.out.println(movimentacaoDto);
             validTicket(movimentacaoDto);
-            System.out.println("Passei aqui!");
+
             CustomerDto customerDto = new CustomerDto();
             TicketDto ticketDto = new TicketDto();
             VehicleDto vehicleDto = new VehicleDto();
@@ -229,6 +154,26 @@ public class TicketService {
             return ticketDto;
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível criar o Ticket!", e);
+        }
+    }
+
+    public TicketDto updateById(TicketDto ticketDto, Integer id) {
+        try {
+            Optional<TicketModel> ticketExist = ticketRepository.findById(id);
+
+            if (ticketExist.isPresent()) {
+                TicketModel ticketUpdated = ticketExist.get();
+                
+                modelMapper.map(ticketDto, ticketUpdated);   
+                ticketUpdated.setId(id);
+                ticketUpdated = ticketRepository.save(ticketUpdated);
+
+                return modelMapper.map(ticketUpdated, TicketDto.class);
+            }else{
+                throw new DataIntegrityException("O Id do Ticket não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Ticket não foi(foram) preenchido(s).");
         }
     }
 
@@ -314,6 +259,60 @@ public class TicketService {
         }
     }
 
+    public void deleteById(Integer id) {
+        try {
+            if (ticketRepository.existsById(id)) {
+                TicketDto ticketDto = this.findById(id);
+                VacancyDto vacancyDto = vacancyService.findById(ticketDto.getIdVacancy());
+                vacancyDto.setSituation(true);
+                vacancyService.updateById(vacancyDto, vacancyDto.getId());
+                ticketRepository.deleteById(id);
+            }else {
+                throw new DataIntegrityException("O Id do Ticket não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível excluir a Ticket!");
+        }
+    }
+
+    public Page<MovimentacaoDto> getAllTickets(Optional<Pageable> optionalPage) {
+        try {
+            Pageable page = optionalPage.orElse(Pageable.unpaged());
+            Page<TicketModel> tickets = ticketRepository.findByIsActive(true, page);
+            List<MovimentacaoDto> newDtoList = new ArrayList<>();           
+
+            for (TicketModel ticket : tickets) {
+                MovimentacaoDto newDto = new MovimentacaoDto();
+
+                CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(ticket.getIdCustomerVehicle());
+
+                CustomerDto customerDto = customerService.findById(customerVehicleDto.getIdCustomer());
+                VehicleDto vehicleDto = vehicleService.findById(customerVehicleDto.getIdVehicle());
+                PersonDto personDto = personService.findById(customerDto.getIdPerson());
+ 
+                if(ticket.getExitTime() == null) {
+                    newDto.setId(ticket.getId());
+                    newDto.setEntryTime(ticket.getEntryTime());
+                    newDto.setExitTime(ticket.getExitTime());
+                    newDto.setName(personDto.getName());
+                    newDto.setMake(vehicleDto.getMake());
+                    newDto.setModel(vehicleDto.getModel());
+                    newDto.setPlate(vehicleDto.getPlate());
+                    newDto.setIdVacancy(ticket.getIdVacancy());
+                    newDto.setIdCustomerType(customerDto.getIdCustomerType());
+                    newDto.setIdCustomer(null);
+                    newDto.setIdVehicle(null);
+                    newDtoList.add(newDto);
+                }
+            } 
+
+            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, tickets.getTotalElements());
+            return pageableMov;
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível listar os Tickets!");
+        }
+    }
+
     private void validTicket(MovimentacaoDto movimentacaoDto) {
         try {
             if(movimentacaoDto.getIdCustomerType() == 2) {
@@ -364,5 +363,4 @@ public class TicketService {
             throw new BusinessRuleException("Não foi possível buscar os dados!");
         }
     }
-
 }

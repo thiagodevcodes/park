@@ -24,9 +24,9 @@ public class TicketRotativoForm {
     @NotBlank(message = "O modelo do veículo não pode estar em branco!")
     private String model;
 
-    @NotNull(message = "O nome não pode ser nulo!")
+    @NotNull(message = "A vaga não pode ser nula!")
     private Integer idVacancy;
 
-    @NotNull(message = "O nome não pode ser nulo!")
+    @NotNull(message = "O tipo do cliente não pode ser nulo!")
     private Integer idCustomerType;
 }

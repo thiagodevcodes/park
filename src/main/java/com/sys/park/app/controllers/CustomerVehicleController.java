@@ -31,18 +31,18 @@ public class CustomerVehicleController {
     @Autowired
     ModelMapper modelMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CustomerVehicleDto> findById(@PathVariable("id") Integer id) {        
-        CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(id);
-        return ResponseEntity.ok().body(customerVehicleDto);
-    }
-    
     @GetMapping
     public ResponseEntity<List<CustomerVehicleDto>> findAll() {
         List<CustomerVehicleDto> customerVehicleDto = customerVehicleService.findAll();
         return ResponseEntity.ok().body(customerVehicleDto);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerVehicleDto> findById(@PathVariable("id") Integer id) {        
+        CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(id);
+        return ResponseEntity.ok().body(customerVehicleDto);
+    }
+    
     @PostMapping
     public ResponseEntity<CustomerVehicleDto> insert(@Valid @RequestBody CustomerVehicleForm customerVehicleForm, BindingResult br) {
             

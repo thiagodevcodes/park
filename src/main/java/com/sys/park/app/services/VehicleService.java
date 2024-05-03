@@ -26,13 +26,25 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 @Service
 public class VehicleService {
     @Autowired
-    VehicleRepository vehicleRepository;
+    private VehicleRepository vehicleRepository;
 
     @Autowired
-    CustomerVehicleService customerVehicleService;
+    private CustomerVehicleService customerVehicleService;
     
     @Autowired
     private ModelMapper modelMapper;
+
+    public List<VehicleDto> findAll() {
+        try {
+            List<VehicleModel> vehicleModelList = vehicleRepository.findAll();
+
+            return vehicleModelList.stream()
+                    .map(vehicle -> modelMapper.map(vehicle, VehicleDto.class))
+                    .collect(Collectors.toList());
+        } catch (BusinessRuleException e) {
+            throw new BusinessRuleException("Não é possível consultar o Veiculo!");
+        }
+    }
 
     public VehicleDto findById(Integer id) {
         try {
@@ -53,18 +65,6 @@ public class VehicleService {
         }
     }
 
-    public List<VehicleDto> findAll() {
-        try {
-            List<VehicleModel> vehicleModelList = vehicleRepository.findAll();
-
-            return vehicleModelList.stream()
-                    .map(vehicle -> modelMapper.map(vehicle, VehicleDto.class))
-                    .collect(Collectors.toList());
-        } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar o Veiculo!");
-        }
-    }
-
     public VehicleDto insert(VehicleDto vehicleDto) {
         try {
             VehicleModel newVehicle = modelMapper.map(vehicleDto, VehicleModel.class);
@@ -76,65 +76,6 @@ public class VehicleService {
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Campo(s) obrigatório(s) do Veiculo não foi(foram) preenchido(s).");
-        }
-    }
-
-    public VehicleDto updateById(VehicleDto vehicleDto, Integer id) {
-        try {
-            Optional<VehicleModel> byPlate = vehicleRepository.findById(id);
-
-            if(!byPlate.get().getPlate().equals(vehicleDto.getPlate())) {
-                validVehicle(vehicleDto.getPlate());
-            }
-
-            if (byPlate.isPresent()) {
-                VehicleModel vehicleUpdated = byPlate.get();
-
-                modelMapper.map(vehicleDto, vehicleUpdated);
-                vehicleUpdated.setId(id);
-                vehicleUpdated = vehicleRepository.save(vehicleUpdated);
-
-                return modelMapper.map(vehicleUpdated, VehicleDto.class);
-            }else{
-                throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Campo(s) obrigatório(s) do Veiculo não foi(foram) preenchido(s).");
-        }
-    }
-
-    public void deleteById(Integer id) {
-        try {
-            if (vehicleRepository.existsById(id)) {
-                vehicleRepository.deleteById(id);
-            }else {
-                throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não é possível excluir a Pessoa!");
-        }
-    }
-
-    public Page<VehicleDto> getMensalByIdCustomer(Integer idCustomer, Optional<Pageable> optionalPage) {
-        try {
-            Pageable page = optionalPage.orElse(Pageable.unpaged());
-            List<CustomerVehicleDto> customerVehicleModels = customerVehicleService.findByIdCustomer(idCustomer);
-            List<VehicleDto> vehicleDtos = new ArrayList<>();
-
-            for (CustomerVehicleDto customerVehicleDto : customerVehicleModels) {
-                VehicleDto vehicleDto = this.findById(customerVehicleDto.getIdVehicle());
-
-                if(vehicleDto.getMonthlyVehicle()) {
-                    vehicleDtos.add(vehicleDto);
-                }
-            }
-
-            System.out.println(vehicleDtos);
-
-            Page<VehicleDto> pageVehicleDto =  new PageImpl<>(vehicleDtos, page, vehicleDtos.size());
-            return pageVehicleDto;
-        } catch (NoSuchElementException e) {
-            throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
         }
     }
 
@@ -176,6 +117,30 @@ public class VehicleService {
         }   
     }
 
+    public VehicleDto updateById(VehicleDto vehicleDto, Integer id) {
+        try {
+            Optional<VehicleModel> byPlate = vehicleRepository.findById(id);
+
+            if(!byPlate.get().getPlate().equals(vehicleDto.getPlate())) {
+                validVehicle(vehicleDto.getPlate());
+            }
+
+            if (byPlate.isPresent()) {
+                VehicleModel vehicleUpdated = byPlate.get();
+
+                modelMapper.map(vehicleDto, vehicleUpdated);
+                vehicleUpdated.setId(id);
+                vehicleUpdated = vehicleRepository.save(vehicleUpdated);
+
+                return modelMapper.map(vehicleUpdated, VehicleDto.class);
+            }else{
+                throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Veiculo não foi(foram) preenchido(s).");
+        }
+    }
+
     public VehicleDto finishVehicle(VehicleForm vehicleForm, Integer id) {
         try {
             Optional<VehicleModel> vehicleExist = vehicleRepository.findById(id);
@@ -192,6 +157,39 @@ public class VehicleService {
             }
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Erro ao finalizar o veículo!", e);
+        }
+    }
+
+    public void deleteById(Integer id) {
+        try {
+            if (vehicleRepository.existsById(id)) {
+                vehicleRepository.deleteById(id);
+            }else {
+                throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível excluir a Pessoa!");
+        }
+    }
+
+    public Page<VehicleDto> getMensalByIdCustomer(Integer idCustomer, Optional<Pageable> optionalPage) {
+        try {
+            Pageable page = optionalPage.orElse(Pageable.unpaged());
+            List<CustomerVehicleDto> customerVehicleModels = customerVehicleService.findByIdCustomer(idCustomer);
+            List<VehicleDto> vehicleDtos = new ArrayList<>();
+
+            for (CustomerVehicleDto customerVehicleDto : customerVehicleModels) {
+                VehicleDto vehicleDto = this.findById(customerVehicleDto.getIdVehicle());
+
+                if(vehicleDto.getMonthlyVehicle()) {
+                    vehicleDtos.add(vehicleDto);
+                }
+            }
+
+            Page<VehicleDto> pageVehicleDto =  new PageImpl<>(vehicleDtos, page, vehicleDtos.size());
+            return pageVehicleDto;
+        } catch (NoSuchElementException e) {
+            throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
         }
     }
 

@@ -42,43 +42,43 @@ export const fetchDataById = async (id, path) => {
 
 export const handleCreate = async (data, path) => {
     try {
-        await axios
-            .post(`http://localhost:8080/api/${path}`, data)
-            .then((res) => {
-                if(res.status === 200) 
-                    toast.success('Cadastrado com sucesso!')
-            })
-            .catch((error) => {
-                toast.error(error.response.data.messages[0])
-            });
+        const response = await axios.post(`http://localhost:8080/api/${path}`, data);
+        if (response.status === 200) toast.success('Cadastrado com sucesso!');
+        return response;
     } catch (error) {
-        console.error(error);
-        toast.error('Ocorreu um erro ao cadastrar!')
+        if (error.response && error.response.data && error.response.data.messages && error.response.data.messages.length > 0) {
+            toast.error(error.response.data.messages[0]);
+        } else {
+            toast.error('Ocorreu um erro ao cadastrar!');
+        }
     }
 }
 
-
 export const handleUpdate = async (id, path, data) => {
     try {
-        await axios.put(`http://localhost:8080/api/${path}/${id}`, data)
-            .then((res) => {
-
-                toast.success('Operação realizada com sucesso!')
-            }).catch((error) => {
-                toast.error(error.response.data.messages[0])
-            })
+        const response = await axios.put(`http://localhost:8080/api/${path}/${id}`, data);
+        if (response.status === 200) toast.success('Operação realizada com sucesso!');
+        return response;
     } catch (error) {
-        console.error(error);
+        if (error.response && error.response.data && error.response.data.messages && error.response.data.messages.length > 0) {
+            toast.error(error.response.data.messages[0]);
+        } else {
+            toast.error('Ocorreu um erro ao cadastrar!');
+        }
     }
 }
 
 export const handleDelete = async (id, path) => {
     try {
-        await axios.delete(`http://localhost:8080/api/${path}/${id}`).then(() => {
-            toast.success('Operação realizada com sucesso!');
-        })
+        const response = await axios.delete(`http://localhost:8080/api/${path}/${id}`)
+        console.log(response)
+        if(response.status === 204) toast.success('Operação realizada com sucesso!');
+        return response
     } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-        toast.error("Erro ao deletar: " + error.response.data.messages);
+        if (error.response && error.response.data && error.response.data.messages && error.response.data.messages.length > 0) {
+            toast.error(error.response.data.messages[0]);
+        } else {
+            toast.error('Ocorreu um erro ao deletar!');
+        }
     }
 }

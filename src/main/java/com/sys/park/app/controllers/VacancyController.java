@@ -35,12 +35,6 @@ public class VacancyController {
     @Autowired
     ModelMapper modelMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<VacancyDto> findById(@PathVariable("id") Integer id) {        
-        VacancyDto vacancyDto = vacancyService.findById(id);
-        return ResponseEntity.ok().body(vacancyDto);
-    }
-
     @GetMapping
     public ResponseEntity<VacancyResponse> findAll() {
         List<VacancyDto> vacancyDtoList = vacancyService.findAll();
@@ -54,6 +48,12 @@ public class VacancyController {
         vacancyResponse.setVacanciesList(vacancyDtoList);
 
         return ResponseEntity.ok().body(vacancyResponse);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<VacancyDto> findById(@PathVariable("id") Integer id) {        
+        VacancyDto vacancyDto = vacancyService.findById(id);
+        return ResponseEntity.ok().body(vacancyDto);
     }
 
     @PostMapping
@@ -72,7 +72,7 @@ public class VacancyController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VacancyDto> update(@Valid @RequestBody
+    public ResponseEntity<VacancyDto> updateById(@Valid @RequestBody
         VacancyForm vacancyForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
@@ -89,7 +89,7 @@ public class VacancyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
         vacancyService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

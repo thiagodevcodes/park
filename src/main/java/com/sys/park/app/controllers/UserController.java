@@ -29,17 +29,17 @@ import jakarta.validation.Valid;
 public class UserController {
     @Autowired
     UserService userService;
+  
+    @GetMapping
+    public ResponseEntity<List<UserDto>> findAll() {
+        List<UserDto> userDtoList = userService.findAll();
+        return ResponseEntity.ok().body(userDtoList);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> find(@PathVariable("id") Integer id) {        
         UserDto userDto = userService.findById(id);
         return ResponseEntity.ok().body(userDto);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<UserDto>> findAll() {
-        List<UserDto> userDtoList = userService.findAll();
-        return ResponseEntity.ok().body(userDtoList);
     }
 
     @PostMapping
@@ -58,7 +58,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> update(@Valid @RequestBody
+    public ResponseEntity<UserDto> updateById(@Valid @RequestBody
         UserForm userForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
@@ -75,7 +75,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

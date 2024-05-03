@@ -21,19 +21,10 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 @Service
 public class UserService {
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
     
     @Autowired
     private ModelMapper modelMapper;
-
-    public UserDto findById(Integer id) {
-        try {
-            UserModel acaoModel = userRepository.findById(id).get();
-            return modelMapper.map(acaoModel, UserDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + UserModel.class.getName());
-        }
-    }
 
     public List<UserDto> findAll() {
         try {
@@ -47,7 +38,16 @@ public class UserService {
         }
     }
 
-     public UserDto insert(UserForm userForm) {
+    public UserDto findById(Integer id) {
+        try {
+            UserModel acaoModel = userRepository.findById(id).get();
+            return modelMapper.map(acaoModel, UserDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + UserModel.class.getName());
+        }
+    }
+
+    public UserDto insert(UserForm userForm) {
         try {
             UserModel newUser = modelMapper.map(userForm, UserModel.class);
            

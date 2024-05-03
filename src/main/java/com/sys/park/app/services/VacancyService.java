@@ -21,19 +21,10 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 @Service
 public class VacancyService {
     @Autowired
-    VacancyRepository vacancyRepository;
+    private VacancyRepository vacancyRepository;
     
     @Autowired
     private ModelMapper modelMapper;
-
-    public VacancyDto findById(Integer id) {
-        try {
-            VacancyModel vacancyModel = vacancyRepository.findById(id).get();
-            return modelMapper.map(vacancyModel, VacancyDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + PersonModel.class.getName());
-        }
-    }
 
     public List<VacancyDto> findAll() {
         try {
@@ -44,6 +35,15 @@ public class VacancyService {
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Não é possível consultar a Vaga!");
+        }
+    }
+
+    public VacancyDto findById(Integer id) {
+        try {
+            VacancyModel vacancyModel = vacancyRepository.findById(id).get();
+            return modelMapper.map(vacancyModel, VacancyDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + PersonModel.class.getName());
         }
     }
 

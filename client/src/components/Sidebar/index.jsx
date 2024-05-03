@@ -21,10 +21,6 @@ export default function Aside({ active }) {
                     <Image src={"/icons/Movement.svg"} width={25} height={25} alt="Logo Home"></Image>
                     <Link href={"/movimentacoes"}>Movimentações</Link>
                 </li>
-                <li className={router.pathname === "/precos" ? `${styles.active}` : ""}>
-                    <Image src={"/icons/Money.svg"} width={25} height={25} alt="Logo Home"></Image>
-                    <Link href={"#"}>Preços</Link>
-                </li>
                 <li className={router.pathname === "/usuarios" ? `${styles.active}` : ""}>
                     <Image src={"/icons/Users.svg"} width={25} height={25} alt="Logo Home"></Image>
                     <Link href={"#"}>Usuários</Link>

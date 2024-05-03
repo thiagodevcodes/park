@@ -7,15 +7,15 @@ import lombok.Data;
 public class TicketMensalForm {
     private Integer id;
 
-    @NotNull(message = "O id da Vaga não pode ser nulo!")
+    @NotNull(message = "A vaga não pode ser nula!")
     private Integer idVacancy;
 
-    @NotNull(message = "O tipo de Cliente não pode ser nulo!")
+    @NotNull(message = "O tipo de cliente não pode ser nulo!")
     private Integer idCustomerType;
 
-    @NotNull(message = "O id do Veículo não pode ser nulo!")
+    @NotNull(message = "O veículo não pode ser nulo!")
     private Integer idVehicle;
 
-    @NotNull(message = "O id do Cliente não pode ser nulo!")
+    @NotNull(message = "O cliente não pode ser nulo!")
     private Integer idCustomer;
 }

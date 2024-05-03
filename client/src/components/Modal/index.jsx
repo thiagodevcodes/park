@@ -6,47 +6,52 @@ import { useRouter } from "next/router";
 export default function Modal({ children, setModalOpen, modalOpen, title, action, path, data }) {
     const router = useRouter()
 
-    const submitUpdated = (e, id, path, data) => {
+    const submitUpdated = async (e, id, path, data) => {
         e.preventDefault();
         if (id) {
             try {
-                handleUpdate(id, path, data).then(() => {
+                const res = await handleUpdate(id, path, data)
+                
+                if(res && res.status === 200) {
                     setModalOpen({ ...modalOpen, update: false, finish: false })
                     setTimeout(() => {
                         router.reload(); 
                     }, 3000);
-                });
+                }
             } catch (error) {
                 console.error("Erro ao criar:", error);
             }
         }
     };
 
-    const handleSubmit = (e, path, data) => {
+    const handleSubmit = async (e, path, data) => {
         e.preventDefault();
         try {
-            handleCreate(data, path).then(() => {
+            const res = await handleCreate(data, path);
+            
+            if(res && res.status === 200) {
                 setModalOpen({ ...modalOpen, post: false })
                 setTimeout(() => {
                     router.reload(); 
                 }, 3000);
-            });
+            }
         } catch (error) {
             console.error("Erro ao criar:", error);
         }
-
     };
 
-    const submitDelete = (e, id, path) => {
+    const submitDelete = async (e, id, path) => {
         e.preventDefault();
         if (id) {
             try {
-                handleDelete(id, path).then(() => {
+                const res = await handleDelete(id, path)
+
+                if(res && res.status === 204) {
                     setModalOpen({...modalOpen, delete: false})
                     setTimeout(() => {
                         router.reload(); 
                     }, 3000);
-                });
+                }
             } catch (error) {
                 console.error("Erro ao criar:", error);
             }

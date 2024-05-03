@@ -21,68 +21,10 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 @Service
 public class CustomerVehicleService {
     @Autowired
-    CustomerVehicleRepository customerVehicleRepository;
+    private CustomerVehicleRepository customerVehicleRepository;
 
     @Autowired
     private ModelMapper modelMapper;
-
-    public CustomerVehicleDto findById(Integer id) {
-        try {
-            CustomerVehicleModel customerVehicleModel = customerVehicleRepository.findById(id).get();
-            return modelMapper.map(customerVehicleModel, CustomerVehicleDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + CustomerVehicleModel.class.getName());
-        }
-    }
-
-    public List<CustomerVehicleDto> findByIdCustomer(Integer idCustomer) {
-        try {
-            List<CustomerVehicleModel> customerVehicleModel = customerVehicleRepository.findByIdCustomer(idCustomer);
-            
-            return customerVehicleModel.stream()
-            .map(customerVehicle -> modelMapper.map(customerVehicle, CustomerVehicleDto.class))
-            .collect(Collectors.toList());
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + idCustomer + ", Tipo: " + CustomerVehicleModel.class.getName());
-        }
-    }   
-
-    public CustomerVehicleDto findByIdCustomerAndIdVehicle(Integer idCustomer, Integer idVehicle) {
-        try {
-            CustomerVehicleModel customerVehicleModel = customerVehicleRepository.findByIdCustomerAndIdVehicle(idCustomer, idVehicle).get();
-            return modelMapper.map(customerVehicleModel, CustomerVehicleDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + idCustomer + ", Tipo: " + CustomerVehicleModel.class.getName());
-        }
-    }   
-
-    public Boolean vehicleCustomerExist(Integer idCustomer, Integer idVehicle) {
-        try {
-            Optional<CustomerVehicleModel> customerVehicle = customerVehicleRepository.findByIdCustomerAndIdVehicle(idCustomer, idVehicle);
-
-            if(customerVehicle.isPresent()) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + idCustomer + ", Tipo: " + CustomerVehicleModel.class.getName());
-        }
-    }   
-
-
-    
-    public List<CustomerVehicleDto> findByIdVehicle(Integer idCustomer) {
-        try {
-            List<CustomerVehicleModel> customerVehicleModel = customerVehicleRepository.findByIdCustomer(idCustomer);
-            
-            return customerVehicleModel.stream()
-            .map(customerVehicle -> modelMapper.map(customerVehicle, CustomerVehicleDto.class))
-            .collect(Collectors.toList());
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + idCustomer + ", Tipo: " + CustomerVehicleModel.class.getName());
-        }
-    }  
 
     public List<CustomerVehicleDto> findAll() {
         try {
@@ -108,4 +50,60 @@ public class CustomerVehicleService {
         }
         
     }
+
+    public CustomerVehicleDto findById(Integer id) {
+        try {
+            CustomerVehicleModel customerVehicleModel = customerVehicleRepository.findById(id).get();
+            return modelMapper.map(customerVehicleModel, CustomerVehicleDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + CustomerVehicleModel.class.getName());
+        }
+    }
+
+    public List<CustomerVehicleDto> findByIdCustomer(Integer idCustomer) {
+        try {
+            List<CustomerVehicleModel> customerVehicleModel = customerVehicleRepository.findByIdCustomer(idCustomer);
+            
+            return customerVehicleModel.stream()
+            .map(customerVehicle -> modelMapper.map(customerVehicle, CustomerVehicleDto.class))
+            .collect(Collectors.toList());
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + idCustomer + ", Tipo: " + CustomerVehicleModel.class.getName());
+        }
+    }   
+  
+    public List<CustomerVehicleDto> findByIdVehicle(Integer idCustomer) {
+        try {
+            List<CustomerVehicleModel> customerVehicleModel = customerVehicleRepository.findByIdCustomer(idCustomer);
+            
+            return customerVehicleModel.stream()
+            .map(customerVehicle -> modelMapper.map(customerVehicle, CustomerVehicleDto.class))
+            .collect(Collectors.toList());
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + idCustomer + ", Tipo: " + CustomerVehicleModel.class.getName());
+        }
+    }  
+
+    public CustomerVehicleDto findByIdCustomerAndIdVehicle(Integer idCustomer, Integer idVehicle) {
+        try {
+            CustomerVehicleModel customerVehicleModel = customerVehicleRepository.findByIdCustomerAndIdVehicle(idCustomer, idVehicle).get();
+            return modelMapper.map(customerVehicleModel, CustomerVehicleDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + idCustomer + ", Tipo: " + CustomerVehicleModel.class.getName());
+        }
+    }   
+
+    public Boolean vehicleCustomerExist(Integer idCustomer, Integer idVehicle) {
+        try {
+            Optional<CustomerVehicleModel> customerVehicle = customerVehicleRepository.findByIdCustomerAndIdVehicle(idCustomer, idVehicle);
+
+            if(customerVehicle.isPresent()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + idCustomer + ", Tipo: " + CustomerVehicleModel.class.getName());
+        }
+    }   
 }

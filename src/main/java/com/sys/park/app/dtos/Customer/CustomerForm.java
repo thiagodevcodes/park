@@ -20,13 +20,13 @@ public class CustomerForm {
     @NotBlank(message = "O CPF não pode estar em branco")
     @NotEmpty(message = "O CPF não pode estar vazio")
     @NotNull(message = "O CPF não pode ser nulo")
-    @CPF(message = "O CPF informado é inválido")
+    @CPF(message = "O CPF informado não é válido")
     private String cpf;
 
     @NotBlank(message = "O email não pode estar em branco")
     @NotNull(message = "O email não pode ser nulo")
     @NotEmpty(message = "O email não pode estar vazio")
-    @Email(message = "O email informado é inválido")
+    @Email(message = "O email informado não é válido")
     private String email;
 
     @NotBlank(message = "O telefone não pode estar em branco")

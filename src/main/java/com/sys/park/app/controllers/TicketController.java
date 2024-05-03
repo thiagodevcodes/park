@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Ticket.MovimentacaoDto;
 import com.sys.park.app.dtos.Ticket.TicketDto;
-import com.sys.park.app.dtos.Ticket.TicketForm;
 import com.sys.park.app.dtos.Ticket.TicketMensalForm;
 import com.sys.park.app.dtos.Ticket.TicketRotativoForm;
 import com.sys.park.app.services.TicketService;
@@ -43,64 +42,26 @@ public class TicketController {
     @Autowired
     ModelMapper modelMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TicketDto> findById(@PathVariable("id") Integer id) {        
-        TicketDto personDto = ticketService.findById(id);
-        return ResponseEntity.ok().body(personDto);
-    }
-
     @GetMapping
     public ResponseEntity<List<TicketDto>> findAll() {
         List<TicketDto> userDtoList = ticketService.findAll();
         return ResponseEntity.ok().body(userDtoList);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TicketDto> findById(@PathVariable("id") Integer id) {        
+        TicketDto personDto = ticketService.findById(id);
+        return ResponseEntity.ok().body(personDto);
+    }
+
     @GetMapping("/registerdate")
-    public ResponseEntity<List<TicketDto>> findByExitTime() {
+    public ResponseEntity<List<TicketDto>> findByRegisterDate() {
         List<TicketDto> userDtoList = ticketService.findByRegisterDateAndIsActive();
         return ResponseEntity.ok().body(userDtoList);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<TicketDto> update(@Valid @RequestBody
-        TicketForm ticketForm, @PathVariable("id") Integer id, BindingResult br) {
-       
-        if (br.hasErrors()) {
-            List<String> errors = new ArrayList<>();
-            br.getAllErrors().forEach(e -> {
-                errors.add(e.getDefaultMessage());
-            });
-
-            throw new ConstraintException("Restrição de Dados", errors);
-        }
-     
-        TicketDto ticketDto = ticketService.updateById(modelMapper.map(ticketForm, TicketDto.class), id);
-        return ResponseEntity.ok().body(ticketDto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
-        ticketService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping
-    public ResponseEntity<TicketDto> insert(@Valid @RequestBody TicketForm ticketForm, BindingResult br) {
-            
-        if (br.hasErrors()) {
-            List<String> errors = br.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-
-            throw new ConstraintException("Restrição de Dados", errors);
-        }
-
-        TicketDto ticketDto = ticketService.insert(modelMapper.map(ticketForm, TicketDto.class));
-        return ResponseEntity.ok().body(ticketDto);
-    }
-
     @GetMapping("/movimentacoes")
-    public ResponseEntity<Page<MovimentacaoDto>> findAllTicket(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+    public ResponseEntity<Page<MovimentacaoDto>> findAllTickets(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
         try {
             Pageable pageable = Pageable.unpaged();
 
@@ -113,6 +74,21 @@ public class TicketController {
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Erro de paginação");
         }
+    }
+
+    @PostMapping
+    public ResponseEntity<TicketDto> insert(@Valid @RequestBody TicketDto ticketForm, BindingResult br) {
+            
+        if (br.hasErrors()) {
+            List<String> errors = br.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            throw new ConstraintException("Restrição de Dados", errors);
+        }
+
+        TicketDto ticketDto = ticketService.insert(ticketForm);
+        return ResponseEntity.ok().body(ticketDto);
     }
 
     @PostMapping("/mensalistas")
@@ -147,9 +123,26 @@ public class TicketController {
         
         return ResponseEntity.ok().body(ticketDto);
     }
- 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TicketDto> updateById(@Valid @RequestBody
+        TicketDto ticketForm, @PathVariable("id") Integer id, BindingResult br) {
+       
+        if (br.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            br.getAllErrors().forEach(e -> {
+                errors.add(e.getDefaultMessage());
+            });
+
+            throw new ConstraintException("Restrição de Dados", errors);
+        }
+     
+        TicketDto ticketDto = ticketService.updateById(ticketForm, id);
+        return ResponseEntity.ok().body(ticketDto);
+    }
+
     @PutMapping("/mensalistas/{id}")
-    public ResponseEntity<TicketDto> updateMensalista(@Valid @RequestBody TicketMensalForm movForm, 
+    public ResponseEntity<TicketDto> updateMensalistaById(@Valid @RequestBody TicketMensalForm movForm, 
         @PathVariable("id") Integer id, BindingResult br) {
             
         if (br.hasErrors()) {
@@ -165,7 +158,7 @@ public class TicketController {
     }
 
     @PutMapping("/rotativos/{id}")
-    public ResponseEntity<TicketDto> updateRotativo(@Valid @RequestBody TicketRotativoForm movForm, 
+    public ResponseEntity<TicketDto> updateRotativoById(@Valid @RequestBody TicketRotativoForm movForm, 
         @PathVariable("id") Integer id, BindingResult br) {
             
         if (br.hasErrors()) {
@@ -181,8 +174,8 @@ public class TicketController {
     }
 
     @PutMapping("/finish/{id}")
-    public ResponseEntity<TicketDto> finish(@Valid @RequestBody
-        TicketForm ticketForm, @PathVariable("id") Integer id, BindingResult br) {
+    public ResponseEntity<TicketDto> finishById(@Valid @RequestBody
+        TicketDto ticketForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -195,6 +188,12 @@ public class TicketController {
      
         TicketDto ticketDto = ticketService.finishTicket(modelMapper.map(ticketForm, TicketDto.class), id);
         return ResponseEntity.ok().body(ticketDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
+        ticketService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
 

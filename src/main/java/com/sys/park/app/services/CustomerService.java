@@ -27,16 +27,28 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 @Service
 public class CustomerService {
     @Autowired
-    CustomerRepository customerRepository;
+    private CustomerRepository customerRepository;
 
     @Autowired 
-    PersonService personService;
+    private PersonService personService;
 
     @Autowired
-    CustomerTypeService customerTypeService;
+    private CustomerTypeService customerTypeService;
        
     @Autowired
     private ModelMapper modelMapper;
+
+    public List<CustomerDto> findAll() {
+        try {
+            List<CustomerModel> customerModelList = customerRepository.findAll();
+
+            return customerModelList.stream()
+                    .map(customer -> modelMapper.map(customer, CustomerDto.class))
+                    .collect(Collectors.toList());
+        } catch (BusinessRuleException e) {
+            throw new BusinessRuleException("Não é possível consultar os Clientes!");
+        }
+    }
 
     public CustomerDto findById(Integer id) {
         try {
@@ -56,18 +68,6 @@ public class CustomerService {
         }
     }
 
-    public List<CustomerDto> findAll() {
-        try {
-            List<CustomerModel> customerModelList = customerRepository.findAll();
-
-            return customerModelList.stream()
-                    .map(customer -> modelMapper.map(customer, CustomerDto.class))
-                    .collect(Collectors.toList());
-        } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar os Clientes!");
-        }
-    }
-
     public CustomerDto insert(CustomerDto customerDto) {
         try {
             CustomerModel newCustomer = modelMapper.map(customerDto, CustomerModel.class);
@@ -77,72 +77,6 @@ public class CustomerService {
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Erro ao tentar inserir um cliente!");
-        }
-    }
-
-    public CustomerDto updateById(CustomerDto customerDto, Integer id) {
-        try {
-            Optional<CustomerModel> customerExist = customerRepository.findById(id);
-
-            if (customerExist.isPresent()) {
-                CustomerModel customerUpdated = customerExist.get();
-                
-                modelMapper.map(customerDto, customerUpdated);
-                customerUpdated.setId(id);
-                customerUpdated = customerRepository.save(customerUpdated);
-
-                return modelMapper.map(customerUpdated, CustomerDto.class);
-            }else{
-                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não foi possível atualizar o cliente!");
-        }
-    }
-
-    public void deleteById(Integer id) {
-        try {
-            Optional<CustomerModel> customerModel = customerRepository.findById(id);
-            if (customerRepository.existsById(id)) {
-                customerRepository.deleteById(id);
-                personService.deleteById(customerModel.get().getIdPerson());
-            }else {
-                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não é possível excluir o Cliente!");
-        }
-    }
-
-    public Page<CustomerMensalDto> getCustomersByCustomerType(Integer customerType, Optional<Pageable> optionalPage) {
-        try {
-            Pageable page = optionalPage.orElse(Pageable.unpaged());
-            Page<CustomerModel> customers = customerRepository.findByIdCustomerTypeAndIsActive(customerType, true, page);
-            List<CustomerMensalDto> newDtoList = new ArrayList<>();
-    
-            for (CustomerModel customer : customers) {
-                CustomerMensalDto newDto = new CustomerMensalDto();
-    
-                PersonDto personDto = personService.findById(customer.getIdPerson());
-                CustomerTypeDto customerTypeDto = customerTypeService.findById(customer.getIdCustomerType());
-    
-                if(personDto != null && customerTypeDto != null && customer.getIsActive()) {
-                    newDto.setId(customer.getId());
-                    newDto.setCpf(personDto.getCpf());
-                    newDto.setEmail(personDto.getEmail());
-                    newDto.setName(personDto.getName());
-                    newDto.setClientType(customerType);
-                    newDto.setPhone(personDto.getPhone());
-                    newDto.setPaymentDay(customer.getPaymentDay());
-                    newDto.setIsActive(true);
-                    newDtoList.add(newDto);
-                }
-            }
-
-            Page<CustomerMensalDto> pageableClient = new PageImpl<>(newDtoList, page, customers.getTotalElements());
-            return pageableClient; 
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não foi possível buscar os Clientes!");
         }
     }
 
@@ -207,21 +141,23 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto finishCustomer(Integer id) {
+    public CustomerDto updateById(CustomerDto customerDto, Integer id) {
         try {
             Optional<CustomerModel> customerExist = customerRepository.findById(id);
 
-            if(!customerExist.isPresent()) 
+            if (customerExist.isPresent()) {
+                CustomerModel customerUpdated = customerExist.get();
+                
+                modelMapper.map(customerDto, customerUpdated);
+                customerUpdated.setId(id);
+                customerUpdated = customerRepository.save(customerUpdated);
+
+                return modelMapper.map(customerUpdated, CustomerDto.class);
+            }else{
                 throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
-
-            CustomerModel customerUpdated = customerExist.get();
-
-            customerUpdated.setIsActive(false);
-            customerUpdated = customerRepository.save(customerUpdated);
-
-            return modelMapper.map(customerUpdated, CustomerDto.class);  
+            }
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não foi possível finalizar o cliente!", e);
+            throw new DataIntegrityException("Não foi possível atualizar o cliente!");
         }
     }
 
@@ -257,6 +193,70 @@ public class CustomerService {
             return updatedCustomer;
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Não foi possível atualizar o cliente", e);
+        }
+    }
+
+    public void deleteById(Integer id) {
+        try {
+            Optional<CustomerModel> customerModel = customerRepository.findById(id);
+            if (customerRepository.existsById(id)) {
+                customerRepository.deleteById(id);
+                personService.deleteById(customerModel.get().getIdPerson());
+            }else {
+                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível excluir o Cliente!");
+        }
+    }
+
+    public Page<CustomerMensalDto> getCustomersByCustomerType(Integer customerType, Optional<Pageable> optionalPage) {
+        try {
+            Pageable page = optionalPage.orElse(Pageable.unpaged());
+            Page<CustomerModel> customers = customerRepository.findByIdCustomerTypeAndIsActive(customerType, true, page);
+            List<CustomerMensalDto> newDtoList = new ArrayList<>();
+    
+            for (CustomerModel customer : customers) {
+                CustomerMensalDto newDto = new CustomerMensalDto();
+    
+                PersonDto personDto = personService.findById(customer.getIdPerson());
+                CustomerTypeDto customerTypeDto = customerTypeService.findById(customer.getIdCustomerType());
+    
+                if(personDto != null && customerTypeDto != null && customer.getIsActive()) {
+                    newDto.setId(customer.getId());
+                    newDto.setCpf(personDto.getCpf());
+                    newDto.setEmail(personDto.getEmail());
+                    newDto.setName(personDto.getName());
+                    newDto.setClientType(customerType);
+                    newDto.setPhone(personDto.getPhone());
+                    newDto.setPaymentDay(customer.getPaymentDay());
+                    newDto.setIsActive(true);
+                    newDtoList.add(newDto);
+                }
+            }
+
+            Page<CustomerMensalDto> pageableClient = new PageImpl<>(newDtoList, page, customers.getTotalElements());
+            return pageableClient; 
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não foi possível buscar os Clientes!");
+        }
+    }
+
+    public CustomerDto finishCustomer(Integer id) {
+        try {
+            Optional<CustomerModel> customerExist = customerRepository.findById(id);
+
+            if(!customerExist.isPresent()) 
+                throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
+
+            CustomerModel customerUpdated = customerExist.get();
+
+            customerUpdated.setIsActive(false);
+            customerUpdated = customerRepository.save(customerUpdated);
+
+            return modelMapper.map(customerUpdated, CustomerDto.class);  
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não foi possível finalizar o cliente!", e);
         }
     }
 }

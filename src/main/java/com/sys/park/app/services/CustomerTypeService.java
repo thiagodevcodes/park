@@ -21,19 +21,10 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 @Service
 public class CustomerTypeService {
     @Autowired
-    CustomerTypeRepository customerTypeRepository;
+    private CustomerTypeRepository customerTypeRepository;
     
     @Autowired
     private ModelMapper modelMapper;
-
-    public CustomerTypeDto findById(Integer id) {
-        try {
-            CustomerTypeModel customerTypeModel = customerTypeRepository.findById(id).get();
-            return modelMapper.map(customerTypeModel, CustomerTypeDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + CustomerTypeDto.class.getName());
-        }
-    }
 
     public List<CustomerTypeDto> findAll() {
         try {
@@ -44,6 +35,15 @@ public class CustomerTypeService {
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Não é possível consultar o Tipo do Cliente!");
+        }
+    }
+
+    public CustomerTypeDto findById(Integer id) {
+        try {
+            CustomerTypeModel customerTypeModel = customerTypeRepository.findById(id).get();
+            return modelMapper.map(customerTypeModel, CustomerTypeDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + CustomerTypeDto.class.getName());
         }
     }
 

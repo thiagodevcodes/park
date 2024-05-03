@@ -39,15 +39,27 @@ public class VehicleController {
     @Autowired
     ModelMapper modelMapper;
 
+    @GetMapping
+    public ResponseEntity<List<VehicleDto>> findAll() {
+        List<VehicleDto> vehicleDtoList = vehicleService.findAll();
+        return ResponseEntity.ok().body(vehicleDtoList);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<VehicleDto> findById(@PathVariable("id") Integer id) {        
         VehicleDto vehicleDto = vehicleService.findById(id);
         return ResponseEntity.ok().body(vehicleDto);
     }
 
-    @GetMapping
-    public ResponseEntity<List<VehicleDto>> findAll() {
-        List<VehicleDto> vehicleDtoList = vehicleService.findAll();
+    @GetMapping("/mensalistas/{id}")
+    public ResponseEntity<Page<VehicleDto>> findByIdCustomer(@PathVariable("id") Integer idCustomer, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+        Pageable pageable = Pageable.unpaged();
+
+        if (page != null && size != null) {
+            pageable = PageRequest.of(page, size);
+        }
+
+        Page<VehicleDto> vehicleDtoList = vehicleService.getMensalByIdCustomer(idCustomer, Optional.of(pageable));
         return ResponseEntity.ok().body(vehicleDtoList);
     }
 
@@ -67,7 +79,7 @@ public class VehicleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VehicleDto> update(@Valid @RequestBody
+    public ResponseEntity<VehicleDto> updateById(@Valid @RequestBody
         VehicleForm vehicleForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
@@ -84,20 +96,8 @@ public class VehicleController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
         vehicleService.deleteById(id);
         return ResponseEntity.noContent().build();
-    }
-     
-    @GetMapping("/mensalistas/{id}")
-    public ResponseEntity<Page<VehicleDto>> findByIdCustomer(@PathVariable("id") Integer idCustomer, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
-        Pageable pageable = Pageable.unpaged();
-
-        if (page != null && size != null) {
-            pageable = PageRequest.of(page, size);
-        }
-
-        Page<VehicleDto> vehicleDtoList = vehicleService.getMensalByIdCustomer(idCustomer, Optional.of(pageable));
-        return ResponseEntity.ok().body(vehicleDtoList);
     }
 }

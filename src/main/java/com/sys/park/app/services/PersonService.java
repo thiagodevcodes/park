@@ -20,10 +20,22 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 @Service
 public class PersonService {
     @Autowired
-    PersonRepository personRepository;
+    private PersonRepository personRepository;
     
     @Autowired
     private ModelMapper modelMapper;
+
+    public List<PersonDto> findAll() {
+        try {
+            List<PersonModel> personModelList = personRepository.findAll();
+
+            return personModelList.stream()
+                    .map(user -> modelMapper.map(user, PersonDto.class))
+                    .collect(Collectors.toList());
+        } catch (BusinessRuleException e) {
+            throw new BusinessRuleException("Não é possível consultar a Pessoa!");
+        }
+    }
 
     public PersonDto findById(Integer id) {
         try {
@@ -40,18 +52,6 @@ public class PersonService {
             return modelMapper.map(personModel, PersonDto.class);
         } catch (NoSuchElementException e) {
             throw new NotFoundException("Objeto não encontrado! Cpf: " + cpf + ", Tipo: " + PersonModel.class.getName());
-        }
-    }
-
-    public List<PersonDto> findAll() {
-        try {
-            List<PersonModel> personModelList = personRepository.findAll();
-
-            return personModelList.stream()
-                    .map(user -> modelMapper.map(user, PersonDto.class))
-                    .collect(Collectors.toList());
-        } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar a Pessoa!");
         }
     }
 

@@ -41,71 +41,16 @@ public class CustomerController {
     @Autowired
     ModelMapper modelMapper;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CustomerDto> findById(@PathVariable("id") Integer id) {        
-        CustomerDto customerDto = customerService.findById(id);
-        return ResponseEntity.ok().body(customerDto);
-    }
-    
     @GetMapping
     public ResponseEntity<List<CustomerDto>> findAll() {
         List<CustomerDto> customerDtoList = customerService.findAll();
         return ResponseEntity.ok().body(customerDtoList);
     }
 
-    @PostMapping
-    public ResponseEntity<CustomerMensalDto> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {
-            
-        if (br.hasErrors()) {
-            List<String> errors = br.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-
-            throw new ConstraintException("Dados incorretos!", errors);
-        }
-
-        CustomerMensalDto customerDto = customerService.createNewCustomer(modelMapper.map(customerForm, CustomerMensalDto.class), 2);
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerDto> findById(@PathVariable("id") Integer id) {        
+        CustomerDto customerDto = customerService.findById(id);
         return ResponseEntity.ok().body(customerDto);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<CustomerDto> update(@Valid @RequestBody
-        CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
-       
-        if (br.hasErrors()) {
-            List<String> errors = new ArrayList<>();
-            br.getAllErrors().forEach(e -> {
-                errors.add(e.getDefaultMessage());
-            });
-
-            throw new ConstraintException("Dados incorretos!", errors);
-        }
-     
-        CustomerDto costumerDto = customerService.updateById(modelMapper.map(custumerForm, CustomerDto.class), id);
-        return ResponseEntity.ok().body(costumerDto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
-        customerService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/finish/{id}")
-    public ResponseEntity<CustomerDto> finishCustomer(@Valid @RequestBody
-        CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
-       
-        if (br.hasErrors()) {
-            List<String> errors = new ArrayList<>();
-            br.getAllErrors().forEach(e -> {
-                errors.add(e.getDefaultMessage());
-            });
-
-            throw new ConstraintException("Dados incorretos!", errors);
-        }
-     
-        CustomerDto costumerDto = customerService.finishCustomer(id);
-        return ResponseEntity.ok().body(costumerDto);
     }
 
     @GetMapping("/mensalistas")
@@ -124,6 +69,55 @@ public class CustomerController {
         }
     }
 
+    @PostMapping
+    public ResponseEntity<CustomerMensalDto> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {
+            
+        if (br.hasErrors()) {
+            List<String> errors = br.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            throw new ConstraintException("Dados incorretos!", errors);
+        }
+
+        CustomerMensalDto customerDto = customerService.createNewCustomer(modelMapper.map(customerForm, CustomerMensalDto.class), 2);
+        return ResponseEntity.ok().body(customerDto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerDto> updateById(@Valid @RequestBody
+        CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
+       
+        if (br.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            br.getAllErrors().forEach(e -> {
+                errors.add(e.getDefaultMessage());
+            });
+
+            throw new ConstraintException("Dados incorretos!", errors);
+        }
+     
+        CustomerDto costumerDto = customerService.updateById(modelMapper.map(custumerForm, CustomerDto.class), id);
+        return ResponseEntity.ok().body(costumerDto);
+    }
+
+    @PutMapping("/finish/{id}")
+    public ResponseEntity<CustomerDto> finishCustomerById(@Valid @RequestBody
+        CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
+       
+        if (br.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            br.getAllErrors().forEach(e -> {
+                errors.add(e.getDefaultMessage());
+            });
+
+            throw new ConstraintException("Dados incorretos!", errors);
+        }
+     
+        CustomerDto costumerDto = customerService.finishCustomer(id);
+        return ResponseEntity.ok().body(costumerDto);
+    }
+
     @PutMapping("/mensalistas/{id}")
     public ResponseEntity<CustomerMensalDto> updateMensal(@Valid @RequestBody
         CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
@@ -139,6 +133,12 @@ public class CustomerController {
      
         CustomerMensalDto costumerDto = customerService.updateCustomer(modelMapper.map(custumerForm, CustomerMensalDto.class), id);
         return ResponseEntity.ok().body(costumerDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
+        customerService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
 
