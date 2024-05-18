@@ -40,12 +40,14 @@ public class VacancyController {
         List<VacancyDto> vacancyDtoList = vacancyService.findAll();
         Integer vagasLivres = vacancyService.vacanciesNotOcuppuied();
         Integer vagasOcupadas = vacancyService.vacanciesOcuppied();
+        List<VacancyDto> vacancyDtosNotOccupied = vacancyService.findBySituation(true);
 
         VacancyResponse vacancyResponse = new VacancyResponse();
 
         vacancyResponse.setVacanciesNotOccupied(vagasLivres);
         vacancyResponse.setVacanciesOccupied(vagasOcupadas);
         vacancyResponse.setVacanciesList(vacancyDtoList);
+        vacancyResponse.setVacanciesNotOccupiedList(vacancyDtosNotOccupied);
 
         return ResponseEntity.ok().body(vacancyResponse);
     }

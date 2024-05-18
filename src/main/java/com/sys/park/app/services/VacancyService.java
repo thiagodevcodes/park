@@ -47,6 +47,19 @@ public class VacancyService {
         }
     }
 
+    public List<VacancyDto> findBySituation(Boolean situation) {
+        try {
+            List<VacancyModel> vacancyList = vacancyRepository.findBySituation(situation);
+
+            return vacancyList.stream()
+                .map(user -> modelMapper.map(user, VacancyDto.class))
+                .collect(Collectors.toList());
+
+        } catch (NoSuchElementException e) {
+            throw new BusinessRuleException("Não é possível consultar as Vaga!");
+        }
+    }
+
     public VacancyDto insert(VacancyDto vacancyDto) {
         try {
             VacancyModel newVacancy = modelMapper.map(vacancyDto, VacancyModel.class);

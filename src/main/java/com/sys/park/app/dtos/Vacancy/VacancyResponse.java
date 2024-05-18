@@ -9,4 +9,5 @@ public class VacancyResponse {
     private Integer vacanciesNotOccupied;
     private Integer vacanciesOccupied;
     private List<VacancyDto> vacanciesList;
+    private List<VacancyDto> vacanciesNotOccupiedList;
 }

@@ -149,7 +149,9 @@ public class TicketService {
             ticketDto.setIdVacancy(vacancyDto.getId());
             ticketDto.setIdCustomerVehicle(customerVehicleDto.getId());
             ticketDto.setIsActive(true);
+            System.out.println(ticketDto);
             ticketDto = this.insert(ticketDto);
+    
     
             return ticketDto;
         } catch (DataIntegrityViolationException e) {
@@ -300,8 +302,8 @@ public class TicketService {
                     newDto.setPlate(vehicleDto.getPlate());
                     newDto.setIdVacancy(ticket.getIdVacancy());
                     newDto.setIdCustomerType(customerDto.getIdCustomerType());
-                    newDto.setIdCustomer(null);
-                    newDto.setIdVehicle(null);
+                    newDto.setIdCustomer(customerDto.getId());
+                    newDto.setIdVehicle(vehicleDto.getId());
                     newDtoList.add(newDto);
                 }
             } 
