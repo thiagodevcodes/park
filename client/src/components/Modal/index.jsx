@@ -6,6 +6,8 @@ import { useRouter } from "next/router";
 export default function Modal({ children, setModalOpen, modalOpen, title, action, path, data }) {
     const router = useRouter()
 
+    //console.log(data)
+
     const submitUpdated = async (e, id, path, data) => {
         e.preventDefault();
         if (id) {

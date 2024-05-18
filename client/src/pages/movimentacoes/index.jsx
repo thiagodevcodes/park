@@ -13,13 +13,14 @@ import InputForm from "@/components/InputForm";
 import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
+import Select from "@/components/Select";
 
 export default function Movimentacoes() {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [width, setWidth] = useState(0)
     const [modalOpen, setModalOpen] = useState({ post: false, update: false, delete: false, finish: false });
-    const [models, setModels] = useState({ tickets: [], clients: [], vehicles: [], vacancys: [] })
+    const [models, setModels] = useState({ tickets: [], clients: [], vehicles: [], vacancys: [], customerTypes: [] })
     const [formData, setFormData] = useState({ name: null, plate: null, make: null, model: null, idVacancy: null, idCustomerType: 1, idCustomer: null, idVehicle: null, totalPrice: null })
 
     const handleInputChange = (column, event) => {
@@ -32,16 +33,18 @@ export default function Movimentacoes() {
     useEffect(() => {
         const fetchDataModels = async () => {
             try {
-                const [clientsResponse, ticketsResponse, vacanciesResponse] = await Promise.all([
+                const [clientsResponse, ticketsResponse, vacanciesResponse, customerTypesResponse] = await Promise.all([
                     fetchData("customers/mensalistas"),
                     fetchDataPage(3, currentPage, "tickets/movimentacoes"),
-                    fetchData("vacancies")
+                    fetchData("vacancies"),
+                    fetchData("customer_type")
                 ]);
                 setModels(prevValues => ({
                     ...prevValues,
                     clients: clientsResponse.content,
                     tickets: ticketsResponse.content,
-                    vacancys: vacanciesResponse
+                    vacancys: vacanciesResponse,
+                    customerTypes: customerTypesResponse
                 }));
                 setTotalPages(ticketsResponse.totalPages)
             } catch (error) {
@@ -102,41 +105,20 @@ export default function Movimentacoes() {
                 </div>
 
                 {modalOpen.post &&
-                    <Modal action={"post"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`} data={formData} modalOpen={modalOpen} 
+                    <Modal action={"post"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`} data={formData} modalOpen={modalOpen}
                         title={"Adicionar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
-                            <div className={styles.modalInputContainer}>
-                                <label htmlFor="">Tipo de Cliente</label>
-                                <select value={formData.idCustomerType} name="" id="" onChange={(e) => handleInputChange("idCustomerType", e)}>
-                                    <option key={2} value={2}>Mensalista</option>
-                                    <option key={1} value={1}>Rotativo</option>
-                                </select>
-                            </div>
+                            <Select onChange={(e) => handleInputChange("idCustomerType", e)} noOption={false}
+                                value={formData.idCustomerType} title="TIpo de Cliente" data={models.customerTypes} />
                         </div>
 
                         {formData.idCustomerType == 2 &&
                             <div className={styles.modalContainer}>
-                                <div className={styles.modalInputContainer}>
-                                    <label htmlFor="">Cliente</label> 
-                                    <select value={formData.idCustomer} name="" id="" onChange={(e) => handleInputChange("idCustomer", e)}>
-                                        <option value={null} key={0}>Nenhum Cliente Selecionado</option>
-                                        {models.clients.length > 0 && models.clients.map((item) => (
-                                            <option key={item.id} value={item.id}>{item.id} - {item.name}</option>
-                                        ))} 
-                                    </select>
-                                </div>
-                                <div className={styles.modalInputContainer}>
-                                    <label htmlFor="">Veiculo</label>
-                                    <select value={formData.idVehicle} name="" id="" onChange={(e) => handleInputChange("idVehicle", e)}>
-                                        <option key={0} value={0}>Nenhum Veículo Selecionado</option>
-                                        {
-                                            models.vehicles.map((item) => (
-                                                <option key={item.id} value={item.id}> {item.plate} - {item.model}</option>
-                                            ))
-                                        }
-                                    </select>
-                                </div>
+                                <Select onChange={(e) => handleInputChange("idCustomer", e)} noOption={true}
+                                    value={formData.idCustomer} title="Cliente" data={models.clients} />
 
+                                <Select onChange={(e) => handleInputChange("idVehicle", e)} noOption={true}
+                                    value={formData.idVehicle} title="Veiculo" data={models.vehicles} />
                             </div>
                         }
 
@@ -154,45 +136,23 @@ export default function Movimentacoes() {
                         }
 
                         <div className={styles.modalContainer}>
-                            <div className={styles.modalInputContainer}>
-                                <label htmlFor="">Vaga: </label>
-                                <select defaultValue={null} value={formData.idVacancy} name="" id="" onChange={(e) => handleInputChange("idVacancy", e)}>
-                                    <option value={null}>Nenhuma Vaga Selecionada</option>
-                                    {models.vacancys.vacanciesList.map((item) => (
-                                        item.situation &&
-                                        <option key={item.id} value={item.id}>{item.id}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <Select onChange={(e) => handleInputChange("idVacancy", e)} noOption={true}
+                                value={formData.idVacancy} title="Vaga" data={models.vacancys.vacanciesList} />
+
                         </div>
                     </Modal>
                 }
 
                 {modalOpen.update &&
-                    <Modal action={"update"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`} 
+                    <Modal action={"update"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`}
                         data={formData} modalOpen={modalOpen} title={"Editar"} setModalOpen={setModalOpen}>
                         {formData.idCustomerType == 2 &&
                             <div className={styles.modalContainer}>
-                                <div className={styles.modalInputContainer}>
-                                    <label htmlFor="">Cliente</label>
-                                    <select value={formData.idCustomer} name="" id="" onChange={(e) => handleInputChange("idCustomer", e)}>
-                                        <option value={0} key={0}>Nenhum Cliente Selecionado</option>
-                                        {models.clients.length > 0 && models.clients.map((item) => (
-                                            <option key={item.id} value={item.id}>{item.id} - {item.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className={styles.modalInputContainer}>
-                                    <label htmlFor="">Veiculo</label>
-                                    <select value={formData.idVehicle} name="" id="" onChange={(e) => handleInputChange("idVehicle", e)}>
-                                        <option key={0} value={0}>Nenhum Veículo Selecionado</option>
-                                        {
-                                            models.vehicles.map((item) => (
-                                                <option key={item.id} value={item.id}> {item.plate} - {item.model}</option>
-                                            ))
-                                        }
-                                    </select>
-                                </div>
+                                <Select onChange={(e) => handleInputChange("idCustomer", e)} noOption={true}
+                                    value={formData.idCustomer} title="Cliente" data={models.clients} />
+
+                                <Select onChange={(e) => handleInputChange("idVehicle", e)} noOption={true}
+                                    value={formData.idVehicle} title="Veiculo" data={models.vehicles} />
                             </div>
                         }
 
@@ -211,16 +171,8 @@ export default function Movimentacoes() {
                         }
 
                         <div className={styles.modalContainer}>
-                            <div className={styles.modalInputContainer}>
-                                <label htmlFor="">Vaga: </label>
-                                <select defaultValue={formData.idVacancy} value={formData.idVacancy} name="" id="" onChange={(e) => handleInputChange("idVacancy", e)}>
-                                    <option value={null}>Nenhuma Vaga Selecionada</option>
-                                    {models.vacancys.vacanciesList.map((item) => (
-                                        item.situation &&
-                                        <option key={item.id} value={item.id}>{item.id}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <Select onChange={(e) => handleInputChange("idVacancy", e)} noOption={true}
+                                value={formData.idVacancy} title="Vaga" data={models.vacancys.vacanciesList} />
                         </div>
                     </Modal>
 
@@ -234,7 +186,7 @@ export default function Movimentacoes() {
 
                 {modalOpen.finish &&
                     <Modal action={"update"} path={"tickets/finish"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Finalizar"}>
-                        <InputForm type="number" title="Valor pago R$:" onChange={(e) => handleInputChange("totalPrice", e)} value={formData.totalPrice}/>
+                        <InputForm type="number" title="Valor pago R$:" onChange={(e) => handleInputChange("totalPrice", e)} value={formData.totalPrice} />
                     </Modal>
                 }
                 <div className={styles.box}>
@@ -254,23 +206,25 @@ export default function Movimentacoes() {
                                             <div className={styles.buttonContainer}>
                                                 <button onClick={() => {
                                                     setModalOpen({ ...modalOpen, update: true })
+                                                    console.log(item)
                                                     setFormData({ ...item })
                                                 }}
                                                     className={`${styles.bgYellow} ${styles.actionButton}`}>
                                                     <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
                                                 </button>
-                                                { item.idCustomerType == 1 ?
-                                                <button onClick={() => {
-                                                    setModalOpen({ ...modalOpen, finish: true })
-                                                    setFormData({ ...item })
-                                                }}
-                                                    className={`${styles.bgGreen} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Finish" />
-                                                </button>
-                                                :
-                                                <button onClick={() => handleUpdate(item.id, "tickets/finish", { ...item })} className={`${styles.bgGreen} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Finish" />
-                                                </button>
+                                                {item.idCustomerType == 1 ?
+                                                    <button onClick={() => {
+                                                        setModalOpen({ ...modalOpen, finish: true })
+                                                        console.log(item)
+                                                        setFormData({ ...item })
+                                                    }}
+                                                        className={`${styles.bgGreen} ${styles.actionButton}`}>
+                                                        <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Finish" />
+                                                    </button>
+                                                    :
+                                                    <button onClick={() => handleUpdate(item.id, "tickets/finish", { ...item })} className={`${styles.bgGreen} ${styles.actionButton}`}>
+                                                        <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Finish" />
+                                                    </button>
                                                 }
                                                 <button onClick={() => {
                                                     setModalOpen({ ...modalOpen, delete: true })

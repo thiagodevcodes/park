@@ -81,17 +81,9 @@
 }
 
 .modalContainer {
-    display: flex;
-    justify-content: center;
+    display: flex;    
     flex-wrap: wrap;
     gap: 5px;
     margin-bottom: 10px;
     margin-top: 10px;
-}
-
-.modalContainer select {
-    width: 100%;
-    border-radius: 5px;
-    height: 28px;
-    border: 1px solid black;
 }
