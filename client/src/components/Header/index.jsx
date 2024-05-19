@@ -1,10 +1,8 @@
 import styles from "./header.module.css"
-import { ReactElement } from "react" 
 import Nav from "../Nav"
-import Image from "next/image"
 import { useState, useEffect } from "react"
-import MobileButton from "../MobileButton"
-import Aside from "../Sidebar"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faP, faParking } from "@fortawesome/free-solid-svg-icons"
 
 
 export default function Header({ children }) {
@@ -12,33 +10,35 @@ export default function Header({ children }) {
 
     useEffect(() => {
         const handleResize = () => {
-          setWidth(window.innerWidth);
+            setWidth(window.innerWidth);
         };
-    
+
         if (typeof window !== 'undefined') {
-          window.addEventListener('resize', handleResize);
-    
-          setWidth(window.innerWidth);
-    
-          return () => {
-            window.removeEventListener('resize', handleResize);
-          };
+            window.addEventListener('resize', handleResize);
+
+            setWidth(window.innerWidth);
+
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
         }
     }, [])
-    
+
     return (
         <header className={styles.header}>
             <div className={styles.flexCenter}>
-                    {children}
-                    { width > 800 ?
-                    <> 
-                        <Image src={"/img/Parking.svg"} width={50} height={50} alt="Logo"></Image>
-                        <h2>SysPark</h2>     
-                    </> : ""
-                    }
+
+                {children}
+
+                {width > 800 &&
+                    <>
+                        <FontAwesomeIcon style={{ marginLeft: "15px" }} icon={faParking} width={30}></FontAwesomeIcon>
+                        <h2 style={{ marginLeft: "5px" }}>SysPark</h2>
+                    </>
+                }
             </div>
- 
-            <Nav/>
+
+            <Nav />
         </header>
     )
 }

@@ -1,6 +1,7 @@
 import styles from "./nav.module.css"
 import Link from "next/link"
-import Image from "next/image"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons"
 
 export default function Nav() {
     return (
@@ -8,7 +9,7 @@ export default function Nav() {
             <ul>
                 <li className={styles.navOptions}>
                     <Link href={"/"}>Sair</Link>
-                    <Image src="/img/Logout.svg" width={30} height={30} alt="Logout"></Image>
+                    <FontAwesomeIcon style={{marginLeft: "10px"}} icon={faRightFromBracket} width={20}/>
                 </li>
             </ul>
         </nav>

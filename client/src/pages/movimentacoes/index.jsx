@@ -14,6 +14,9 @@ import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
 import Select from "@/components/Select";
+import Button from "@/components/Button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSquareParking, faCirclePlus, faPenToSquare, faCircleExclamation, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
 export default function Movimentacoes() {
     const [currentPage, setCurrentPage] = useState(0);
@@ -99,13 +102,13 @@ export default function Movimentacoes() {
             <Layout>
                 <div className={styles.container}>
                     <div className={styles.headerLogo}>
-                        <h1>Movimentações</h1>
+                        <h1 className="d-flex-center" ><FontAwesomeIcon icon={faSquareParking} width={30} />Movimentações</h1>
                         <button onClick={() => setModalOpen({ ...modalOpen, post: true })} className={styles.addButton}>+ Adicionar</button>
                     </div>
                 </div>
 
                 {modalOpen.post &&
-                    <Modal action={"post"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`} data={formData} modalOpen={modalOpen}
+                    <Modal icon={faCirclePlus} action={"post"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`} data={formData} modalOpen={modalOpen}
                         title={"Adicionar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
                             <Select onChange={(e) => handleInputChange("idCustomerType", e)} noOption={false}
@@ -123,28 +126,23 @@ export default function Movimentacoes() {
                         }
 
                         {formData.idCustomerType == 1 &&
-                            <div>
-                                <div className={styles.modalContainer}>
-                                    <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} />
-                                    <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} />
-                                </div>
-                                <div className={styles.modalContainer}>
-                                    <InputForm title={"Modelo: "} onChange={(e) => handleInputChange("model", e)} />
-                                    <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} />
-                                </div>
+                            <div className={styles.modalContainer}>
+                                <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} />
+                                <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} />
+                                <InputForm title={"Modelo: "} onChange={(e) => handleInputChange("model", e)} />
+                                <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} />
                             </div>
                         }
 
                         <div className={styles.modalContainer}>
                             <Select onChange={(e) => handleInputChange("idVacancy", e)} noOption={true}
-                                value={formData.idVacancy} title="Vaga" data={models.vacancys.vacanciesList} />
-
+                                value={formData.idVacancy} title="Vaga" data={models.vacancys.vacanciesNotOccupiedList} />
                         </div>
                     </Modal>
                 }
 
                 {modalOpen.update &&
-                    <Modal action={"update"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`}
+                    <Modal icon={faPenToSquare} action={"update"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`}
                         data={formData} modalOpen={modalOpen} title={"Editar"} setModalOpen={setModalOpen}>
                         {formData.idCustomerType == 2 &&
                             <div className={styles.modalContainer}>
@@ -157,16 +155,11 @@ export default function Movimentacoes() {
                         }
 
                         {formData.idCustomerType == 1 &&
-                            <div>
-                                <div className={styles.modalContainer}>
-                                    <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name} />
-                                    <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} value={formData.make} />
-                                </div>
-
-                                <div className={styles.modalContainer}>
-                                    <InputForm title={"Modelo: "} onChange={(e) => handleInputChange("model", e)} value={formData.model} />
-                                    <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} value={formData.plate} />
-                                </div>
+                            <div className={styles.modalContainer}>
+                                <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name} />
+                                <InputForm title={"Marca: "} onChange={(e) => handleInputChange("make", e)} value={formData.make} />
+                                <InputForm title={"Modelo: "} onChange={(e) => handleInputChange("model", e)} value={formData.model} />
+                                <InputForm title={"Placa: "} onChange={(e) => handleInputChange("plate", e)} value={formData.plate} />
                             </div>
                         }
 
@@ -179,14 +172,19 @@ export default function Movimentacoes() {
                 }
 
                 {modalOpen.delete &&
-                    <Modal action={"delete"} path={"tickets"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Excluir"}>
-                        <p>Tem certeza que deseja excluir a movimentacão?</p>
+                    <Modal icon={faCircleExclamation} action={"delete"} path={"tickets"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Excluir"}>
+                        <p style={{ textAlign: "center", marginBottom: "10px" }}>Tem certeza que deseja excluir a movimentação?</p>
                     </Modal>
                 }
 
                 {modalOpen.finish &&
-                    <Modal action={"update"} path={"tickets/finish"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Finalizar"}>
-                        <InputForm type="number" title="Valor pago R$:" onChange={(e) => handleInputChange("totalPrice", e)} value={formData.totalPrice} />
+                    <Modal icon={faCircleCheck} action={"update"} path={"tickets/finish"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Finalizar"}>
+                        <p style={{ textAlign: "center", marginBottom: "10px" }}>Deseja realmente finalizar essa movimentação?</p>
+                        {formData.idCustomerType == 1 &&
+                            <div style={{ marginBottom: "10px" }}>
+                                <InputForm type="number" title="Valor pago R$:" onChange={(e) => handleInputChange("totalPrice", e)} value={formData.totalPrice} />
+                            </div>
+                        }
                     </Modal>
                 }
                 <div className={styles.box}>
@@ -204,34 +202,14 @@ export default function Movimentacoes() {
                                         <td>{formatDate(item.entryTime)}</td>
                                         <td>
                                             <div className={styles.buttonContainer}>
-                                                <button onClick={() => {
-                                                    setModalOpen({ ...modalOpen, update: true })
-                                                    console.log(item)
-                                                    setFormData({ ...item })
-                                                }}
-                                                    className={`${styles.bgYellow} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
-                                                </button>
-                                                {item.idCustomerType == 1 ?
-                                                    <button onClick={() => {
-                                                        setModalOpen({ ...modalOpen, finish: true })
-                                                        console.log(item)
-                                                        setFormData({ ...item })
-                                                    }}
-                                                        className={`${styles.bgGreen} ${styles.actionButton}`}>
-                                                        <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Finish" />
-                                                    </button>
-                                                    :
-                                                    <button onClick={() => handleUpdate(item.id, "tickets/finish", { ...item })} className={`${styles.bgGreen} ${styles.actionButton}`}>
-                                                        <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Finish" />
-                                                    </button>
-                                                }
-                                                <button onClick={() => {
-                                                    setModalOpen({ ...modalOpen, delete: true })
-                                                    setFormData({ ...item })
-                                                }} className={`${styles.bgRed} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Remove.svg"} width={30} height={30} alt="Icone Remove" />
-                                                </button>
+                                                <Button onClick={() => { setModalOpen({ ...modalOpen, update: true }) 
+                                                    setFormData({ ...item })}} imgUrl={"/icons/Edit.svg"} bgColor={"#E9B500"} padding={"2px"}/>
+
+                                                <Button onClick={() => { setModalOpen({ ...modalOpen, finish: true }) 
+                                                    setFormData({ ...item })}} imgUrl={"/icons/Done.svg"} bgColor={"#00bd1f"} padding={"2px"}/>
+
+                                                <Button onClick={() => {setModalOpen({ ...modalOpen, delete: true })
+                                                    setFormData({ ...item })}} imgUrl={"/icons/Remove.svg"} bgColor={"#FF0000"} padding={"2px"}/>
                                             </div>
                                         </td>
                                     </tr>

@@ -7,18 +7,22 @@ import Image from "next/image";
 
 
 import { ToastContainer } from "react-toastify";
-import { fetchDataPage, handleUpdate } from "@/services/axios";
+import { fetchDataPage } from "@/services/axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendarDays, faCirclePlus, faPenToSquare, faCircleExclamation, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
+
 
 import Pagination from "@/components/Pagination";
 import InputForm from "@/components/InputForm";
 import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
+import Button from "@/components/Button";
 
 
 export default function Mensalistas() {
     const [width, setWidth] = useState(0)
-    const [modalOpen, setModalOpen] = useState({ post: false, update: false, delete: false });
+    const [modalOpen, setModalOpen] = useState({ post: false, update: false, delete: false, finish: false });
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [models, setModels] = useState({ mensal: [] })
@@ -75,54 +79,59 @@ export default function Mensalistas() {
                 <div className={styles.container}>
 
                     <div className={styles.headerLogo}>
-                        <h1>Mensalistas </h1>
+                        <h1 className="d-flex-center"><FontAwesomeIcon width={30} icon={faCalendarDays} />Mensalistas </h1>
                         <button onClick={() => setModalOpen({ ...modalOpen, post: true })} className={styles.addButton}>+ Adicionar</button>
                     </div>
                 </div>
 
                 {modalOpen.post &&
-                    <Modal action={"post"} path={"customers"} data={formData} modalOpen={modalOpen}
-                    title={"Adicionar"} setModalOpen={setModalOpen}>
+                    <Modal icon={faCirclePlus} action={"post"} path={"customers"} data={formData} modalOpen={modalOpen}
+                        title={"Adicionar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
-                            <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name}/>
-                            <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.cpf}/>
+                            <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name} />
+                            <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.cpf} />
                         </div>
 
                         <div className={styles.modalContainer}>
-                            <InputForm title={"Email: "} onChange={(e) => handleInputChange("email", e)} value={formData.email}/>
-                            <InputForm title={"Telefone: "} onChange={(e) => handleInputChange("phone", e)} value={formData.phone}/>
+                            <InputForm title={"Email: "} onChange={(e) => handleInputChange("email", e)} value={formData.email} />
+                            <InputForm title={"Telefone: "} onChange={(e) => handleInputChange("phone", e)} value={formData.phone} />
                         </div>
                         <div className={styles.modalContainer}>
-                            <InputForm title={"Dia do Pagamento: "} onChange={(e) => handleInputChange("paymentDay", e)} value={formData.paymentDay}/>
+                            <InputForm title={"Dia do Pagamento: "} onChange={(e) => handleInputChange("paymentDay", e)} value={formData.paymentDay} />
                         </div>
                     </Modal>
                 }
 
                 {modalOpen.update &&
-                    <Modal path={"customers/mensalistas"} data={formData} modalOpen={modalOpen} 
-                        action={"update"} title={"Adicionar"} setModalOpen={setModalOpen}>
+                    <Modal icon={faPenToSquare} path={"customers/mensalistas"} data={formData} modalOpen={modalOpen}
+                        action={"update"} title={"Editar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
-                            <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name}/>
-                            <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.cpf}/>
-                        </div>
-
-                        <div className={styles.modalContainer}>
-                            <InputForm title={"Email: "} onChange={(e) => handleInputChange("email", e)} value={formData.email}/>
-                            <InputForm title={"Telefone: "} onChange={(e) => handleInputChange("phone", e)} value={formData.phone}/>
-                        </div>
-                        <div className={styles.modalContainer}>
-                            <InputForm title={"Dia de Pagamento: "} onChange={(e) => handleInputChange("paymentDay", e)} value={formData.paymentDay}/>
+                            <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name} />
+                            <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.cpf} />
+                            <InputForm title={"Email: "} onChange={(e) => handleInputChange("email", e)} value={formData.email} />
+                            <InputForm title={"Telefone: "} onChange={(e) => handleInputChange("phone", e)} value={formData.phone} />
+                            <InputForm title={"Dia de Pagamento: "} onChange={(e) => handleInputChange("paymentDay", e)} value={formData.paymentDay} />
                         </div>
                     </Modal>
                 }
 
                 {modalOpen.delete &&
-                    <Modal path={"customers"} action={"delete"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} 
+                    <Modal icon={faCircleExclamation} path={"customers"} action={"update"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen}
                         title={"Excluir"}>
-                        <p>Tem certeza que deseja excluir o cliente mensalista?</p>
+                        <p style={{ textAlign: "center", marginBottom: "10px" }}>Tem certeza que deseja excluir o cliente mensalista?</p>
                     </Modal>
                 }
 
+                {modalOpen.finish &&
+                    <Modal icon={faCircleCheck} action={"update"} path={"customers/finish"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen} title={"Finalizar"}>
+                        <p style={{ textAlign: "center", marginBottom: "10px" }}>Deseja realmente finalizar esse cliente mensalista?</p>
+                        {formData.idCustomerType == 1 &&
+                            <div style={{ marginBottom: "10px" }}>
+                                <InputForm type="number" title="Valor pago R$:" onChange={(e) => handleInputChange("totalPrice", e)} value={formData.totalPrice} />
+                            </div>
+                        }
+                    </Modal>
+                }
 
                 <div className={styles.box}>
                     <Table columns={["Nome", "Telefone", "Email", "CPF", "Dia Pagamento"]}>
@@ -140,21 +149,15 @@ export default function Mensalistas() {
 
                                         <td>
                                             <div className={styles.buttonContainer}>
-                                                <button onClick={() => {
-                                                    setModalOpen({ ...modalOpen, update: true })
-                                                    setFormData({ ...item })
-                                                }} className={`${styles.bgYellow} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Edit.svg"} width={30} height={30} alt="Icone Edit" />
-                                                </button>
-                                                <button onClick={() => handleUpdate(item.id, "customers/finish", { ...item, isActive: false })} className={`${styles.bgGreen} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Done.svg"} width={30} height={30} alt="Icone Remove" />
-                                                </button>
-                                                <button onClick={() => {
-                                                    setModalOpen({ ...modalOpen, delete: true })
-                                                    setFormData({...item})
-                                                }} className={`${styles.bgRed} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Remove.svg"} width={30} height={30} alt="Icone Remove" />
-                                                </button>
+                                                <Button onClick={() => { setModalOpen({ ...modalOpen, update: true }) 
+                                                    setFormData({ ...item })}} imgUrl={"/icons/Edit.svg"} bgColor={"#E9B500"} padding={"2px"}/>
+
+                                                <Button onClick={() => { setModalOpen({ ...modalOpen, finish: true }) 
+                                                    setFormData({ ...item })}} imgUrl={"/icons/Done.svg"} bgColor={"#00bd1f"} padding={"2px"}/>
+
+                                                <Button onClick={() => {setModalOpen({ ...modalOpen, delete: true })
+                                                    setFormData({ ...item })}} imgUrl={"/icons/Remove.svg"} bgColor={"#FF0000"} padding={"2px"}/>
+
                                                 <Link href={`/mensalistas/vehicles/${item.id}`} className={`${styles.bgBlue} ${styles.actionButton}`}>
                                                     <Image src={"/icons/Cars.svg"} width={30} height={30} alt="Icone Cars" />
                                                 </Link>
@@ -171,13 +174,13 @@ export default function Mensalistas() {
                     </Table>
 
                     {models.mensal.length > 0 ?
-                    <Pagination
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        totalPages={totalPages}
-                    /> :
-                    null
-                }
+                        <Pagination
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            totalPages={totalPages}
+                        /> :
+                        null
+                    }
                 </div>
                 <ToastContainer />
 

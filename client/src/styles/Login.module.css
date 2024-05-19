@@ -55,8 +55,9 @@
 
 .inputContainer input {
   width: 300px;
-  border-radius: 18px;
-  border: 1px solid black;
+  border-radius: 5px;
+  border: 1px solid #dddddd;
+  box-shadow: 0 0 3px;
   padding: 10px;
-  background-color: #CECECE;
+  background-color: #dddddd;
 }

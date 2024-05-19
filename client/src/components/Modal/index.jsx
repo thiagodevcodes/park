@@ -1,9 +1,9 @@
-import { useState } from "react";
 import styles from "./modal.module.css";
 import { handleCreate, handleDelete, handleUpdate } from "@/services/axios";
 import { useRouter } from "next/router";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function Modal({ children, setModalOpen, modalOpen, title, action, path, data }) {
+export default function Modal({ children, setModalOpen, modalOpen, title, action, path, data, icon }) {
     const router = useRouter()
 
     //console.log(data)
@@ -63,7 +63,7 @@ export default function Modal({ children, setModalOpen, modalOpen, title, action
     return (
         <div className={styles.modalOverlay}>
             <form className={styles.modal} method="POST">
-                <h2>{title}</h2>
+                <h2 style={{display: "flex", justifyContent: "center", gap: "10px"}}><FontAwesomeIcon width={30} icon={icon}/> {title}</h2>
 
                 {children}
 

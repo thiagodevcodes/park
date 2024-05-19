@@ -1,0 +1,34 @@
+.bgYellow {
+    background-color: #E9B500;
+}
+
+.bgBlue {
+    background-color: #4865FF;
+}
+
+.bgRed {
+    background-color: #FF0000;
+}
+
+.bgGreen {
+    background-color: #00bd1f;
+}
+
+.actionButton:hover {
+    cursor: pointer;
+}
+
+.actionButton {
+    border: none;
+    border-radius: 10px;
+    margin: 0 5px;
+}
+
+.addButton {
+    border: none;
+    background-color: black;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
