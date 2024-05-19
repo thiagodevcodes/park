@@ -162,13 +162,14 @@ public class VehicleService {
 
     public void deleteById(Integer id) {
         try {
+            System.out.println(id);
             if (vehicleRepository.existsById(id)) {
                 vehicleRepository.deleteById(id);
             }else {
                 throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
             }
         } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Não é possível excluir a Pessoa!");
+            throw new DataIntegrityException("Não é possível excluir o Veiculo!");
         }
     }
 
