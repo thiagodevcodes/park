@@ -81,6 +81,29 @@ CREATE TABLE IF NOT EXISTS ticket (
     CONSTRAINT FK_ticket_customerVehicle FOREIGN KEY (id_customer_vehicle) REFERENCES vehicle_customer (id)
 );
 
+CREATE TABLE IF NOT EXISTS user_type (
+    id INTEGER AUTO_INCREMENT NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    is_active BOOLEAN,
+    CONSTRAINT PK_userType PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS user_system (
+    id INTEGER AUTO_INCREMENT NOT NULL,
+    id_person INTEGER NOT NULL,
+    id_user_type INTEGER NOT NULL,
+    username VARCHAR(30) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    is_active BOOLEAN NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    CONSTRAINT PK_user PRIMARY KEY (id),
+    CONSTRAINT FK_user_Person FOREIGN KEY (id_person) REFERENCES person (id),
+    CONSTRAINT FK_user_UserType FOREIGN KEY (id_user_type) REFERENCES user_type (id),
+    CONSTRAINT UK_username UNIQUE (username)
+);
 
 INSERT INTO vacancy(`id`, `created_at`, `situation`, `updated_at`)
 VALUES(1, current_timestamp(), true,current_timestamp());
@@ -123,3 +146,9 @@ VALUES(1, current_timestamp(), true, 'Rotativo', current_timestamp());
 
 INSERT INTO customer_type(`id`, `created_at`, `is_active`, `name`, `updated_at`)
 VALUES(2, current_timestamp(), true, 'Mensalista', current_timestamp());
+
+INSERT INTO user_type(`id`, `created_at`, `is_active`, `name`, `updated_at`)
+VALUES(1, current_timestamp(), true, 'Admin', current_timestamp());
+
+INSERT INTO user_type(`id`, `created_at`, `is_active`, `name`, `updated_at`)
+VALUES(2, current_timestamp(), true, 'Default', current_timestamp());

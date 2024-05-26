@@ -11,74 +11,74 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sys.park.app.dtos.CustomerType.CustomerTypeDto;
-import com.sys.park.app.dtos.CustomerType.CustomerTypeForm;
-import com.sys.park.app.models.CustomerTypeModel;
-import com.sys.park.app.repositories.CustomerTypeRepository;
+import com.sys.park.app.dtos.UserType.UserTypeDto;
+import com.sys.park.app.dtos.UserType.UserTypeForm;
+import com.sys.park.app.models.UserTypeModel;
+import com.sys.park.app.repositories.UserTypeRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
 import com.sys.park.app.services.exceptions.DataIntegrityException;
 import com.sys.park.app.services.exceptions.NotFoundException;
 
 @Service
-public class CustomerTypeService {
+public class UserTypeService {
     @Autowired
-    private CustomerTypeRepository customerTypeRepository;
+    private UserTypeRepository userTypeRepository;
     
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<CustomerTypeDto> findAll() {
+    public List<UserTypeDto> findAll() {
         try {
-            List<CustomerTypeModel> customerTypeModelList = customerTypeRepository.findAll();
+            List<UserTypeModel> customerTypeModelList = userTypeRepository.findAll();
 
             return customerTypeModelList.stream()
-                    .map(customerType -> modelMapper.map(customerType, CustomerTypeDto.class))
+                    .map(customerType -> modelMapper.map(customerType, UserTypeDto.class))
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Não é possível consultar o Tipo do Cliente!");
         }
     }
 
-    public CustomerTypeDto findById(Integer id) {
+    public UserTypeDto findById(Integer id) {
         try {
-            CustomerTypeModel customerTypeModel = customerTypeRepository.findById(id).get();
-            return modelMapper.map(customerTypeModel, CustomerTypeDto.class);
+            UserTypeModel customerTypeModel = userTypeRepository.findById(id).get();
+            return modelMapper.map(customerTypeModel, UserTypeDto.class);
         } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + CustomerTypeDto.class.getName());
+            throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + UserTypeDto.class.getName());
         }
     }
 
-    public CustomerTypeDto insert(CustomerTypeDto customerTypeDto) {
+    public UserTypeDto insert(UserTypeDto userTypeDto) {
         try {
-            CustomerTypeModel newCustomerType = modelMapper.map(customerTypeDto, CustomerTypeModel.class);
+            UserTypeModel newUserType = modelMapper.map(userTypeDto, UserTypeModel.class);
             
-            Optional<CustomerTypeModel> byName = customerTypeRepository.findByName(newCustomerType.getName());
+            Optional<UserTypeModel> byName = userTypeRepository.findByName(newUserType.getName());
         
             if (byName.isPresent()) {
                 throw new DataIntegrityException("Tipo de Cliente já registrado.");
             }
             
-            newCustomerType = customerTypeRepository.save(newCustomerType);
-            return modelMapper.map(newCustomerType, CustomerTypeDto.class);
+            newUserType = userTypeRepository.save(newUserType);
+            return modelMapper.map(newUserType, UserTypeDto.class);
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Campo(s) obrigatório(s) do Tipo do Cliente não foi(foram) preenchido(s).");
         }
     }
 
-    public CustomerTypeDto updateById(CustomerTypeForm customerTypeForm, Integer id) {
+    public UserTypeDto updateById(UserTypeForm userTypeForm, Integer id) {
         try {
-            Optional<CustomerTypeModel> customerTypeExist = customerTypeRepository.findById(id);
+            Optional<UserTypeModel> userTypeExist = userTypeRepository.findById(id);
 
-            if (customerTypeExist.isPresent()) {
-                CustomerTypeModel customerTypeUpdated = customerTypeExist.get();
+            if (userTypeExist.isPresent()) {
+                UserTypeModel userTypeUpdated = userTypeExist.get();
 
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
-                modelMapper.map(customerTypeForm, customerTypeUpdated);
+                modelMapper.map(userTypeForm, userTypeUpdated);
                 
-                customerTypeUpdated = customerTypeRepository.save(customerTypeUpdated);
+                userTypeUpdated = userTypeRepository.save(userTypeUpdated);
 
-                return modelMapper.map(customerTypeUpdated, CustomerTypeDto.class);
+                return modelMapper.map(userTypeUpdated, UserTypeDto.class);
             }else{
                 throw new DataIntegrityException("O Id do Tipo do Cliente não existe na base de dados!");
             }
@@ -89,8 +89,8 @@ public class CustomerTypeService {
 
     public void deleteById(Integer id) {
         try {
-            if (customerTypeRepository.existsById(id)) {
-                customerTypeRepository.deleteById(id);
+            if (userTypeRepository.existsById(id)) {
+                userTypeRepository.deleteById(id);
 
             }else {
                 throw new DataIntegrityException("O Id do Tipo do Cliente não existe na base de dados!");
@@ -100,3 +100,5 @@ public class CustomerTypeService {
         }
     }
 }
+
+

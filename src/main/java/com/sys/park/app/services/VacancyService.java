@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -81,7 +82,9 @@ public class VacancyService {
             if (vacancyExist.isPresent()) {
                 VacancyModel vacancyUpdated = vacancyExist.get();
 
+                modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(vacancyDto, vacancyUpdated);
+                
                 vacancyUpdated = vacancyRepository.save(vacancyUpdated);
 
                 return modelMapper.map(vacancyUpdated, VacancyDto.class);

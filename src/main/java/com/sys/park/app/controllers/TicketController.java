@@ -15,9 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Ticket.MovimentacaoDto;
 import com.sys.park.app.dtos.Ticket.TicketDto;
+import com.sys.park.app.dtos.Ticket.TicketGetDto;
 import com.sys.park.app.dtos.Ticket.TicketMensalForm;
 import com.sys.park.app.dtos.Ticket.TicketRotativoForm;
 import com.sys.park.app.services.TicketService;
@@ -61,7 +62,7 @@ public class TicketController {
     }
 
     @GetMapping("/movimentacoes")
-    public ResponseEntity<Page<MovimentacaoDto>> findAllTickets(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+    public ResponseEntity<Page<TicketGetDto>> findAllTickets(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
         try {
             Pageable pageable = Pageable.unpaged();
 
@@ -69,7 +70,7 @@ public class TicketController {
                 pageable = PageRequest.of(page, size);
             }
 
-            Page<MovimentacaoDto> ticketDtoPage = ticketService.getAllTickets(Optional.of(pageable));
+            Page<TicketGetDto> ticketDtoPage = ticketService.getAllTickets(Optional.of(pageable));
             return ResponseEntity.ok().body(ticketDtoPage);     
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Erro de paginação");
@@ -124,7 +125,7 @@ public class TicketController {
         return ResponseEntity.ok().body(ticketDto);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<TicketDto> updateById(@Valid @RequestBody
         TicketDto ticketForm, @PathVariable("id") Integer id, BindingResult br) {
        
@@ -141,7 +142,7 @@ public class TicketController {
         return ResponseEntity.ok().body(ticketDto);
     }
 
-    @PutMapping("/mensalistas/{id}")
+    @PatchMapping("/mensalistas/{id}")
     public ResponseEntity<TicketDto> updateMensalistaById(@Valid @RequestBody TicketMensalForm movForm, 
         @PathVariable("id") Integer id, BindingResult br) {
             
@@ -157,7 +158,9 @@ public class TicketController {
         return ResponseEntity.ok().body(ticketDto);
     }
 
-    @PutMapping("/rotativos/{id}")
+    
+
+    @PatchMapping("/rotativos/{id}")
     public ResponseEntity<TicketDto> updateRotativoById(@Valid @RequestBody TicketRotativoForm movForm, 
         @PathVariable("id") Integer id, BindingResult br) {
             
@@ -173,7 +176,7 @@ public class TicketController {
         return ResponseEntity.ok().body(ticketDto);
     }
 
-    @PutMapping("/finish/{id}")
+    @PatchMapping("/finish/{id}")
     public ResponseEntity<TicketDto> finishById(@Valid @RequestBody
         TicketDto ticketForm, @PathVariable("id") Integer id, BindingResult br) {
        

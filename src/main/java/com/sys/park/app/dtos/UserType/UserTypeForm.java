@@ -1,0 +1,14 @@
+package com.sys.park.app.dtos.UserType;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+@Data
+public class UserTypeForm {
+    @NotEmpty(message = "O nome não pode ser vazia")
+    @NotBlank(message = "O nome não pode estar em branco")
+    @NotNull(message = "O nome não pode ser nula")
+    private String name;
+}

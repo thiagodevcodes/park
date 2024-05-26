@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,6 +23,7 @@ import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.dtos.Ticket.MovimentacaoDto;
 import com.sys.park.app.dtos.Ticket.TicketDto;
+import com.sys.park.app.dtos.Ticket.TicketGetDto;
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Vacancy.VacancyDto;
 import com.sys.park.app.models.TicketModel;
@@ -166,8 +168,9 @@ public class TicketService {
             if (ticketExist.isPresent()) {
                 TicketModel ticketUpdated = ticketExist.get();
                 
+                modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(ticketDto, ticketUpdated);   
-                ticketUpdated.setId(id);
+                
                 ticketUpdated = ticketRepository.save(ticketUpdated);
 
                 return modelMapper.map(ticketUpdated, TicketDto.class);
@@ -277,14 +280,14 @@ public class TicketService {
         }
     }
 
-    public Page<MovimentacaoDto> getAllTickets(Optional<Pageable> optionalPage) {
+    public Page<TicketGetDto> getAllTickets(Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
             Page<TicketModel> tickets = ticketRepository.findByIsActive(true, page);
-            List<MovimentacaoDto> newDtoList = new ArrayList<>();           
+            List<TicketGetDto> newDtoList = new ArrayList<>();           
 
             for (TicketModel ticket : tickets) {
-                MovimentacaoDto newDto = new MovimentacaoDto();
+                TicketGetDto newDto = new TicketGetDto();
 
                 CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(ticket.getIdCustomerVehicle());
 
@@ -295,20 +298,17 @@ public class TicketService {
                 if(ticket.getExitTime() == null) {
                     newDto.setId(ticket.getId());
                     newDto.setEntryTime(ticket.getEntryTime());
-                    newDto.setExitTime(ticket.getExitTime());
                     newDto.setName(personDto.getName());
                     newDto.setMake(vehicleDto.getMake());
                     newDto.setModel(vehicleDto.getModel());
                     newDto.setPlate(vehicleDto.getPlate());
                     newDto.setIdVacancy(ticket.getIdVacancy());
                     newDto.setIdCustomerType(customerDto.getIdCustomerType());
-                    newDto.setIdCustomer(customerDto.getId());
-                    newDto.setIdVehicle(vehicleDto.getId());
                     newDtoList.add(newDto);
                 }
             } 
 
-            Page<MovimentacaoDto> pageableMov = new PageImpl<>(newDtoList, page, tickets.getTotalElements());
+            Page<TicketGetDto> pageableMov = new PageImpl<>(newDtoList, page, tickets.getTotalElements());
             return pageableMov;
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível listar os Tickets!");

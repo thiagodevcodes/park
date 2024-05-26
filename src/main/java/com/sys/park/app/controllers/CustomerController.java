@@ -15,9 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerForm;
+import com.sys.park.app.dtos.Customer.CustomerFormUpdate;
+import com.sys.park.app.dtos.Customer.CustomerGetDto;
 import com.sys.park.app.dtos.Customer.CustomerMensalDto;
 import com.sys.park.app.services.CustomerService;
 import com.sys.park.app.services.exceptions.ConstraintException;
@@ -54,7 +56,7 @@ public class CustomerController {
     }
 
     @GetMapping("/mensalistas")
-    public ResponseEntity<Page<CustomerMensalDto>> findAllMov(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+    public ResponseEntity<Page<CustomerGetDto>> findAllMov(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
         try {
             Pageable pageable = Pageable.unpaged();
 
@@ -62,7 +64,7 @@ public class CustomerController {
                 pageable = PageRequest.of(page, size);
             }
 
-            Page<CustomerMensalDto> ticketDtoPage = customerService.getCustomersByCustomerType(2, Optional.of(pageable));
+            Page<CustomerGetDto> ticketDtoPage = customerService.getCustomersByCustomerType(2, Optional.of(pageable));
             return ResponseEntity.ok().body(ticketDtoPage);     
         } catch (DataIntegrityException e) {
             throw new DataIntegrityException("Erro de paginação");
@@ -84,9 +86,9 @@ public class CustomerController {
         return ResponseEntity.ok().body(customerDto);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<CustomerDto> updateById(@Valid @RequestBody
-        CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
+        CustomerForm customerForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -97,13 +99,13 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
      
-        CustomerDto costumerDto = customerService.updateById(modelMapper.map(custumerForm, CustomerDto.class), id);
+        CustomerDto costumerDto = customerService.updateById(modelMapper.map(customerForm, CustomerDto.class), id);
         return ResponseEntity.ok().body(costumerDto);
     }
 
-    @PutMapping("/finish/{id}")
+    @PatchMapping("/finish/{id}")
     public ResponseEntity<CustomerDto> finishCustomerById(@Valid @RequestBody
-        CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
+        CustomerFormUpdate custumerForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -118,9 +120,9 @@ public class CustomerController {
         return ResponseEntity.ok().body(costumerDto);
     }
 
-    @PutMapping("/mensalistas/{id}")
+    @PatchMapping("/mensalistas/{id}")
     public ResponseEntity<CustomerMensalDto> updateMensal(@Valid @RequestBody
-        CustomerForm custumerForm, @PathVariable("id") Integer id, BindingResult br) {
+        CustomerForm customerForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -131,7 +133,7 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
      
-        CustomerMensalDto costumerDto = customerService.updateCustomer(modelMapper.map(custumerForm, CustomerMensalDto.class), id);
+        CustomerMensalDto costumerDto = customerService.updateCustomer(modelMapper.map(customerForm, CustomerMensalDto.class), id);
         return ResponseEntity.ok().body(costumerDto);
     }
 

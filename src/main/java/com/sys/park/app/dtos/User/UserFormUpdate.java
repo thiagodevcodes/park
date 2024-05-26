@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class UserForm {
+public class UserFormUpdate {
     @NotNull(message = "O tipo de usuário não pode ser nulo")
     private Integer userType;
  
@@ -34,16 +34,7 @@ public class UserForm {
     @Size(max = 255, message = "O nome de usuário pode ter no máximo 255 caracteres")
     @NotNull(message = "O nome de usuário não pode ser nulo")
     private String username;
-
-    @NotEmpty(message = "A senha não pode ser vazio")
-    @NotNull(message = "A senha não pode ser nulo")
-    @NotBlank(message = "A senha não pode estar em branco")
-    @Size(max = 255, message = "A senha pode ter no máximo 255 caracteres")
+    
     private String password;
-
-    @NotEmpty(message = "A confirmação de senha não pode ser vazio")
-    @NotNull(message = "A confirmação de senha não pode ser nulo")
-    @NotBlank(message = "A confirmação de senha não pode estar em branco")
-    @Size(max = 255, message = "A confirmação de senha pode ter no máximo 255 caracteres")
     private String confirmPassword;
 }

@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleForm;
+import com.sys.park.app.dtos.Vehicle.VehicleGetDto;
 import com.sys.park.app.models.VehicleModel;
 import com.sys.park.app.repositories.VehicleRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -119,6 +121,7 @@ public class VehicleService {
 
     public VehicleDto updateById(VehicleDto vehicleDto, Integer id) {
         try {
+            
             Optional<VehicleModel> byPlate = vehicleRepository.findById(id);
 
             if(!byPlate.get().getPlate().equals(vehicleDto.getPlate())) {
@@ -128,8 +131,9 @@ public class VehicleService {
             if (byPlate.isPresent()) {
                 VehicleModel vehicleUpdated = byPlate.get();
 
+                modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(vehicleDto, vehicleUpdated);
-                vehicleUpdated.setId(id);
+                
                 vehicleUpdated = vehicleRepository.save(vehicleUpdated);
 
                 return modelMapper.map(vehicleUpdated, VehicleDto.class);
@@ -173,21 +177,22 @@ public class VehicleService {
         }
     }
 
-    public Page<VehicleDto> getMensalByIdCustomer(Integer idCustomer, Optional<Pageable> optionalPage) {
+    public Page<VehicleGetDto> getMensalByIdCustomer(Integer idCustomer, Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
             List<CustomerVehicleDto> customerVehicleModels = customerVehicleService.findByIdCustomer(idCustomer);
-            List<VehicleDto> vehicleDtos = new ArrayList<>();
+            List<VehicleGetDto> vehicleDtos = new ArrayList<>();
 
             for (CustomerVehicleDto customerVehicleDto : customerVehicleModels) {
                 VehicleDto vehicleDto = this.findById(customerVehicleDto.getIdVehicle());
+                VehicleGetDto vehicle = modelMapper.map(vehicleDto, VehicleGetDto.class);
 
                 if(vehicleDto.getMonthlyVehicle()) {
-                    vehicleDtos.add(vehicleDto);
+                    vehicleDtos.add(vehicle);
                 }
             }
 
-            Page<VehicleDto> pageVehicleDto =  new PageImpl<>(vehicleDtos, page, vehicleDtos.size());
+            Page<VehicleGetDto> pageVehicleDto =  new PageImpl<>(vehicleDtos, page, vehicleDtos.size());
             return pageVehicleDto;
         } catch (NoSuchElementException e) {
             throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");

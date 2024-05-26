@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -55,6 +56,15 @@ public class PersonService {
         }
     }
 
+    public PersonDto findByEmail(String email) {
+        try {
+            PersonModel personModel = personRepository.findByEmail(email).get();
+            return modelMapper.map(personModel, PersonDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Cpf: " + email + ", Tipo: " + PersonModel.class.getName());
+        }
+    }
+
     public PersonDto insert(PersonDto personDto) {
         try {
             PersonModel newPerson = modelMapper.map(personDto, PersonModel.class);
@@ -77,7 +87,9 @@ public class PersonService {
             if (personExist.isPresent()) {
                 PersonModel personUpdated = personExist.get();
 
+                modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(personDto, personUpdated);
+                
                 personUpdated = personRepository.save(personUpdated);
 
                 return modelMapper.map(personUpdated, PersonDto.class);
@@ -115,6 +127,22 @@ public class PersonService {
 
         } catch (NoSuchElementException e) {
             throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());
+        }
+    }
+
+    public Boolean verifyEmail(String email) {
+        try {
+            Optional<PersonModel> emailExist = personRepository.findByEmail(email);
+            //Optional<PersonModel> emailExist = personRepository.findByEmail(email);
+
+            if(emailExist.isPresent()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Id: " + email + ", Tipo: " + PersonModel.class.getName());
         }
     }
 

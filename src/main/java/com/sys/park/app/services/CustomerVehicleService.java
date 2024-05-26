@@ -48,7 +48,6 @@ public class CustomerVehicleService {
             } catch (DataIntegrityViolationException e) {
                 throw new DataIntegrityException("Erro ao tentar inserir um cliente!");
         }
-        
     }
 
     public CustomerVehicleDto findById(Integer id) {

@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,10 +16,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
+import com.sys.park.app.dtos.Customer.CustomerGetDto;
 import com.sys.park.app.dtos.Customer.CustomerMensalDto;
 import com.sys.park.app.dtos.CustomerType.CustomerTypeDto;
 import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.models.CustomerModel;
+import com.sys.park.app.models.UserModel;
 import com.sys.park.app.repositories.CustomerRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
 import com.sys.park.app.services.exceptions.DataIntegrityException;
@@ -80,51 +83,79 @@ public class CustomerService {
         }
     }
 
+    public Boolean customerByIdPerson(Integer idPerson) {
+        try {
+            Optional<CustomerModel> userModel = customerRepository.findByIdPerson(idPerson);
+
+            if (userModel.isPresent()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException(
+                    "Objeto não encontrado! Id Pessoa: " + idPerson + ", Tipo: " + UserModel.class.getName());
+        }
+    }
+
+    public Boolean validCustomer(CustomerMensalDto user) {
+
+        if (personService.validCpfAndEmail(user.getCpf(), user.getEmail())) {
+            PersonDto newPerson = personService.findByCpf(user.getCpf());
+            CustomerDto customerDto = new CustomerDto();
+
+            if (this.customerByIdPerson(newPerson.getId())) {
+                customerDto = this.findByIdPerson(newPerson.getId());
+
+                if (!customerDto.getIsActive()) {
+                    customerDto.setIsActive(true);
+                    customerDto = this.updateById(customerDto, customerDto.getId());
+                } else {
+                    throw new BusinessRuleException("O cliente já existe!");
+                }
+            }
+        }
+
+        return true;
+    }
+
     public CustomerMensalDto createNewCustomer(CustomerMensalDto customerMensalDto, Integer customerType) {
         try {
+            this.validCustomer(customerMensalDto);
             CustomerMensalDto newCustomer = new CustomerMensalDto();
             PersonDto personDto = new PersonDto();
             CustomerDto customerDto = new CustomerDto();
 
             if(customerType == 2) {
-                personDto.setCpf(customerMensalDto.getCpf());
-                personDto.setEmail(customerMensalDto.getEmail());
-                personDto.setName(customerMensalDto.getName());
-                personDto.setPhone(customerMensalDto.getPhone());
-                
-                if(personService.verifyCpf(personDto.getCpf())) {
-                    System.out.println(personDto.getCpf());
+                if(personService.verifyCpf(customerMensalDto.getCpf()) && personService.verifyEmail(customerMensalDto.getEmail())) {
                     personDto = personService.findByCpf(customerMensalDto.getCpf());
-                    System.out.println(personDto);
-
-                    customerDto = this.findByIdPerson(personDto.getId());
                     
-                    if(!customerDto.getIsActive()) {
-                        customerDto.setIsActive(true);
-                        customerDto = this.updateById(customerDto, customerDto.getId());
-                    } else {
-                        throw new BusinessRuleException("O cliente já existe!");
+                    if(!this.customerByIdPerson(personDto.getId())) {
+                        customerDto.setIdPerson(personDto.getId());
                     }
+
                 } else {
+                    personDto.setCpf(customerMensalDto.getCpf());
+                    personDto.setEmail(customerMensalDto.getEmail());
+                    personDto.setName(customerMensalDto.getName());
+                    personDto.setPhone(customerMensalDto.getPhone());
+
                     personDto = personService.insert(personDto);
                     customerDto.setIdPerson(personDto.getId());
-                    customerDto.setIdCustomerType(customerType);
-                    customerDto.setPaymentDay(customerMensalDto.getPaymentDay());
-                    customerDto.setIsActive(true);
-
-                    customerDto = this.insert(customerDto);
-                }
+                    
+                }   
             } else if(customerType == 1) {
                 personDto.setName(customerMensalDto.getName());
                 personDto = personService.insert(personDto);
                 
-                customerDto.setIdPerson(personDto.getId());
-                customerDto.setIdCustomerType(customerType);
-                customerDto.setPaymentDay(customerMensalDto.getPaymentDay());
-                customerDto.setIsActive(true);
-
-                customerDto = this.insert(customerDto);
             }
+
+            customerDto.setIdPerson(personDto.getId());
+            customerDto.setIdCustomerType(customerType);
+            customerDto.setPaymentDay(customerMensalDto.getPaymentDay());
+            customerDto.setIsActive(true);
+
+            customerDto = this.insert(customerDto);
 
             newCustomer.setId(customerDto.getId());
             newCustomer.setCpf(personDto.getCpf());
@@ -148,8 +179,9 @@ public class CustomerService {
             if (customerExist.isPresent()) {
                 CustomerModel customerUpdated = customerExist.get();
                 
+                modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(customerDto, customerUpdated);
-                customerUpdated.setId(id);
+
                 customerUpdated = customerRepository.save(customerUpdated);
 
                 return modelMapper.map(customerUpdated, CustomerDto.class);
@@ -178,10 +210,12 @@ public class CustomerService {
             customerDto.setPaymentDay(customerMensalDto.getPaymentDay());
 
             personDto = personService.updateById(personDto, personDto.getId());
+            System.out.println(customerDto);
             customerDto = this.updateById(customerDto, id);
 
             CustomerMensalDto updatedCustomer = new CustomerMensalDto();
 
+            
             updatedCustomer.setClientType(customerDto.getIdCustomerType());
             updatedCustomer.setCpf(personDto.getCpf());
             updatedCustomer.setEmail(personDto.getEmail());
@@ -210,14 +244,14 @@ public class CustomerService {
         }
     }
 
-    public Page<CustomerMensalDto> getCustomersByCustomerType(Integer customerType, Optional<Pageable> optionalPage) {
+    public Page<CustomerGetDto> getCustomersByCustomerType(Integer customerType, Optional<Pageable> optionalPage) {
         try {
             Pageable page = optionalPage.orElse(Pageable.unpaged());
             Page<CustomerModel> customers = customerRepository.findByIdCustomerTypeAndIsActive(customerType, true, page);
-            List<CustomerMensalDto> newDtoList = new ArrayList<>();
+            List<CustomerGetDto> newDtoList = new ArrayList<>();
     
             for (CustomerModel customer : customers) {
-                CustomerMensalDto newDto = new CustomerMensalDto();
+                CustomerGetDto newDto = new CustomerGetDto();
     
                 PersonDto personDto = personService.findById(customer.getIdPerson());
                 CustomerTypeDto customerTypeDto = customerTypeService.findById(customer.getIdCustomerType());
@@ -227,15 +261,13 @@ public class CustomerService {
                     newDto.setCpf(personDto.getCpf());
                     newDto.setEmail(personDto.getEmail());
                     newDto.setName(personDto.getName());
-                    newDto.setClientType(customerType);
                     newDto.setPhone(personDto.getPhone());
                     newDto.setPaymentDay(customer.getPaymentDay());
-                    newDto.setIsActive(true);
                     newDtoList.add(newDto);
                 }
             }
 
-            Page<CustomerMensalDto> pageableClient = new PageImpl<>(newDtoList, page, customers.getTotalElements());
+            Page<CustomerGetDto> pageableClient = new PageImpl<>(newDtoList, page, customers.getTotalElements());
             return pageableClient; 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não foi possível buscar os Clientes!");
@@ -250,6 +282,8 @@ public class CustomerService {
                 throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
 
             CustomerModel customerUpdated = customerExist.get();
+
+            modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
 
             customerUpdated.setIsActive(false);
             customerUpdated = customerRepository.save(customerUpdated);
