@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default function Modal({ children, setModalOpen, modalOpen, title, action, path, data, icon }) {
     const router = useRouter()
 
-    //console.log(data)
+    console.log(data)
 
     const submitUpdated = async (e, id, path, data) => {
         e.preventDefault();

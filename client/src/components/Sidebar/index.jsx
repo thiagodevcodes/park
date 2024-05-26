@@ -22,9 +22,9 @@ export default function Aside({ active }) {
                     <FontAwesomeIcon icon={faCar} color="black" width={18}></FontAwesomeIcon>
                     <Link href={"/movimentacoes"}>Movimentações</Link>
                 </li>
-                <li className={router.pathname === "/usuarios" ? `${styles.active}` : ""}>
+                <li className={router.pathname === "/users" ? `${styles.active}` : ""}>
                     <FontAwesomeIcon icon={faUserGroup} color="black" width={20}></FontAwesomeIcon>
-                    <Link href={"#"}>Usuários</Link>
+                    <Link href={"/users"}>Usuários</Link>
                 </li>
                 <li className={router.pathname === "/relatorios" ? `${styles.active}` : ""}> 
                     <FontAwesomeIcon icon={faSquarePollHorizontal} color="black" width={18}></FontAwesomeIcon>

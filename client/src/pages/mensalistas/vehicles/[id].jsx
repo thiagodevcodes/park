@@ -48,6 +48,7 @@ export default function VehicleById() {
         if (id) {
             fetchData(`vehicles/mensalistas/${id}`)
                 .then((response) => {
+                    
                     setVehicles(response.content);
                     setTotalPages(response.totalPages);
                 })
@@ -70,7 +71,7 @@ export default function VehicleById() {
                 <link rel="icon" href="/img/Parking.svg" />
             </Head>
 
-            <Layout>
+         
                 <div className={styles.container}>
                     <div className={styles.headerLogo}>
                         <h1 style={{ display: "flex", alignItems: "center", gap: "5px" }}><FontAwesomeIcon icon={faCar} width={30} /> Veículos</h1>
@@ -105,34 +106,8 @@ export default function VehicleById() {
                 }
 
                 <div className={styles.box}>
-                    <Table tableName={"Veiculos"} columns={["Placa", "Marca", "Modelo"]} model={vehicles} colSpan={6}>
-                        <tbody>
-                            {vehicles && vehicles.length > 0 ? (
-                                vehicles.map((item) => (
-                                    <tr key={item.id}>
-                                        <td>{item.plate}</td>
-                                        <td>{item.make}</td>
-                                        <td>{item.model}</td>
-
-                                        <td>
-                                            <div className={styles.buttonContainer}>
-                                                <Button onClick={() => { setModalOpen({ ...modalOpen, update: true }) 
-                                                    setFormData({ ...item })}} imgUrl={"/icons/Edit.svg"} bgColor={"#E9B500"} padding={"2px"}/>
-
-                                                <Button onClick={() => { setModalOpen({ ...modalOpen, finish: true }) 
-                                                    setFormData({ ...item })}} imgUrl={"/icons/Done.svg"} bgColor={"#00bd1f"} padding={"2px"}/>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={6}>Não possui dados!</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </Table>
-
+                    <Table tableName={"Veiculos"} columns={["Id","Placa", "Marca", "Modelo"]} model={vehicles} colSpan={6} width={"70%"} data={vehicles} setModalOpen={setModalOpen} modalOpen={modalOpen} setFormData={setFormData}/>
+                        
                     {vehicles.length > 0 &&
                         <Pagination
                             currentPage={currentPage}
@@ -142,7 +117,7 @@ export default function VehicleById() {
                     }
                 </div>
                 <ToastContainer />
-            </Layout>
+
         </>
     );
 };

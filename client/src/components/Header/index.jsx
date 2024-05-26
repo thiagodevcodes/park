@@ -2,7 +2,7 @@ import styles from "./header.module.css"
 import Nav from "../Nav"
 import { useState, useEffect } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faP, faParking } from "@fortawesome/free-solid-svg-icons"
+import { faParking } from "@fortawesome/free-solid-svg-icons"
 
 
 export default function Header({ children }) {
@@ -30,7 +30,7 @@ export default function Header({ children }) {
 
                 {children}
 
-                {width > 800 &&
+                {width > 1039 &&
                     <>
                         <FontAwesomeIcon style={{ marginLeft: "15px" }} icon={faParking} width={30}></FontAwesomeIcon>
                         <h2 style={{ marginLeft: "5px" }}>SysPark</h2>

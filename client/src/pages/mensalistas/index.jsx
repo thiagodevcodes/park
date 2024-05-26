@@ -5,12 +5,10 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
-
 import { ToastContainer } from "react-toastify";
 import { fetchDataPage } from "@/services/axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays, faCirclePlus, faPenToSquare, faCircleExclamation, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
-
 
 import Pagination from "@/components/Pagination";
 import InputForm from "@/components/InputForm";
@@ -18,7 +16,6 @@ import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
-
 
 export default function Mensalistas() {
     const [width, setWidth] = useState(0)
@@ -47,7 +44,7 @@ export default function Mensalistas() {
             .catch(error => {
                 console.error("Erro ao carregar dados:", error);
             });
-    }, [currentPage, fetchDataPage]);
+    }, [currentPage]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -74,7 +71,7 @@ export default function Mensalistas() {
                 <link rel="icon" href="/img/Parking.svg" />
             </Head>
 
-            <Layout>
+
 
                 <div className={styles.container}>
 
@@ -103,7 +100,7 @@ export default function Mensalistas() {
                 }
 
                 {modalOpen.update &&
-                    <Modal icon={faPenToSquare} path={"customers/mensalistas"} data={formData} modalOpen={modalOpen}
+                    <Modal icon={faPenToSquare} path={"customers/mensalistas"} data={{...formData, clientType: 2}} modalOpen={modalOpen}
                         action={"update"} title={"Editar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
                             <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name} />
@@ -116,7 +113,7 @@ export default function Mensalistas() {
                 }
 
                 {modalOpen.delete &&
-                    <Modal icon={faCircleExclamation} path={"customers"} action={"update"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen}
+                    <Modal icon={faCircleExclamation} path={"customers"} action={"delete"} data={formData} modalOpen={modalOpen} setModalOpen={setModalOpen}
                         title={"Excluir"}>
                         <p style={{ textAlign: "center", marginBottom: "10px" }}>Tem certeza que deseja excluir o cliente mensalista?</p>
                     </Modal>
@@ -134,57 +131,19 @@ export default function Mensalistas() {
                 }
 
                 <div className={styles.box}>
-                    <Table columns={["Nome", "Telefone", "Email", "CPF", "Dia Pagamento"]}>
-                        <tbody>
-                            {models.mensal && models.mensal.length > 0 ? (
-                                models.mensal.map((item) => (
-                                    <tr key={item.id}>
-                                        <>
-                                            <td>{item.name}</td>
-                                            <td>{item.phone}</td>
-                                            <td>{item.email}</td>
-                                            <td>{item.cpf}</td>
-                                            <td>{item.paymentDay}</td>
-                                        </>
+                    <Table columns={["Id", "Nome", "Telefone", "Email", "CPF", "Dia Pagamento"]} width={"85%"} data={models.mensal} setModalOpen={setModalOpen} modalOpen={modalOpen} setFormData={setFormData} />
 
-                                        <td>
-                                            <div className={styles.buttonContainer}>
-                                                <Button onClick={() => { setModalOpen({ ...modalOpen, update: true }) 
-                                                    setFormData({ ...item })}} imgUrl={"/icons/Edit.svg"} bgColor={"#E9B500"} padding={"2px"}/>
-
-                                                <Button onClick={() => { setModalOpen({ ...modalOpen, finish: true }) 
-                                                    setFormData({ ...item })}} imgUrl={"/icons/Done.svg"} bgColor={"#00bd1f"} padding={"2px"}/>
-
-                                                <Button onClick={() => {setModalOpen({ ...modalOpen, delete: true })
-                                                    setFormData({ ...item })}} imgUrl={"/icons/Remove.svg"} bgColor={"#FF0000"} padding={"2px"}/>
-
-                                                <Link href={`/mensalistas/vehicles/${item.id}`} className={`${styles.bgBlue} ${styles.actionButton}`}>
-                                                    <Image src={"/icons/Cars.svg"} width={30} height={30} alt="Icone Cars" />
-                                                </Link>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={7}>Não possui dados!</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </Table>
-
-                    {models.mensal.length > 0 ?
+                    {models.mensal.length > 0 &&
                         <Pagination
                             currentPage={currentPage}
                             setCurrentPage={setCurrentPage}
                             totalPages={totalPages}
-                        /> :
-                        null
+                        />
                     }
                 </div>
                 <ToastContainer />
 
-            </Layout>
+          
         </>
     );
 }

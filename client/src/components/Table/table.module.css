@@ -15,8 +15,7 @@
     border-collapse: collapse;
     margin-bottom: 20px;
     padding: 0 20px;
-    max-width: 80%;
-    min-width: 80%;
+    width: 90%;
 }
 
 .table th {
@@ -92,5 +91,9 @@
     .container {
         align-items: start;
         padding: 0 30px;
+    }
+
+    .table {
+        width: 100%;
     }
 }

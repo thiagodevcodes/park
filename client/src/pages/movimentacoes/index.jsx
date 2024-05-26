@@ -2,7 +2,6 @@ import "react-toastify/dist/ReactToastify.css";
 import styles from "../../styles/Mensalistas.module.css";
 import { useState, useEffect } from "react";
 import Head from "next/head";
-import Image from "next/image";
 
 import { ToastContainer } from "react-toastify";
 import { formatDate } from "@/services/utils";
@@ -14,7 +13,6 @@ import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
 import Select from "@/components/Select";
-import Button from "@/components/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquareParking, faCirclePlus, faPenToSquare, faCircleExclamation, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
@@ -48,7 +46,7 @@ export default function Movimentacoes() {
                     tickets: ticketsResponse.content,
                     vacancys: vacanciesResponse,
                     customerTypes: customerTypesResponse
-                }));
+                }));              
                 setTotalPages(ticketsResponse.totalPages)
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
@@ -59,13 +57,15 @@ export default function Movimentacoes() {
 
     useEffect(() => {
         const fetchDataVehicles = async () => {
-            if (formData.idCustomerType == "2") {
+            if (formData.idCustomerType == "2" && formData.idCustomer) {
                 try {
                     const vehiclesResponse = await fetchData(`vehicles/mensalistas/${formData.idCustomer}`);
+
                     setModels(prevValues => ({
                         ...prevValues,
                         vehicles: vehiclesResponse.content
                     }));
+                    console.log(vehiclesResponse.content)
                 } catch (error) {
                     console.error("Erro ao carregar dados dos veículos:", error);
                 }
@@ -99,7 +99,7 @@ export default function Movimentacoes() {
                 <link rel="icon" href="/img/Parking.svg" />
             </Head>
 
-            <Layout>
+            
                 <div className={styles.container}>
                     <div className={styles.headerLogo}>
                         <h1 className="d-flex-center" ><FontAwesomeIcon icon={faSquareParking} width={30} />Movimentações</h1>
@@ -144,7 +144,7 @@ export default function Movimentacoes() {
                 {modalOpen.update &&
                     <Modal icon={faPenToSquare} action={"update"} path={`tickets/${formData.idCustomerType == 1 ? "rotativos" : "mensalistas"}`}
                         data={formData} modalOpen={modalOpen} title={"Editar"} setModalOpen={setModalOpen}>
-                        {formData.idCustomerType == 2 &&
+                        {formData.idCustomerType == 2 && models.vehicles &&
                             <div className={styles.modalContainer}>
                                 <Select onChange={(e) => handleInputChange("idCustomer", e)} noOption={true}
                                     value={formData.idCustomer} title="Cliente" data={models.clients} />
@@ -188,51 +188,18 @@ export default function Movimentacoes() {
                     </Modal>
                 }
                 <div className={styles.box}>
-                    <Table columns={["Nome", "Placa", "Marca", "Modelo", "Vaga", "Tipo Cliente", "Entrada"]}>
-                        <tbody>
-                            {models.tickets && models.tickets.length > 0 ? (
-                                models.tickets.map((item) => (
-                                    <tr key={item.id}>
-                                        <td>{item.name}</td>
-                                        <td>{item.plate}</td>
-                                        <td>{item.make}</td>
-                                        <td>{item.model}</td>
-                                        <td>{item.idVacancy}</td>
-                                        <td>{item.idCustomerType == 1 ? "Rotativo" : "Mensalista"}</td>
-                                        <td>{formatDate(item.entryTime)}</td>
-                                        <td>
-                                            <div className={styles.buttonContainer}>
-                                                <Button onClick={() => { setModalOpen({ ...modalOpen, update: true }) 
-                                                    setFormData({ ...item })}} imgUrl={"/icons/Edit.svg"} bgColor={"#E9B500"} padding={"2px"}/>
-
-                                                <Button onClick={() => { setModalOpen({ ...modalOpen, finish: true }) 
-                                                    setFormData({ ...item })}} imgUrl={"/icons/Done.svg"} bgColor={"#00bd1f"} padding={"2px"}/>
-
-                                                <Button onClick={() => {setModalOpen({ ...modalOpen, delete: true })
-                                                    setFormData({ ...item })}} imgUrl={"/icons/Remove.svg"} bgColor={"#FF0000"} padding={"2px"}/>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={9}>Não possui movimentações!</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </Table>
-
-                    {models.tickets.length > 0 ?
+                    <Table columns={["Id", "Nome", "Placa", "Marca", "Modelo", "Vaga", "Entrada", "Tipo Cliente"]} data={models.tickets} width={"85%"} setModalOpen={setModalOpen} modalOpen={modalOpen} setFormData={setFormData}/>
+                    
+                    {models.tickets.length > 0 &&
                         <Pagination
                             currentPage={currentPage}
                             setCurrentPage={setCurrentPage}
                             totalPages={totalPages}
-                        /> :
-                        null
+                        />
                     }
                 </div>
                 <ToastContainer />
-            </Layout >
+            
         </>
     );
 }

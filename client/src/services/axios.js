@@ -1,7 +1,6 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-
 export const fetchData = async (path) => {
     try {
         const response = await axios.get(`http://localhost:8080/api/${path}`);
@@ -56,7 +55,7 @@ export const handleCreate = async (data, path) => {
 
 export const handleUpdate = async (id, path, data) => {
     try {
-        const response = await axios.put(`http://localhost:8080/api/${path}/${id}`, data);
+        const response = await axios.patch(`http://localhost:8080/api/${path}/${id}`, data);
         if (response.status === 200) toast.success('Operação realizada com sucesso!');
         return response;
     } catch (error) {
