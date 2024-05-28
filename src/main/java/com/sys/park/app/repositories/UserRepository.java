@@ -14,4 +14,6 @@ public interface UserRepository extends JpaRepository<UserModel, Integer>{
     Page<UserModel> findByIsActive(Boolean isActive, Pageable page);
     Optional<UserModel> findByUsername(String username);
     Optional<UserModel> findByIdPerson(Integer idPerson);
+    Boolean existsByIdPerson(Integer IdPerson);
+    Boolean existsByUsername(String username);
 }

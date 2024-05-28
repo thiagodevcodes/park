@@ -72,7 +72,7 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerMensalDto> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {
+    public ResponseEntity<CustomerDto> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -82,7 +82,7 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        CustomerMensalDto customerDto = customerService.createNewCustomer(modelMapper.map(customerForm, CustomerMensalDto.class), 2);
+        CustomerDto customerDto = customerService.createNewCustomer(customerForm, 2);
         return ResponseEntity.ok().body(customerDto);
     }
 

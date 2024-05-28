@@ -21,8 +21,8 @@ import com.sys.park.app.dtos.User.UserForm;
 import com.sys.park.app.dtos.User.UserFormUpdate;
 import com.sys.park.app.dtos.User.UserGetDto;
 import com.sys.park.app.dtos.UserType.UserTypeDto;
-
 import com.sys.park.app.models.UserModel;
+import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.repositories.UserRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
 import com.sys.park.app.services.exceptions.DataIntegrityException;
@@ -35,6 +35,9 @@ public class UserService {
 
     @Autowired
     private PersonService personService;
+
+    @Autowired
+    private PersonRepository personRepository;
 
     @Autowired
     private UserTypeService userTypeService;
@@ -129,10 +132,9 @@ public class UserService {
 
     public void deleteById(Integer id) {
         try {
-            Optional<UserModel> userModel = userRepository.findById(id);
             if (userRepository.existsById(id)) {
                 userRepository.deleteById(id);
-                personService.deleteById(userModel.get().getIdPerson());
+
             } else {
                 throw new DataIntegrityException("O Id do Usuário não existe na base de dados!");
             }
@@ -142,33 +144,38 @@ public class UserService {
     }
 
     public Boolean validUser(UserForm user) {
-        Optional<UserModel> byUser = userRepository.findByUsername(user.getUsername());
+        PersonDto newPerson = new PersonDto();
+        UserDto userDto = new UserDto();
+        Boolean isPresent = false;
 
-        if (byUser.isPresent()) {
-            throw new DataIntegrityException("Nome de usuário já utilizado!");
+        if (!user.getPassword().equals(user.getConfirmPassword())) 
+            throw new DataIntegrityException("As senhas se diferem!");
+        
+        if (personRepository.existsByEmail(user.getEmail())) {
+            newPerson = personService.findByEmail(user.getEmail());
+            isPresent = true;
+        } else if(personRepository.existsByPhone(user.getPhone())) {
+            newPerson = personService.findByPhone(user.getPhone());
+            isPresent = true;
         }
 
-        if (personService.verifyEmail(user.getEmail())) {
-            PersonDto newPerson = personService.findByEmail(user.getEmail());
-            UserDto userDto = new UserDto();
-
+        if (isPresent) {
             if (this.userByIdPerson(newPerson.getId())) {
                 userDto = this.findByIdPerson(newPerson.getId());
+                if (userDto.getIsActive()) {    
+                    if (userRepository.existsByUsername(user.getUsername())) 
+                        throw new DataIntegrityException("Nome de usuário já utilizado!");
 
-                if (!userDto.getIsActive()) {
-                    userDto.setIsActive(true);
-                    userDto = this.updateById(userDto, userDto.getId());
-                } else {
-                    throw new BusinessRuleException("O usuário já existe!");
+                    if(personRepository.existsByEmail(user.getEmail()))
+                        throw new BusinessRuleException("O email já existe!");
+
+                    if(personRepository.existsByPhone(user.getPhone())) 
+                        throw new BusinessRuleException("O celular já existe!");
                 }
             }
         }
 
-        if (!user.getPassword().equals(user.getConfirmPassword())) {
-            throw new DataIntegrityException("As senhas se diferem");
-        }
-
-        return true;
+        return isPresent;
     }
 
     public UserDto addNewUser(UserForm userForm) {
@@ -176,19 +183,26 @@ public class UserService {
             this.validUser(userForm);
             UserDto userDto = new UserDto();
             PersonDto newPerson = new PersonDto();
-
-            if (personService.verifyEmail(userForm.getEmail())) {
-                newPerson = personService.findByEmail(userForm.getEmail());
-
-                if (!this.userByIdPerson(newPerson.getId())) {
-                    userDto.setIdPerson(newPerson.getId());
-                } 
+            Boolean isPresent = false;
+            
+            if (personRepository.existsByEmail(userForm.getEmail())) {
+                newPerson = personService.findByEmail(userForm.getEmail()); 
+                isPresent = true; 
+            } else if(personRepository.existsByPhone(userForm.getPhone())) {
+                newPerson = personService.findByPhone(userForm.getPhone());  
+                isPresent = true; 
             } else {
                 newPerson.setName(userForm.getName());
                 newPerson.setPhone(userForm.getPhone());
                 newPerson.setEmail(userForm.getEmail());
-                newPerson = personService.insert(newPerson);
-                userDto.setIdPerson(newPerson.getId());
+                newPerson = personService.insert(newPerson);  
+            }
+ 
+            if(isPresent) {
+                Integer id = newPerson.getId();
+                newPerson = modelMapper.map(userForm,PersonDto.class);
+                newPerson.setId(id);
+                newPerson = personService.updateById(newPerson, id); 
             }
 
             userDto.setIdUserType(userForm.getUserType());
@@ -196,8 +210,19 @@ public class UserService {
             userDto.setIsActive(true);
             userDto.setUserType(userForm.getUserType());
             userDto.setUsername(userForm.getUsername());
+            userDto.setIdPerson(newPerson.getId());
 
-            userDto = this.insert(userDto);
+            if (userRepository.existsByIdPerson(newPerson.getId())) {      
+                UserDto oldUser = this.findByIdPerson(newPerson.getId());   
+
+                if(oldUser.getIsActive() == false) {
+                    userDto = this.updateById(userDto, oldUser.getId());
+                } else {
+                    throw new DataIntegrityException("Usuário já está ativo!");
+                }       
+            } else {
+                userDto = this.insert(userDto);
+            }
 
             return userDto;
         } catch (DataIntegrityViolationException e) {
@@ -265,6 +290,29 @@ public class UserService {
             return userDto;
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Não foi possível atualizar o cliente", e);
+        }
+    }
+
+    public UserDto finishUser(UserDto userDto, Integer id) {
+        try {
+            Optional<UserModel> userExist = userRepository.findById(id);
+
+            if (userExist.isPresent()) {
+                UserModel user = userExist.get();
+
+                user.setIsActive(false);
+
+                modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+                userDto = modelMapper.map(user, UserDto.class);
+
+                userDto = this.updateById(userDto, id);
+
+                return userDto;
+            } else {
+                throw new DataIntegrityException("O Id do Ticket não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) do Cliente não foi(foram) preenchido(s).", e);
         }
     }
 }

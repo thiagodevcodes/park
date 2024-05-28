@@ -9,4 +9,8 @@ import com.sys.park.app.models.PersonModel;
 public interface PersonRepository extends JpaRepository<PersonModel, Integer> {
     Optional<PersonModel> findByCpf(String cpf);
     Optional<PersonModel> findByEmail(String email);
+    Optional<PersonModel> findByPhone(String phone);
+    Boolean existsByEmail(String email);
+    Boolean existsByCpf(String cpf);
+    Boolean existsByPhone(String phone);
 }

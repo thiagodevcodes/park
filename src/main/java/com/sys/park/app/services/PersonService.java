@@ -61,7 +61,16 @@ public class PersonService {
             PersonModel personModel = personRepository.findByEmail(email).get();
             return modelMapper.map(personModel, PersonDto.class);
         } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Cpf: " + email + ", Tipo: " + PersonModel.class.getName());
+            throw new NotFoundException("Objeto não encontrado! Email: " + email + ", Tipo: " + PersonModel.class.getName());
+        }
+    }
+
+    public PersonDto findByPhone(String phone) {
+        try {
+            PersonModel personModel = personRepository.findByPhone(phone).get();
+            return modelMapper.map(personModel, PersonDto.class);
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Objeto não encontrado! Telefone: " + phone + ", Tipo: " + PersonModel.class.getName());
         }
     }
 

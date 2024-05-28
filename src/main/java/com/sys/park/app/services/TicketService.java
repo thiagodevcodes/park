@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
+import com.sys.park.app.dtos.Customer.CustomerForm;
 import com.sys.park.app.dtos.Customer.CustomerMensalDto;
 import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.Person.PersonDto;
@@ -113,8 +114,8 @@ public class TicketService {
                 customerNew.setClientType(1);
                 customerNew.setIsActive(true);
 
-                customerNew = customerService.createNewCustomer(customerNew, customerNew.getClientType());
-                customerDto = customerService.findById(customerNew.getId());
+                customerDto = customerService.createNewCustomer(modelMapper.map(customerNew, CustomerForm.class), customerNew.getClientType());
+                customerDto = customerService.findById(customerDto.getId());
 
                 if (!vehicleIsPresent) {
                     vehicleDto.setMake(movimentacaoDto.getMake());

@@ -107,4 +107,21 @@ public class UserController {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/finish/{id}")
+    public ResponseEntity<UserDto> finishById(@Valid @RequestBody
+        UserFormUpdate userDto, @PathVariable("id") Integer id, BindingResult br) {
+       
+        if (br.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            br.getAllErrors().forEach(e -> {
+                errors.add(e.getDefaultMessage());
+            });
+
+            throw new ConstraintException("Dados incorretos!", errors);
+        }
+     
+        UserDto ticketDto = userService.finishUser(modelMapper.map(userDto, UserDto.class), id);
+        return ResponseEntity.ok().body(ticketDto);
+    }
 }

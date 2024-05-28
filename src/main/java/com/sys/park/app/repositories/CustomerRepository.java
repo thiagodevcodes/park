@@ -15,4 +15,5 @@ public interface CustomerRepository extends JpaRepository<CustomerModel, Integer
     Page<CustomerModel> findByIdCustomerTypeAndIsActive(Integer idCustomerType, Boolean isActive, Pageable page);
     Optional<CustomerModel> findByIdPerson(Integer idPerson);
     List<CustomerModel> findByIdCustomerTypeAndIsActive(Integer idCustomerType, Boolean isActive);
+    Boolean existsByIdPerson(Integer IdPerson);
 }
