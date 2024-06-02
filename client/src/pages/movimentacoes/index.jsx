@@ -40,14 +40,17 @@ export default function Movimentacoes() {
                     fetchData("vacancies"),
                     fetchData("customer_type")
                 ]);
-                setModels(prevValues => ({
-                    ...prevValues,
-                    clients: clientsResponse.content,
-                    tickets: ticketsResponse.content,
-                    vacancys: vacanciesResponse,
-                    customerTypes: customerTypesResponse
-                }));              
-                setTotalPages(ticketsResponse.totalPages)
+                if(clientsResponse && ticketsResponse && vacanciesResponse && customerTypesResponse) {
+                    setModels(prevValues => ({
+                        ...prevValues,
+                        clients: clientsResponse.content,
+                        tickets: ticketsResponse.content,
+                        vacancys: vacanciesResponse,
+                        customerTypes: customerTypesResponse
+                    }));              
+                    setTotalPages(ticketsResponse.totalPages)
+                }
+
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
             }

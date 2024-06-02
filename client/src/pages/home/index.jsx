@@ -17,9 +17,12 @@ export default function Home() {
 
     useEffect(() => {
         fetchData("vacancies").then((response) => {
-            setModel(response.vacanciesList);
-            setOcuppied(response.vacanciesOccupied);
-            setNotOcuppied(response.vacanciesNotOccupied);
+            if(response){
+                setModel(response.vacanciesList);
+                setOcuppied(response.vacanciesOccupied);
+                setNotOcuppied(response.vacanciesNotOccupied);
+            }
+
         })
     }, [notOcuppied, ocuppied])
 
@@ -27,11 +30,14 @@ export default function Home() {
         fetchData("tickets/registerdate").then((res) => {
             let totalPriceSum = 0;
 
-            res.forEach(element => {
-                totalPriceSum += element.totalPrice;
-            });
+            if(res) {
+                res.forEach(element => {
+                    totalPriceSum += element.totalPrice;
+                });
+    
+                setTotalPrice(totalPriceSum);
+            }
 
-            setTotalPrice(totalPriceSum);
         });
     }, []);
 

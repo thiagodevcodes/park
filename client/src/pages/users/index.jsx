@@ -36,13 +36,15 @@ export default function Users() {
         const fetchDataVehicles = async () => {
             try {
                 const usersResponse = await fetchData("users/active");
-
-                setModels(prevValues => ({
-                    ...prevValues,
-                    users: usersResponse.content
-                }));
-                setTotalPages(usersResponse.totalPages)
-                console.log(usersResponse)
+                if(usersResponse) {
+                    setModels(prevValues => ({
+                        ...prevValues,
+                        users: usersResponse.content
+                    }));
+                    setTotalPages(usersResponse.totalPages)
+                    console.log(usersResponse)
+                }
+              
             } catch (error) {
                 console.error("Erro ao carregar dados dos usuários:", error);
             }
