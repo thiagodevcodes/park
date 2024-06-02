@@ -27,7 +27,6 @@ import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerForm;
 import com.sys.park.app.dtos.Customer.CustomerFormUpdate;
 import com.sys.park.app.dtos.Customer.CustomerGetDto;
-import com.sys.park.app.dtos.Customer.CustomerMensalDto;
 import com.sys.park.app.services.CustomerService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 import com.sys.park.app.services.exceptions.DataIntegrityException;
@@ -82,13 +81,13 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        CustomerDto customerDto = customerService.createNewCustomer(customerForm, 2);
+        CustomerDto customerDto = customerService.createNewCustomer(customerForm);
         return ResponseEntity.ok().body(customerDto);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CustomerDto> updateById(@Valid @RequestBody
-        CustomerForm customerForm, @PathVariable("id") Integer id, BindingResult br) {
+        CustomerFormUpdate customerForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -99,7 +98,7 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
      
-        CustomerDto costumerDto = customerService.updateById(modelMapper.map(customerForm, CustomerDto.class), id);
+        CustomerDto costumerDto = customerService.updateCustomer(customerForm, id);
         return ResponseEntity.ok().body(costumerDto);
     }
 
@@ -121,8 +120,8 @@ public class CustomerController {
     }
 
     @PatchMapping("/mensalistas/{id}")
-    public ResponseEntity<CustomerMensalDto> updateMensal(@Valid @RequestBody
-        CustomerForm customerForm, @PathVariable("id") Integer id, BindingResult br) {
+    public ResponseEntity<CustomerDto> updateMensal(@Valid @RequestBody
+        CustomerFormUpdate customerForm, @PathVariable("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -133,7 +132,7 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
      
-        CustomerMensalDto costumerDto = customerService.updateCustomer(modelMapper.map(customerForm, CustomerMensalDto.class), id);
+        CustomerDto costumerDto = customerService.updateCustomer(customerForm, id);
         return ResponseEntity.ok().body(costumerDto);
     }
 

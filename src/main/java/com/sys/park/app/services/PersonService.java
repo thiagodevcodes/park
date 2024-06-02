@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.sys.park.app.dtos.Customer.CustomerForm;
 import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.PersonRepository;
@@ -77,11 +78,6 @@ public class PersonService {
     public PersonDto insert(PersonDto personDto) {
         try {
             PersonModel newPerson = modelMapper.map(personDto, PersonModel.class);
-            
-            if(personDto.getCpf() != null && personDto.getEmail() != null) {
-                this.validCpfAndEmail(personDto.getCpf(), personDto.getEmail());
-            }
-
             newPerson = personRepository.save(newPerson);
             return modelMapper.map(newPerson, PersonDto.class);
         } catch (DataIntegrityViolationException e) {
@@ -98,7 +94,6 @@ public class PersonService {
 
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(personDto, personUpdated);
-                
                 personUpdated = personRepository.save(personUpdated);
 
                 return modelMapper.map(personUpdated, PersonDto.class);
@@ -123,55 +118,38 @@ public class PersonService {
         }
     }
 
-    public Boolean verifyCpf(String cpf) {
+    public PersonDto getPersonByCustomer(CustomerForm customerForm) {
         try {
-            Optional<PersonModel> cpfExist = personRepository.findByCpf(cpf);
-            //Optional<PersonModel> emailExist = personRepository.findByEmail(email);
+            PersonDto personDto = new PersonDto();
 
-            if(cpfExist.isPresent()) {
-                return true;
+
+            if(customerForm.getClientType().equals(2)) {
+                personDto.setCpf(customerForm.getCpf());
+                personDto.setEmail(customerForm.getEmail());
+                personDto.setName(customerForm.getName());
+                personDto.setPhone(customerForm.getPhone());
+
+                if (personRepository.existsByEmail(customerForm.getEmail())) {
+                    PersonDto person = this.findByEmail(customerForm.getEmail()); 
+                    System.out.println(person);
+                    System.out.println(personDto);
+                    personDto = this.updateById(personDto, person.getId());
+                    
+                } else if (personRepository.existsByCpf(customerForm.getCpf())) {
+                    PersonDto person = this.findByCpf(customerForm.getCpf());
+                    System.out.println(person);
+                    personDto = this.updateById(personDto, person.getId());
+                } else {
+                    personDto = this.insert(personDto);
+                } 
             } else {
-                return false;
+                personDto.setName(customerForm.getName());
+                personDto = this.insert(personDto);
             }
-
+        
+            return personDto;
         } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());
-        }
-    }
-
-    public Boolean verifyEmail(String email) {
-        try {
-            Optional<PersonModel> emailExist = personRepository.findByEmail(email);
-            //Optional<PersonModel> emailExist = personRepository.findByEmail(email);
-
-            if(emailExist.isPresent()) {
-                return true;
-            } else {
-                return false;
-            }
-
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + email + ", Tipo: " + PersonModel.class.getName());
-        }
-    }
-
-    public Boolean validCpfAndEmail(String cpf, String email) {
-        try {
-            Optional<PersonModel> cpfExist = personRepository.findByCpf(cpf);
-            Optional<PersonModel> emailExist = personRepository.findByEmail(email);
-
-            if(cpfExist.isPresent()) {
-                throw new DataIntegrityException("CPF já cadastrado!.");
-            }
-
-            if(emailExist.isPresent()) {
-                throw new DataIntegrityException("Email já cadastrado!.");
-            }
-
-            return false;
-
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + cpf + ", Tipo: " + PersonModel.class.getName());
+            throw new NotFoundException("Objeto não encontrado! Id: " + customerForm.getEmail() + ", Tipo: " + PersonModel.class.getName());
         }
     }
 }

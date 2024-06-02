@@ -114,7 +114,7 @@ public class TicketService {
                 customerNew.setClientType(1);
                 customerNew.setIsActive(true);
 
-                customerDto = customerService.createNewCustomer(modelMapper.map(customerNew, CustomerForm.class), customerNew.getClientType());
+                customerDto = customerService.createNewCustomer(modelMapper.map(customerNew, CustomerForm.class));
                 customerDto = customerService.findById(customerDto.getId());
 
                 if (!vehicleIsPresent) {
@@ -339,9 +339,6 @@ public class TicketService {
                 for (TicketModel ticket: ticketModels) {
                     CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(ticket.getIdCustomerVehicle());
                     VehicleDto vehicle = vehicleService.findById(customerVehicleDto.getIdVehicle());
-
-                    System.out.println(vehicle);
-                    System.out.println(plate);
 
                     if(vehicle.getPlate().equals(plate)) {
                         isPresent = true;

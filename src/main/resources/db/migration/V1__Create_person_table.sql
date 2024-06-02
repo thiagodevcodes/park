@@ -8,6 +8,5 @@ CREATE TABLE person (
     updated_at datetime NULL,
     CONSTRAINT PK_person PRIMARY KEY (id),
     CONSTRAINT UK_personCpf UNIQUE (cpf),
-    CONSTRAINT UK_personEmail UNIQUE  (email),
-    CONSTRAINT UK_personPhone UNIQUE (phone)
+    CONSTRAINT UK_personEmail UNIQUE  (email)
 );

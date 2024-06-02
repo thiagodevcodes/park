@@ -12,6 +12,8 @@ import lombok.Data;
 
 @Data
 public class CustomerForm {
+    private Integer id;
+
     @NotBlank(message = "O nome não pode estar em branco")
     @NotEmpty(message = "O nome não pode estar vazio")
     @NotNull(message = "O nome não pode ser nulo")

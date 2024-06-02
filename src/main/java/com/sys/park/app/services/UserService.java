@@ -76,20 +76,7 @@ public class UserService {
         }
     }
 
-    public Boolean userByIdPerson(Integer idPerson) {
-        try {
-            Optional<UserModel> userModel = userRepository.findByIdPerson(idPerson);
 
-            if (userModel.isPresent()) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException(
-                    "Objeto não encontrado! Id Pessoa: " + idPerson + ", Tipo: " + UserModel.class.getName());
-        }
-    }
 
     public UserDto insert(UserDto userDto) {
         try {
@@ -160,7 +147,7 @@ public class UserService {
         }
 
         if (isPresent) {
-            if (this.userByIdPerson(newPerson.getId())) {
+            if (userRepository.existsByIdPerson(newPerson.getId())) {
                 userDto = this.findByIdPerson(newPerson.getId());
                 if (userDto.getIsActive()) {    
                     if (userRepository.existsByUsername(user.getUsername())) 
@@ -266,7 +253,7 @@ public class UserService {
             PersonDto personDto = personService.findById(userDto.getIdPerson());
 
             if (!userGetDto.getEmail().equals(personDto.getEmail())) {
-                Boolean emailExist = personService.verifyEmail(userGetDto.getEmail());
+                Boolean emailExist = personRepository.existsByEmail(userGetDto.getEmail());
                 if (emailExist)
                     throw new DataIntegrityException("Email já existe!");
             }
