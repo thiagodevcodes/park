@@ -2,6 +2,12 @@
 INSERT INTO vacancy(`id`, `created_at`, `situation`, `updated_at`)
 VALUES(1, current_timestamp(), true,current_timestamp());
 
+INSERT INTO person (`id`, `name`, `cpf`, `email`, `phone`, `created_at`, `updated_at`)
+VALUES (1, 'Thiago', '08516996506', 'thiago@gmail.com', '79988674823', current_timestamp(), current_timestamp());
+
+INSERT INTO user_system(`id`, `created_at`, `updated_at`, `username`, `password`, `is_active`, `id_person`, `role`)
+VALUES (1, current_timestamp(), current_timestamp(), 'thiago', '$2a$10$mhOFFm1tLvE0Mp4NJk4QmOHyUAfy1RhE0HBXXNvFKf.MKyYlmqIqS', true, 1, 0);
+
 INSERT INTO vacancy(`id`, `created_at`, `situation`, `updated_at`)
 VALUES(2, current_timestamp(), true,current_timestamp());
 

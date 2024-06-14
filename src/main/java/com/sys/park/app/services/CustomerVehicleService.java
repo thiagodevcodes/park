@@ -11,7 +11,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
-
 import com.sys.park.app.models.CustomerVehicleModel;
 import com.sys.park.app.repositories.CustomerVehicleRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -38,12 +37,12 @@ public class CustomerVehicleService {
             }
         }
 
-        public CustomerVehicleDto insert(CustomerVehicleDto customerVehicleDto) {
+        public CustomerVehicleModel insert(CustomerVehicleDto customerVehicleDto) {
             try {
                 CustomerVehicleModel newCustomer = modelMapper.map(customerVehicleDto, CustomerVehicleModel.class);
                 
                 newCustomer = customerVehicleRepository.save(newCustomer);
-                return modelMapper.map(newCustomer, CustomerVehicleDto.class);
+                return newCustomer;
     
             } catch (DataIntegrityViolationException e) {
                 throw new DataIntegrityException("Erro ao tentar inserir um cliente!");

@@ -4,58 +4,66 @@ import styles from "../../styles/Home.module.css";
 import Layout from "@/components/Layout";
 import { fetchData } from "@/services/axios";
 
-import UserContext from "@/contexts/UserContext";
+import { AuthContext } from "@/contexts/UserContext";
+import { useRouter } from "next/router";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/dist/server/api-utils";
 
-export default function Home() {
+export default async function Home() {
     const [width, setWidth] = useState(0)
     const [model, setModel] = useState([])
     const [ocuppied, setOcuppied] = useState(0)
     const [notOcuppied, setNotOcuppied] = useState(0)
     const [totalPrice, setTotalPrice] = useState(0)
+    const { auth } = useContext(AuthContext);
+    const router = useRouter()
 
-    const { username, name } = useContext(UserContext)
+    const session = await getServerSession();
 
-    useEffect(() => {
-        fetchData("vacancies").then((response) => {
-            if(response){
-                setModel(response.vacanciesList);
-                setOcuppied(response.vacanciesOccupied);
-                setNotOcuppied(response.vacanciesNotOccupied);
-            }
+    if(!session) {
+        redirect("/")
+    }
+    // useEffect(() => {
+    //     fetchData("vacancies").then((response) => {
+    //         if(response){
+    //             setModel(response.vacanciesList);
+    //             setOcuppied(response.vacanciesOccupied);
+    //             setNotOcuppied(response.vacanciesNotOccupied);
+    //         }
 
-        })
-    }, [notOcuppied, ocuppied])
+    //     })
+    // }, [notOcuppied, ocuppied])
 
-    useEffect(() => {
-        fetchData("tickets/registerdate").then((res) => {
-            let totalPriceSum = 0;
+    // useEffect(() => {
+    //     fetchData("tickets/registerdate").then((res) => {
+    //         let totalPriceSum = 0;
 
-            if(res) {
-                res.forEach(element => {
-                    totalPriceSum += element.totalPrice;
-                });
+    //         if(res) {
+    //             res.forEach(element => {
+    //                 totalPriceSum += element.totalPrice;
+    //             });
     
-                setTotalPrice(totalPriceSum);
-            }
+    //             setTotalPrice(totalPriceSum);
+    //         }
 
-        });
-    }, []);
+    //     });
+    // }, []);
 
-    useEffect(() => {
-        const handleResize = () => {
-            setWidth(window.innerWidth);
-        };
+    // useEffect(() => {
+    //     const handleResize = () => {
+    //         setWidth(window.innerWidth);
+    //     };
 
-        if (typeof window !== 'undefined') {
-            window.addEventListener('resize', handleResize);
+    //     if (typeof window !== 'undefined') {
+    //         window.addEventListener('resize', handleResize);
 
-            setWidth(window.innerWidth);
+    //         setWidth(window.innerWidth);
 
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }
-    }, [width])
+    //         return () => {
+    //             window.removeEventListener('resize', handleResize);
+    //         };
+    //     }
+    // }, [width])
 
     return (
         <>
@@ -65,10 +73,8 @@ export default function Home() {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/img/Parking.svg" />
             </Head>
-
-            
                 <div className={styles.container}>
-                    <h1>Bem-vindo, {name}</h1>
+                    <h1>Bem-vindo, {session.user.name}</h1>
 
                     <div className={styles.infoContainer}>
                         <div className={styles.info}>

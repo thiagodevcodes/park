@@ -11,8 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sys.park.app.dtos.Customer.CustomerForm;
 import com.sys.park.app.dtos.Person.PersonDto;
+import com.sys.park.app.dtos.Person.PersonForm;
+import com.sys.park.app.dtos.Person.PersonUpdateForm;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -48,52 +49,30 @@ public class PersonService {
         }
     }
 
-    public PersonDto findByCpf(String cpf) {
-        try {
-            PersonModel personModel = personRepository.findByCpf(cpf).get();
-            return modelMapper.map(personModel, PersonDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Cpf: " + cpf + ", Tipo: " + PersonModel.class.getName());
-        }
-    }
+    public PersonDto insert(PersonForm personForm) {
+        try {       
+            this.validPerson(modelMapper.map(personForm, PersonDto.class));
 
-    public PersonDto findByEmail(String email) {
-        try {
-            PersonModel personModel = personRepository.findByEmail(email).get();
-            return modelMapper.map(personModel, PersonDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Email: " + email + ", Tipo: " + PersonModel.class.getName());
-        }
-    }
-
-    public PersonDto findByPhone(String phone) {
-        try {
-            PersonModel personModel = personRepository.findByPhone(phone).get();
-            return modelMapper.map(personModel, PersonDto.class);
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Telefone: " + phone + ", Tipo: " + PersonModel.class.getName());
-        }
-    }
-
-    public PersonDto insert(PersonDto personDto) {
-        try {
-            PersonModel newPerson = modelMapper.map(personDto, PersonModel.class);
+            PersonModel newPerson = modelMapper.map(personForm, PersonModel.class);
             newPerson = personRepository.save(newPerson);
+            
             return modelMapper.map(newPerson, PersonDto.class);
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Campo(s) obrigatório(s) da Pessoa não foi(foram) preenchido(s).");
         }
     }
 
-    public PersonDto updateById(PersonDto personDto, Integer id) {
+    public PersonDto updateById(PersonUpdateForm personForm, Integer id) {
         try {
-            Optional<PersonModel> personExist = personRepository.findById(id);
+            this.validPerson(modelMapper.map(personForm, PersonDto.class));
 
+            Optional<PersonModel> personExist = personRepository.findById(id);
+            System.out.println(personForm);
             if (personExist.isPresent()) {
                 PersonModel personUpdated = personExist.get();
 
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
-                modelMapper.map(personDto, personUpdated);
+                modelMapper.map(personForm, personUpdated);
                 personUpdated = personRepository.save(personUpdated);
 
                 return modelMapper.map(personUpdated, PersonDto.class);
@@ -118,39 +97,18 @@ public class PersonService {
         }
     }
 
-    public PersonDto getPersonByCustomer(CustomerForm customerForm) {
-        try {
-            PersonDto personDto = new PersonDto();
+    public Boolean validPerson(PersonDto personDto) {
+        System.out.println(personDto);
 
-
-            if(customerForm.getClientType().equals(2)) {
-                personDto.setCpf(customerForm.getCpf());
-                personDto.setEmail(customerForm.getEmail());
-                personDto.setName(customerForm.getName());
-                personDto.setPhone(customerForm.getPhone());
-
-                if (personRepository.existsByEmail(customerForm.getEmail())) {
-                    PersonDto person = this.findByEmail(customerForm.getEmail()); 
-                    System.out.println(person);
-                    System.out.println(personDto);
-                    personDto = this.updateById(personDto, person.getId());
-                    
-                } else if (personRepository.existsByCpf(customerForm.getCpf())) {
-                    PersonDto person = this.findByCpf(customerForm.getCpf());
-                    System.out.println(person);
-                    personDto = this.updateById(personDto, person.getId());
-                } else {
-                    personDto = this.insert(personDto);
-                } 
-            } else {
-                personDto.setName(customerForm.getName());
-                personDto = this.insert(personDto);
-            }
-        
-            return personDto;
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Id: " + customerForm.getEmail() + ", Tipo: " + PersonModel.class.getName());
+        if (personRepository.existsByCpf(personDto.getCpf()) && personDto.getCpf() != null) {
+            throw new DataIntegrityException("CPF já cadastrado");
         }
+
+        if (personRepository.existsByEmail(personDto.getEmail()) && personDto.getCpf() != null) {
+            throw new DataIntegrityException("Email já cadastrado");
+        }
+
+        return true;
     }
 }
 

@@ -12,4 +12,5 @@ import com.sys.park.app.models.CustomerVehicleModel;
 public interface CustomerVehicleRepository extends JpaRepository<CustomerVehicleModel, Integer> {
     List<CustomerVehicleModel> findByIdCustomer(Integer idCustomer);
     Optional<CustomerVehicleModel> findByIdCustomerAndIdVehicle(Integer idCustomer, Integer idVehicle);
+    Boolean existsByIdCustomerAndIdVehicle(Integer idCustomer, Integer idVehicle);
 }

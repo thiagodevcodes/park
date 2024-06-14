@@ -8,18 +8,20 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.dtos.Person.PersonForm;
+import com.sys.park.app.dtos.Person.PersonUpdateForm;
 import com.sys.park.app.services.PersonService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -34,15 +36,14 @@ public class PersonController {
     @Autowired
     ModelMapper modelMapper;
 
-    
     @GetMapping
     public ResponseEntity<List<PersonDto>> findAll() {
         List<PersonDto> userDtoList = personService.findAll();
         return ResponseEntity.ok().body(userDtoList);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PersonDto> findById(@PathVariable("id") Integer id) {        
+    @GetMapping("find")
+    public ResponseEntity<PersonDto> findById(@RequestParam("id") Integer id) {        
         PersonDto personDto = personService.findById(id);
         return ResponseEntity.ok().body(personDto);
     }
@@ -57,13 +58,14 @@ public class PersonController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        PersonDto personDto = personService.insert(modelMapper.map(personForm, PersonDto.class));
+        PersonDto personDto = personService.insert(personForm);
         return ResponseEntity.ok().body(personDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PersonDto> updateById(@Valid @RequestBody
-        PersonForm personForm, @PathVariable("id") Integer id, BindingResult br) {
+        PersonUpdateForm personForm, @RequestParam("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -74,12 +76,13 @@ public class PersonController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
      
-        PersonDto personDto = personService.updateById(modelMapper.map(personForm, PersonDto.class), id);
+        PersonDto personDto = personService.updateById(personForm, id);
         return ResponseEntity.ok().body(personDto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
+    @DeleteMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteById(@RequestParam("id") Integer id) {
         personService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Vacancy.VacancyDto;
 import com.sys.park.app.dtos.Vacancy.VacancyForm;
-import com.sys.park.app.dtos.Vacancy.VacancyResponse;
 import com.sys.park.app.services.VacancyService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -36,20 +35,9 @@ public class VacancyController {
     ModelMapper modelMapper;
 
     @GetMapping
-    public ResponseEntity<VacancyResponse> findAll() {
-        List<VacancyDto> vacancyDtoList = vacancyService.findAll();
-        Integer vagasLivres = vacancyService.vacanciesNotOcuppuied();
-        Integer vagasOcupadas = vacancyService.vacanciesOcuppied();
-        List<VacancyDto> vacancyDtosNotOccupied = vacancyService.findBySituation(true);
-
-        VacancyResponse vacancyResponse = new VacancyResponse();
-
-        vacancyResponse.setVacanciesNotOccupied(vagasLivres);
-        vacancyResponse.setVacanciesOccupied(vagasOcupadas);
-        vacancyResponse.setVacanciesList(vacancyDtoList);
-        vacancyResponse.setVacanciesNotOccupiedList(vacancyDtosNotOccupied);
-
-        return ResponseEntity.ok().body(vacancyResponse);
+    public ResponseEntity<List<VacancyDto>> findAll() {
+        List<VacancyDto> vacancyDto = vacancyService.findAll();
+        return ResponseEntity.ok().body(vacancyDto);
     }
 
     @GetMapping("/{id}")

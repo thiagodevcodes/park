@@ -14,4 +14,5 @@ public interface VehicleRepository extends JpaRepository<VehicleModel, Integer> 
     //List<VehicleModel> findByIdCustomer(Integer idCustomer);
     //List<VehicleModel> findByIdCustomerAndMonthlyVehicle(Integer idCustomer, Boolean monthlyVehicle);
     List<VehicleModel> findByMonthlyVehicle(Boolean monthlyVehicle);
+    Boolean existsByPlate(String plate);
 }

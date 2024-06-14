@@ -11,10 +11,18 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @Table(name = "person")
 public class PersonModel {
     @Id 
@@ -40,4 +48,15 @@ public class PersonModel {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updetedAt;
+
+    public PersonModel(String name, String cpf, String email, String phone) {
+        this.name = name;
+        this.cpf = cpf;
+        this.email = email;
+        this.phone = phone;
+    }
+
+    public PersonModel(String name) {
+        this.name = name;
+    }
 }

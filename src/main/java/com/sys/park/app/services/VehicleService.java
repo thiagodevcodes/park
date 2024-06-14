@@ -1,6 +1,5 @@
 package com.sys.park.app.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -10,15 +9,10 @@ import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleForm;
-import com.sys.park.app.dtos.Vehicle.VehicleGetDto;
 import com.sys.park.app.models.VehicleModel;
 import com.sys.park.app.repositories.VehicleRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -29,10 +23,7 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 public class VehicleService {
     @Autowired
     private VehicleRepository vehicleRepository;
-
-    @Autowired
-    private CustomerVehicleService customerVehicleService;
-    
+   
     @Autowired
     private ModelMapper modelMapper;
 
@@ -67,13 +58,16 @@ public class VehicleService {
         }
     }
 
-    public VehicleDto insert(VehicleDto vehicleDto) {
+    public VehicleDto insert(VehicleForm vehicleForm) {
         try {
-            VehicleModel newVehicle = modelMapper.map(vehicleDto, VehicleModel.class);
-            
-            validVehicle(vehicleDto.getPlate());
+            VehicleModel newVehicle = modelMapper.map(vehicleForm, VehicleModel.class);
 
-            newVehicle = vehicleRepository.save(newVehicle);
+            if(vehicleRepository.existsByPlate(vehicleForm.getPlate())) {
+                newVehicle = vehicleRepository.findByPlate(vehicleForm.getPlate()).get();
+            } else {
+                newVehicle = vehicleRepository.save(newVehicle);
+            }
+        
             return modelMapper.map(newVehicle, VehicleDto.class);
 
         } catch (DataIntegrityViolationException e) {
@@ -81,52 +75,9 @@ public class VehicleService {
         }
     }
 
-    public VehicleDto createVehicle(VehicleDto vehicleDto, Boolean monthlyVehicle, Integer idCustomer) {
-        try {
-            VehicleDto vehicle = new VehicleDto();
-
-            Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(vehicleDto.getPlate());
-
-            if(plateExist.isPresent()) {
-                VehicleModel vehicleModel = plateExist.get();
-
-                if(vehicleModel.getMonthlyVehicle().equals(true)) {
-                    throw new BusinessRuleException("Veículo pertence a um mensalista!");
-                }
-                
-                vehicle.setMonthlyVehicle(monthlyVehicle);
-                
-                vehicle = this.updateById(vehicleDto, vehicleModel.getId());
-                
-            } else {
-
-                vehicle.setPlate(vehicleDto.getPlate());
-                vehicle.setMake(vehicleDto.getMake());
-                vehicle.setModel(vehicleDto.getModel());
-                vehicle.setMonthlyVehicle(monthlyVehicle);
-
-                vehicle = this.insert(vehicle);
-            }
-            
-            CustomerVehicleDto customerVehicleDto = new CustomerVehicleDto();
-            customerVehicleDto.setIdCustomer(idCustomer);
-            customerVehicleDto.setIdVehicle(vehicle.getId());
-            customerVehicleDto = customerVehicleService.insert(customerVehicleDto);
-
-            return vehicle;
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Erro ao criar o veículo!");
-        }   
-    }
-
     public VehicleDto updateById(VehicleDto vehicleDto, Integer id) {
-        try {
-            
+        try {           
             Optional<VehicleModel> byPlate = vehicleRepository.findById(id);
-
-            if(!byPlate.get().getPlate().equals(vehicleDto.getPlate())) {
-                validVehicle(vehicleDto.getPlate());
-            }
 
             if (byPlate.isPresent()) {
                 VehicleModel vehicleUpdated = byPlate.get();
@@ -145,25 +96,6 @@ public class VehicleService {
         }
     }
 
-    public VehicleDto finishVehicle(VehicleForm vehicleForm, Integer id) {
-        try {
-            Optional<VehicleModel> vehicleExist = vehicleRepository.findById(id);
-
-            if (vehicleExist.isPresent()) {
-                VehicleModel vehicleModel = vehicleExist.get();
-                vehicleModel.setMonthlyVehicle(false);
-                
-                VehicleDto vehicleDto = this.updateById(modelMapper.map(vehicleModel, VehicleDto.class), id);
-
-                return vehicleDto;
-            }else {
-                throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DataIntegrityException("Erro ao finalizar o veículo!", e);
-        }
-    }
-
     public void deleteById(Integer id) {
         try {
             System.out.println(id);
@@ -174,58 +106,6 @@ public class VehicleService {
             }
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Não é possível excluir o Veiculo!");
-        }
-    }
-
-    public Page<VehicleGetDto> getMensalByIdCustomer(Integer idCustomer, Optional<Pageable> optionalPage) {
-        try {
-            Pageable page = optionalPage.orElse(Pageable.unpaged());
-            List<CustomerVehicleDto> customerVehicleModels = customerVehicleService.findByIdCustomer(idCustomer);
-            List<VehicleGetDto> vehicleDtos = new ArrayList<>();
-
-            for (CustomerVehicleDto customerVehicleDto : customerVehicleModels) {
-                VehicleDto vehicleDto = this.findById(customerVehicleDto.getIdVehicle());
-                VehicleGetDto vehicle = modelMapper.map(vehicleDto, VehicleGetDto.class);
-
-                if(vehicleDto.getMonthlyVehicle()) {
-                    vehicleDtos.add(vehicle);
-                }
-            }
-
-            Page<VehicleGetDto> pageVehicleDto =  new PageImpl<>(vehicleDtos, page, vehicleDtos.size());
-            return pageVehicleDto;
-        } catch (NoSuchElementException e) {
-            throw new DataIntegrityException("O Id do Veiculo não existe na base de dados!");
-        }
-    }
-
-    public Boolean verifyPlate(String plate) {
-        try {
-            Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(plate);
-
-            if(plateExist.isPresent()) {
-                return true;
-            } else {
-                return false;
-            }
-
-        } catch (BusinessRuleException e) {
-            throw new NotFoundException("Erro ao verificar veiculo!");
-        }
-    }
-
-    public Boolean validVehicle(String plate) {
-        try {
-            Optional<VehicleModel> plateExist = vehicleRepository.findByPlate(plate);
-
-            if(plateExist.isPresent()) {
-                throw new DataIntegrityException("Veículo já cadastrado!");
-            }
-
-            return false;
-
-        } catch (NoSuchElementException e) {
-            throw new NotFoundException("Objeto não encontrado! Placa: " + plate + ", Tipo: " + VehicleModel.class.getName());
         }
     }
 }

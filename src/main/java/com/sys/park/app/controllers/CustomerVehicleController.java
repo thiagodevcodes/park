@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleForm;
+import com.sys.park.app.models.CustomerVehicleModel;
 import com.sys.park.app.services.CustomerVehicleService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -54,7 +55,7 @@ public class CustomerVehicleController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        CustomerVehicleDto customerVehicleDto = customerVehicleService.insert(modelMapper.map(customerVehicleForm, CustomerVehicleDto.class));
-        return ResponseEntity.ok().body(customerVehicleDto);
+        CustomerVehicleModel customerVehicleModel = customerVehicleService.insert(modelMapper.map(customerVehicleForm, CustomerVehicleDto.class));
+        return ResponseEntity.ok().body(modelMapper.map(customerVehicleModel, CustomerVehicleDto.class));
     }
 }

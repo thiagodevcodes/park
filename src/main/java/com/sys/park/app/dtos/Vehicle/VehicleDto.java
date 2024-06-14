@@ -1,12 +1,16 @@
 package com.sys.park.app.dtos.Vehicle;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class VehicleDto {
     private Integer id;
     private String plate;
