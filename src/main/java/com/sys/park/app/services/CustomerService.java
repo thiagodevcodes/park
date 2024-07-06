@@ -16,6 +16,7 @@ import com.sys.park.app.dtos.Customer.CustomerForm;
 import com.sys.park.app.dtos.Customer.CustomerFormUpdate;
 import com.sys.park.app.dtos.Person.PersonDto;
 import com.sys.park.app.dtos.Person.PersonForm;
+import com.sys.park.app.dtos.Person.PersonUpdateForm;
 import com.sys.park.app.models.CustomerModel;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.CustomerRepository;
@@ -110,13 +111,11 @@ public class CustomerService {
         System.out.println(person);
 
         person = personRepository.save(person);
-        System.out.println(person);
 
         customer.setIsActive(true);
         customer.setIdPerson(person.getId());
         customer.setPaymentDay(customerForm.getPaymentDay());
         customer.setIdCustomerType(customerForm.getIdCustomerType());
-        System.out.println(customer);
 
         if(customerRepository.existsByIdPerson(customer.getIdPerson())) {
             customer = this.customerRepository.findByIdPerson(customer.getIdPerson()).get();
@@ -153,5 +152,24 @@ public class CustomerService {
 
         customer = createDataCustomer(customerForm, personForm);
         return modelMapper.map(customer, CustomerDto.class);
+    }
+
+    public CustomerDto updateCustomer(CustomerFormUpdate customerForm, Integer id) {
+        Optional<CustomerModel> customerOld = customerRepository.findById(id);
+        PersonForm personForm = customerForm.getPerson();
+
+        if (customerOld.isPresent()) {
+            PersonModel personOld = personRepository.findById(customerOld.get().getIdPerson()).get();
+            
+            modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+            modelMapper.map(personForm, personOld);
+
+            CustomerDto customerDto = this.updateById(customerForm, id);
+            personService.updateById(modelMapper.map(personOld, PersonUpdateForm.class), customerDto.getIdPerson());
+            
+            return customerDto;
+        } else {
+            throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
+        }
     }
 }

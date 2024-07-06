@@ -74,7 +74,7 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
      
-        CustomerDto costumerDto = customerService.updateById(customerForm, id);
+        CustomerDto costumerDto = customerService.updateCustomer(customerForm, id);
         return ResponseEntity.ok().body(costumerDto);
     }
 

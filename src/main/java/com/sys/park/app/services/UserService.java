@@ -94,7 +94,7 @@ public class UserService {
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(userForm, userUpdated);
 
-                if(userForm.getPassword() != null) {
+                if (userForm.getPassword() != null) {
                     String encryptedPassword = new BCryptPasswordEncoder().encode(userForm.getPassword());
                     userUpdated.setPassword(encryptedPassword);
                 }
@@ -130,23 +130,25 @@ public class UserService {
             if (personRepository.existsByCpf(data.getCpf())) {
                 person = personRepository.findByCpf(data.getCpf()).get();
                 Optional<UserModel> user = this.userRepository.findByIdPerson(person.getId());
-                
-                if (user.isPresent() && user.get().getIsActive().equals(true))  
-                    throw new DataIntegrityException("Usuário já está ativo");
 
-                if (personRepository.existsByEmail(data.getEmail())) 
-                    throw new DataIntegrityException("Email já cadastrado");
+                if (user.isPresent()) {
+                    if (user.get().getIsActive().equals(true))
+                        throw new DataIntegrityException("Usuário já está ativo");
 
-                if (user.isPresent() && user.get().getIsActive().equals(false)) {
-                    user.get().setIsActive(true);
+                    if (personRepository.existsByEmail(data.getEmail()) && user.get().getIsActive().equals(true))
+                        throw new DataIntegrityException("Email já cadastrado");
 
-                    person.setEmail(data.getEmail());
-                    person.setPhone(data.getPhone());
-                    person.setName(data.getName());
+                    if (user.get().getIsActive().equals(false)) {
+                        user.get().setIsActive(true);
 
-                    person = personRepository.save(person);
-                    this.userRepository.save(user.get());
-                }           
+                        person.setEmail(data.getEmail());
+                        person.setPhone(data.getPhone());
+                        person.setName(data.getName());
+
+                        person = personRepository.save(person);
+                        this.userRepository.save(user.get());
+                    }
+                }
             } else {
                 person = new PersonModel(data.getName(), data.getCpf(), data.getEmail(), data.getPhone());
                 person = personRepository.save(person);
@@ -167,10 +169,11 @@ public class UserService {
     }
 
     public LoginResponseDto loginUser(AuthenticationDto data) {
-        if(userRepository.existsByUsername(data.getUsername())) {
+        if (userRepository.existsByUsername(data.getUsername())) {
             UserDetails user = userRepository.findByUsername(data.getUsername());
 
-            if(!user.isEnabled()) throw new DataIntegrityException("Usuário não está ativo!");
+            if (!user.isEnabled())
+                throw new DataIntegrityException("Usuário não está ativo!");
         }
 
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.getUsername(), data.getPassword());

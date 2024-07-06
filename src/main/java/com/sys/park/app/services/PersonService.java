@@ -64,13 +64,17 @@ public class PersonService {
 
     public PersonDto updateById(PersonUpdateForm personForm, Integer id) {
         try {
-            this.validPerson(modelMapper.map(personForm, PersonDto.class));
-
             Optional<PersonModel> personExist = personRepository.findById(id);
-            System.out.println(personForm);
+            
             if (personExist.isPresent()) {
                 PersonModel personUpdated = personExist.get();
 
+                if(personUpdated.getCpf() != personForm.getCpf() && personForm.getCpf() != null) 
+                    this.validCpf(personForm.getCpf());
+            
+                if(personUpdated.getEmail() != personForm.getEmail() && personForm.getEmail() != null) 
+                    this.validEmail(personForm.getEmail());
+                
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(personForm, personUpdated);
                 personUpdated = personRepository.save(personUpdated);
@@ -104,10 +108,24 @@ public class PersonService {
             throw new DataIntegrityException("CPF já cadastrado");
         }
 
-        if (personRepository.existsByEmail(personDto.getEmail()) && personDto.getCpf() != null) {
+        if (personRepository.existsByEmail(personDto.getEmail()) && personDto.getEmail() != null) {
             throw new DataIntegrityException("Email já cadastrado");
         }
 
+        return true;
+    }
+
+    public Boolean validCpf(String cpf) {
+        if (personRepository.existsByCpf(cpf)) {
+            throw new DataIntegrityException("CPF já cadastrado");
+        }
+        return true;
+    }
+
+    public Boolean validEmail(String email) {
+        if (personRepository.existsByEmail(email)) {
+            throw new DataIntegrityException("Email já cadastrado");
+        }
         return true;
     }
 }
