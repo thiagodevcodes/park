@@ -2,6 +2,7 @@ package com.sys.park.app.services;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,9 @@ public class PersonService {
 
     public PersonDto insert(PersonForm personForm) {
         try {       
-            this.validPerson(modelMapper.map(personForm, PersonDto.class));
+            this.validCpf(personForm.getCpf());
+            this.validEmail(personForm.getEmail());
+            //this.validPerson(modelMapper.map(personForm, PersonDto.class));
 
             PersonModel newPerson = modelMapper.map(personForm, PersonModel.class);
             newPerson = personRepository.save(newPerson);
@@ -68,12 +71,17 @@ public class PersonService {
             
             if (personExist.isPresent()) {
                 PersonModel personUpdated = personExist.get();
-
-                if(personUpdated.getCpf() != personForm.getCpf() && personForm.getCpf() != null) 
+                System.out.println(personUpdated.getCpf());
+                System.out.println(personForm.getCpf());
+                System.out.println(!Objects.equals(personUpdated.getCpf(), personForm.getCpf()));
+                if (!Objects.equals(personUpdated.getCpf(), personForm.getCpf())) {
+                    System.out.println("Entrei na validação de CPF");
                     this.validCpf(personForm.getCpf());
-            
-                if(personUpdated.getEmail() != personForm.getEmail() && personForm.getEmail() != null) 
+                }
+                
+                if (!Objects.equals(personUpdated.getEmail(), personForm.getEmail())) {
                     this.validEmail(personForm.getEmail());
+                }
                 
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(personForm, personUpdated);
@@ -101,29 +109,17 @@ public class PersonService {
         }
     }
 
-    public Boolean validPerson(PersonDto personDto) {
-        System.out.println(personDto);
 
-        if (personRepository.existsByCpf(personDto.getCpf()) && personDto.getCpf() != null) {
-            throw new DataIntegrityException("CPF já cadastrado");
-        }
-
-        if (personRepository.existsByEmail(personDto.getEmail()) && personDto.getEmail() != null) {
-            throw new DataIntegrityException("Email já cadastrado");
-        }
-
-        return true;
-    }
 
     public Boolean validCpf(String cpf) {
-        if (personRepository.existsByCpf(cpf)) {
+        if (personRepository.existsByCpf(cpf) && cpf != null) {
             throw new DataIntegrityException("CPF já cadastrado");
         }
         return true;
     }
 
     public Boolean validEmail(String email) {
-        if (personRepository.existsByEmail(email)) {
+        if (personRepository.existsByEmail(email) && email != null) {
             throw new DataIntegrityException("Email já cadastrado");
         }
         return true;

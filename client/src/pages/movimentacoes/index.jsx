@@ -32,50 +32,16 @@ export default function Movimentacoes() {
     };
 
     useEffect(() => {
-        const fetchDataModels = async () => {
-            try {
-                const [clientsResponse, ticketsResponse, vacanciesResponse, customerTypesResponse] = await Promise.all([
-                    fetchData("customers/mensalistas"),
-                    fetchDataPage(3, currentPage, "tickets/movimentacoes"),
-                    fetchData("vacancies"),
-                    fetchData("customer_type")
-                ]);
-                if(clientsResponse && ticketsResponse && vacanciesResponse && customerTypesResponse) {
-                    setModels(prevValues => ({
-                        ...prevValues,
-                        clients: clientsResponse.content,
-                        tickets: ticketsResponse.content,
-                        vacancys: vacanciesResponse,
-                        customerTypes: customerTypesResponse
-                    }));              
-                    setTotalPages(ticketsResponse.totalPages)
-                }
+        fetchData("tickets").then((response) => {
+            if(response){
+                setModels(prevValues => ({
+                    ...prevValues,
+                    mensal: response
+                }));
 
-            } catch (error) {
-                console.error("Erro ao carregar dados:", error);
             }
-        };
-        fetchDataModels();
-    }, [currentPage, fetchData, fetchDataPage]);
-
-    useEffect(() => {
-        const fetchDataVehicles = async () => {
-            if (formData.idCustomerType == "2" && formData.idCustomer) {
-                try {
-                    const vehiclesResponse = await fetchData(`vehicles/mensalistas/${formData.idCustomer}`);
-
-                    setModels(prevValues => ({
-                        ...prevValues,
-                        vehicles: vehiclesResponse.content
-                    }));
-                    console.log(vehiclesResponse.content)
-                } catch (error) {
-                    console.error("Erro ao carregar dados dos veículos:", error);
-                }
-            }
-        };
-        fetchDataVehicles();
-    }, [formData.idCustomer, fetchData]);
+        })
+    }, [])
 
     useEffect(() => {
         const handleResize = () => {

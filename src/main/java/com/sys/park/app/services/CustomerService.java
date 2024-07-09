@@ -42,9 +42,15 @@ public class CustomerService {
     public List<CustomerDto> findAll() {
         try {
             List<CustomerModel> customerModelList = customerRepository.findAll();
-
+            
             return customerModelList.stream()
-                    .map(customer -> modelMapper.map(customer, CustomerDto.class))
+                    .map(customer -> {
+                        CustomerDto customerDto = modelMapper.map(customer, CustomerDto.class);
+                        // Aqui você adiciona o atributo person ao CustomerDto
+                        PersonModel person = personRepository.findById(customer.getIdPerson()).get();
+                        customerDto.setPerson(modelMapper.map(person, PersonDto.class)); // Supondo que getPerson() retorna o atributo person
+                        return customerDto;
+                    })
                     .collect(Collectors.toList());
         } catch (BusinessRuleException e) {
             throw new BusinessRuleException("Não é possível consultar os Clientes!");
@@ -62,15 +68,15 @@ public class CustomerService {
 
     public CustomerDto updateById(CustomerFormUpdate customerFormUpdate, Integer id) {
         try {
-            Optional<CustomerModel> customerExist = customerRepository.findById(id);
+            Optional<CustomerModel> customerExist = customerRepository.findById(id);      
 
             if (customerExist.isPresent()) {
                 CustomerModel customerUpdated = customerExist.get();
-
+                
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(customerFormUpdate, customerUpdated);
-                customerUpdated = customerRepository.save(customerUpdated);
-
+                customerUpdated = this.customerRepository.save(customerUpdated);
+                
                 return modelMapper.map(customerUpdated, CustomerDto.class);
             } else {
                 throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");
@@ -92,7 +98,7 @@ public class CustomerService {
         }
     }
 
-    public CustomerModel createDataCustomer(CustomerForm customerForm, PersonForm personForm) {
+    public CustomerDto createDataCustomer(CustomerForm customerForm, PersonForm personForm) {
         PersonModel person = new PersonModel();
         CustomerModel customer = new CustomerModel();
 
@@ -125,16 +131,18 @@ public class CustomerService {
 
         System.out.println(customer);
 
-        return customer;
+
+        CustomerDto customerDto = modelMapper.map(customer, CustomerDto.class);
+        customerDto.setPerson(modelMapper.map(person, PersonDto.class));
+        return customerDto;
     }
 
     public CustomerDto addCustomer(CustomerForm customerForm) {
         PersonModel person = new PersonModel();
         CustomerModel customer = new CustomerModel();
         PersonForm personForm = customerForm.getPerson();
-        System.out.println(customerForm);
 
-        if(this.personRepository.existsByCpf(personForm.getCpf()) && personForm.getCpf() != null) {
+        if(this.personRepository.existsByCpf(personForm.getCpf()) && !personForm.getCpf().equals(null)) {
             person = personRepository.findByCpf(personForm.getCpf()).get();
             personForm = modelMapper.map(person, PersonForm.class);
             
@@ -147,26 +155,27 @@ public class CustomerService {
                 }
             } 
         } else {
-            personService.validPerson(modelMapper.map(personForm, PersonDto.class));
+            personService.validCpf(personForm.getCpf());
+            personService.validEmail(personForm.getEmail());
+            //personService.validPerson(modelMapper.map(personForm, PersonDto.class));
         }
 
-        customer = createDataCustomer(customerForm, personForm);
-        return modelMapper.map(customer, CustomerDto.class);
+
+        CustomerDto customerDto = createDataCustomer(customerForm, personForm);
+        return customerDto;
     }
 
     public CustomerDto updateCustomer(CustomerFormUpdate customerForm, Integer id) {
         Optional<CustomerModel> customerOld = customerRepository.findById(id);
         PersonForm personForm = customerForm.getPerson();
-
+        
         if (customerOld.isPresent()) {
-            PersonModel personOld = personRepository.findById(customerOld.get().getIdPerson()).get();
-            
-            modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
-            modelMapper.map(personForm, personOld);
+            CustomerModel customerExist = customerOld.get();
+            PersonModel personOld = personRepository.findById(customerExist.getIdPerson()).get();
 
+            personService.updateById(modelMapper.map(personForm, PersonUpdateForm.class), customerExist.getIdPerson());
             CustomerDto customerDto = this.updateById(customerForm, id);
-            personService.updateById(modelMapper.map(personOld, PersonUpdateForm.class), customerDto.getIdPerson());
-            
+            customerDto.setPerson(modelMapper.map(personOld, PersonDto.class));
             return customerDto;
         } else {
             throw new DataIntegrityException("O Id do Cliente não existe na base de dados!");

@@ -1,66 +1,61 @@
 import "react-toastify/dist/ReactToastify.css";
 import styles from "../../styles/Mensalistas.module.css";
+import tableStyle from "../../components/Table/table.module.css"
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
 import { ToastContainer } from "react-toastify";
-import { fetchDataPage } from "@/services/axios";
+import { fetchData } from "@/services/axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays, faCirclePlus, faPenToSquare, faCircleExclamation, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
 import Pagination from "@/components/Pagination";
 import InputForm from "@/components/InputForm";
-import Layout from "@/components/Layout";
 import Table from "@/components/Table";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
+import { useRouter } from "next/router";
 
 export default function Mensalistas() {
     const [width, setWidth] = useState(0)
     const [modalOpen, setModalOpen] = useState({ post: false, update: false, delete: false, finish: false });
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const [models, setModels] = useState({ mensal: [] })
-    const [formData, setFormData] = useState({ name: null, cpf: null, email: null, phone: null, paymentDay: null, clientType: 2 })
+    const [models, setModels] = useState({ customers: [] })
+    const [formData, setFormData] = useState({ person: { name: null, cpf: null, email: null, phone: null }, paymentDay: null, idCustomerType: 2 })
+
+    const router = useRouter()
 
     const handleInputChange = (column, event) => {
-        setFormData({
-            ...formData,
-            [column]: event.target.value,
-        });
+        const updatedFormData = {
+            id: column === 'id' ? event.target.value : formData.id,
+            idCustomerType: column === 'idCustomerType' ? event.target.value : formData.idCustomerType,
+            paymentDay: column === 'paymentDay' ? event.target.value : formData.paymentDay,
+            
+            person: {
+                name: column === "name" ? event.target.value : formData.person.name,
+                cpf: column === "cpf" ? event.target.value : formData.person.cpf,
+                email: column === "email" ? event.target.value : formData.person.email,
+                phone: column === "phone" ? event.target.value : formData.person.phone     
+            }
+        };
+        
+        setFormData(updatedFormData);
     };
 
     useEffect(() => {
-        fetchDataPage(5, currentPage, "customers/mensalistas")
-            .then(({ content, totalPages }) => {
-                setModels(prevModels => ({
-                    ...prevModels,
-                    mensal: content
+        fetchData("customers").then((response) => {
+            if(response){
+                setModels(prevValues => ({
+                    ...prevValues,
+                    customers: response
                 }));
-                setTotalPages(totalPages);
-            })
-            .catch(error => {
-                console.error("Erro ao carregar dados:", error);
-            });
-    }, [currentPage]);
+            }
+        })
 
-    useEffect(() => {
-        const handleResize = () => {
-            setWidth(window.innerWidth);
-        };
-
-        if (typeof window !== 'undefined') {
-            window.addEventListener('resize', handleResize);
-
-            setWidth(window.innerWidth);
-
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }
-    }, [width])
+    }, [])
 
     return (
         <>
@@ -70,9 +65,6 @@ export default function Mensalistas() {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/img/Parking.svg" />
             </Head>
-
-
-
                 <div className={styles.container}>
 
                     <div className={styles.headerLogo}>
@@ -82,16 +74,16 @@ export default function Mensalistas() {
                 </div>
 
                 {modalOpen.post &&
-                    <Modal icon={faCirclePlus} action={"post"} path={"customers"} data={formData} modalOpen={modalOpen}
+                    <Modal icon={faCirclePlus} action={"post"} path={"customers"} data={{...formData}} modalOpen={modalOpen}
                         title={"Adicionar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
-                            <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name} />
-                            <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.cpf} />
+                            <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.person.name} />
+                            <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.person.cpf} />
                         </div>
 
                         <div className={styles.modalContainer}>
-                            <InputForm title={"Email: "} onChange={(e) => handleInputChange("email", e)} value={formData.email} />
-                            <InputForm title={"Telefone: "} onChange={(e) => handleInputChange("phone", e)} value={formData.phone} />
+                            <InputForm title={"Email: "} onChange={(e) => handleInputChange("email", e)} value={formData.person.email} />
+                            <InputForm title={"Telefone: "} onChange={(e) => handleInputChange("phone", e)} value={formData.person.phone} />
                         </div>
                         <div className={styles.modalContainer}>
                             <InputForm title={"Dia do Pagamento: "} onChange={(e) => handleInputChange("paymentDay", e)} value={formData.paymentDay} />
@@ -100,13 +92,13 @@ export default function Mensalistas() {
                 }
 
                 {modalOpen.update &&
-                    <Modal icon={faPenToSquare} path={"customers/mensalistas"} data={{...formData, clientType: 2}} modalOpen={modalOpen}
+                    <Modal icon={faPenToSquare} path={"customers"} data={{...formData}} modalOpen={modalOpen}
                         action={"update"} title={"Editar"} setModalOpen={setModalOpen}>
                         <div className={styles.modalContainer}>
-                            <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.name} />
-                            <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.cpf} />
-                            <InputForm title={"Email: "} onChange={(e) => handleInputChange("email", e)} value={formData.email} />
-                            <InputForm title={"Telefone: "} onChange={(e) => handleInputChange("phone", e)} value={formData.phone} />
+                            <InputForm title={"Nome: "} onChange={(e) => handleInputChange("name", e)} value={formData.person.name} />
+                            <InputForm title={"CPF: "} onChange={(e) => handleInputChange("cpf", e)} value={formData.person.cpf} />
+                            <InputForm title={"Email: "} onChange={(e) => handleInputChange("email", e)} value={formData.person.email} />
+                            <InputForm title={"Telefone: "} onChange={(e) => handleInputChange("phone", e)} value={formData.person.phone} />
                             <InputForm title={"Dia de Pagamento: "} onChange={(e) => handleInputChange("paymentDay", e)} value={formData.paymentDay} />
                         </div>
                     </Modal>
@@ -131,9 +123,52 @@ export default function Mensalistas() {
                 }
 
                 <div className={styles.box}>
-                    <Table columns={["Id", "Nome", "Telefone", "Email", "CPF", "Dia Pagamento"]} width={"85%"} data={models.mensal} setModalOpen={setModalOpen} modalOpen={modalOpen} setFormData={setFormData} />
+                    <Table columns={["Id", "Nome", "Telefone", "Email", "CPF", "Dia Pagamento"]} width={"85%"} data={models.mensal} setModalOpen={setModalOpen} modalOpen={modalOpen} setFormData={setFormData}>
+                        <tbody>
+                            {models.customers.length > 0 ? (
+                                models.customers.map((item) => (
+                                    <tr key={item.id}>
+                                        <td>{item.id}</td>
+                                        <td>{item.person.name}</td>
+                                        <td>{item.person.phone}</td>
+                                        <td>{item.person.email}</td>
+                                        <td>{item.person.cpf}</td>
+                                        <td>{item.paymentDay}</td>
+                                        <td>
+                                            <div className={styles.buttonContainer}>
+                                                <Button onClick={() => {
+                                                    setModalOpen({ ...modalOpen, update: true });
+                                                    setFormData({ ...item });
+                                                }} imgUrl={"/icons/Edit.svg"} bgColor={"#E9B500"} padding={"2px"} />
 
-                    {models.mensal.length > 0 &&
+                                                <Button onClick={() => {
+                                                    setModalOpen({ ...modalOpen, finish: true });
+                                                    setFormData({ ...item });
+                                                }} imgUrl={"/icons/Done.svg"} bgColor={"#00bd1f"} padding={"2px"} />
+
+                                                <Button onClick={() => {
+                                                    setModalOpen({ ...modalOpen, delete: true });
+                                                    setFormData({ ...item });
+                                                }} imgUrl={"/icons/Remove.svg"} bgColor={"#FF0000"} padding={"2px"} />
+
+                                                { router.pathname === "/mensalistas" &&
+                                                    <Link href={`/mensalistas/vehicles/${item.id}`} className={`${styles.bgBlue} ${styles.actionButton}`}>
+                                                        <Image src={"/icons/Cars.svg"} width={30} height={30} alt="Icone Cars" />
+                                                    </Link>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr style={{ textAlign: "center" }}>
+                                    <td colSpan={6}>Não possui dados</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </Table>
+
+                    {models.customers.length > 0 &&
                         <Pagination
                             currentPage={currentPage}
                             setCurrentPage={setCurrentPage}

@@ -6,9 +6,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default function Modal({ children, setModalOpen, modalOpen, title, action, path, data, icon }) {
     const router = useRouter()
 
-    console.log(data)
-
+    
+    
     const submitUpdated = async (e, id, path, data) => {
+        console.log("entrei aqui")
+        console.log(id)
         e.preventDefault();
         if (id) {
             try {
@@ -72,7 +74,6 @@ export default function Modal({ children, setModalOpen, modalOpen, title, action
                         if (action == "post") {
                             handleSubmit(e, path, data);
                         } else if(action == "update") {
-                            console.log(data)
                             submitUpdated(e, data.id, path, data)
                         } else if(action == "delete") {
                             submitDelete(e, data.id, path)

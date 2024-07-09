@@ -1,5 +1,7 @@
 package com.sys.park.app.dtos.Customer;
 
+import com.sys.park.app.dtos.Person.PersonDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,4 +19,5 @@ public class CustomerDto {
     private Integer paymentDay;
     private Integer idCustomerType;
     private Boolean isActive;
+    private PersonDto person;
 }

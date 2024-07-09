@@ -1,85 +1,30 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { handleLogin } from '@/services/axios';
-import axios from 'axios';
-import { useRouter } from 'next/router';
-import jwt from "jsonwebtoken"
+import { useEffect ,createContext, useState } from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext({})
 
-function AuthProvider({ children }) {
-    const [auth, setAuth] = useState(false);
-    const router = useRouter();
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState()
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-    
-        console.log(isTokenValid(token));
-        console.log(token)
-        if (!token) {
-            router.push('/');
-        } else {
-            setAuth(true);
-            setAuthToken(token); // Configurar o token no Axios
-        }
-    }, [auth]);
+        const userToken = localStorage.getItem("user_token")
+        const usersStorage = localStorage.getItem("users_db")
 
-    const isTokenValid = (token) => {
-        try {
-            const decoded = jwt.decode(token);
-            console.log('Decoded token:', decoded);
+        if(userToken && usersStorage) {
+            const hasUser = JSON.parse(usersStorage)?.filter(
+                (user) => user.email === JSON.parse(userToken).email
+            )
 
-            const now = Date.now().valueOf() / 1000;
-            console.log('Current time:', now);
-
-            if (typeof decoded.exp !== 'undefined' && decoded.exp < now) {
-                console.log('Token expired');
-                return false; // Token expirado
-            }
-            return true;
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            return false; // Token inválido
-        }
-    };
-
-    const setAuthToken = (token) => {
-        if (token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        } else {
-            delete axios.defaults.headers.common['Authorization'];
-        }
-    };
-
-    const login = async (data) => {
-        try {
-            console.log(data)
-            const res = await handleLogin(data);
-            console.log('Login response:', res);
-
-            // Log da resposta do login
-            const token = res.data.token;
-            localStorage.setItem('token', token);
-            setAuthToken(token);
-            setAuth(true);
-            console.log('Redirecionando para /home');
-            router.push('/home');
-        } catch (e) {
-            console.log('Erro durante o login:', e);
-        }
-    };
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        setAuthToken(null);
-        setAuth(false);
-        router.push('/');
-    };
+            if(hasUser) setUser(hasUser[0])
+        }    
+    }, [])
 
     return (
-        <AuthContext.Provider value={{ auth, login, logout }}>
+        <AuthContext.Provider>
             {children}
         </AuthContext.Provider>
-    );
+    )
 }
 
-export { AuthContext, AuthProvider }
+
+
+export default AuthContext

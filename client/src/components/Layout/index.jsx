@@ -11,7 +11,6 @@ export default function Layout({ children }) {
     const [active, setActive] = useState(false);
     const router = useRouter()
 
-
     useEffect(() => {
         const handleResize = () => {
             setWidth(window.innerWidth);

@@ -1,13 +1,115 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const api = axios.create({
-    baseURL: 'http://localhost:8080/api', // Substitua pela URL base da sua API
-});
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRoaWFnbyIsImV4cCI6MTcyMDUwNjI2NH0.as95pQJ3piEEBBykzYVjBbB3qZE0YCp4T3SV6Cnw8ig'
 
-export const handleLogin = async (data) => {
-    console.log("handle", data)
-    await api.post('/auth/login', data);
+export const fetchData = async (path) => {
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        };
+
+        const response = await axios.get(`http://localhost:8080/api/${path}`, { headers });
+        return response.data
+    } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+    }
 };
 
-export default api;
+export const fetchDataPage = async (limit, currentPage, path) => {
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        };
+
+        const response = await axios.get(`http://localhost:8080/api/${path}?size=${limit}&page=${currentPage}`, { headers });
+        return response.data
+    } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+    }
+};
+
+export const fetchDataAll = async (path) => {
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+
+        if (!path) return
+        const response = await axios.get(`http://localhost:8080/api/orcamento/${path}/all`, { headers });
+        return response.data
+    } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+    }
+};
+
+export const fetchDataById = async (id, path) => {
+    try {
+        const response = await axios.get(`http://localhost:8080/api/orcamento/${path}/${id}`);
+        return response.data
+    } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+        toast.error("Erro ao buscar dado!")
+    }
+};
+
+export const handleCreate = async (data, path) => {
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        };
+
+        const response = await axios.post(`http://localhost:8080/api/${path}`, data, { headers });
+        if (response.status === 200) toast.success('Cadastrado com sucesso!');
+        return response;
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.messages && error.response.data.messages.length > 0) {
+            toast.error(error.response.data.messages[0]);
+        } else {
+            toast.error('Ocorreu um erro ao cadastrar!');
+        }
+    }
+}
+
+export const handleUpdate = async (id, path, data) => {
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        };
+
+        const response = await axios.put(`http://localhost:8080/api/${path}?id=${id}`, data, { headers });
+        if (response.status === 200) toast.success('Operação realizada com sucesso!');
+        return response;
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.messages && error.response.data.messages.length > 0) {
+            toast.error(error.response.data.messages[0]);
+        } else {
+            toast.error('Ocorreu um erro ao cadastrar!');
+        }
+    }
+}
+
+export const handleDelete = async (id, path) => {
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        };
+
+        const response = await axios.delete(`http://localhost:8080/api/${path}?id=${id}`, { headers })
+        console.log(response)
+        if(response.status === 204) toast.success('Operação realizada com sucesso!');
+        return response
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.messages && error.response.data.messages.length > 0) {
+            toast.error(error.response.data.messages[0]);
+        } else {
+            toast.error('Ocorreu um erro ao deletar!');
+        }
+    }
+}

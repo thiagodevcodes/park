@@ -72,7 +72,7 @@ public class UserService {
 
             UserDetails byLogin = userRepository.findByUsername(newUser.getUsername());
 
-            if (byLogin != null) {
+            if (!byLogin.equals(null)) {
                 throw new DataIntegrityException("Usuário já registrado.");
             }
 
@@ -94,7 +94,7 @@ public class UserService {
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(userForm, userUpdated);
 
-                if (userForm.getPassword() != null) {
+                if (!userForm.getPassword().equals(null)) {
                     String encryptedPassword = new BCryptPasswordEncoder().encode(userForm.getPassword());
                     userUpdated.setPassword(encryptedPassword);
                 }

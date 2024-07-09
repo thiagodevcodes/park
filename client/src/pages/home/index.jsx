@@ -4,66 +4,45 @@ import styles from "../../styles/Home.module.css";
 import Layout from "@/components/Layout";
 import { fetchData } from "@/services/axios";
 
-import { AuthContext } from "@/contexts/UserContext";
-import { useRouter } from "next/router";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/dist/server/api-utils";
+import UserContext from "@/contexts/UserContext";
 
-export default async function Home() {
+export default function Home() {
     const [width, setWidth] = useState(0)
     const [model, setModel] = useState([])
     const [ocuppied, setOcuppied] = useState(0)
     const [notOcuppied, setNotOcuppied] = useState(0)
     const [totalPrice, setTotalPrice] = useState(0)
-    const { auth } = useContext(AuthContext);
-    const router = useRouter()
 
-    const session = await getServerSession();
+    const { username, name } = useContext(UserContext)
 
-    if(!session) {
-        redirect("/")
-    }
-    // useEffect(() => {
-    //     fetchData("vacancies").then((response) => {
-    //         if(response){
-    //             setModel(response.vacanciesList);
-    //             setOcuppied(response.vacanciesOccupied);
-    //             setNotOcuppied(response.vacanciesNotOccupied);
-    //         }
+    useEffect(() => {
+        fetchData("vacancies").then((response) => {
+            if(response){
+                setModel(response);
+                const ocuppied = response.filter(item => item.situation == false);
+                const notOcuppied =  response.filter(item => item.situation == true);
 
-    //     })
-    // }, [notOcuppied, ocuppied])
+                setOcuppied(ocuppied.length)
+                setNotOcuppied(notOcuppied.length)
+            }
+        })
+    }, [])
 
-    // useEffect(() => {
-    //     fetchData("tickets/registerdate").then((res) => {
-    //         let totalPriceSum = 0;
+    useEffect(() => {
+        const handleResize = () => {
+            setWidth(window.innerWidth);
+        };
 
-    //         if(res) {
-    //             res.forEach(element => {
-    //                 totalPriceSum += element.totalPrice;
-    //             });
-    
-    //             setTotalPrice(totalPriceSum);
-    //         }
+        if (typeof window !== 'undefined') {
+            window.addEventListener('resize', handleResize);
 
-    //     });
-    // }, []);
+            setWidth(window.innerWidth);
 
-    // useEffect(() => {
-    //     const handleResize = () => {
-    //         setWidth(window.innerWidth);
-    //     };
-
-    //     if (typeof window !== 'undefined') {
-    //         window.addEventListener('resize', handleResize);
-
-    //         setWidth(window.innerWidth);
-
-    //         return () => {
-    //             window.removeEventListener('resize', handleResize);
-    //         };
-    //     }
-    // }, [width])
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+    }, [width])
 
     return (
         <>
@@ -73,8 +52,10 @@ export default async function Home() {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/img/Parking.svg" />
             </Head>
+
+            
                 <div className={styles.container}>
-                    <h1>Bem-vindo, {session.user.name}</h1>
+                    <h1>Bem-vindo, {name}</h1>
 
                     <div className={styles.infoContainer}>
                         <div className={styles.info}>

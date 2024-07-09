@@ -26,10 +26,6 @@ export default function Aside({ active }) {
                     <FontAwesomeIcon icon={faUserGroup} color="black" width={20}></FontAwesomeIcon>
                     <Link href={"/users"}>Usuários</Link>
                 </li>
-                <li className={router.pathname === "/relatorios" ? `${styles.active}` : ""}> 
-                    <FontAwesomeIcon icon={faSquarePollHorizontal} color="black" width={18}></FontAwesomeIcon>
-                    <Link href={"#"}>Relatórios</Link>
-                </li>
             </ul>
         </aside>
     )
