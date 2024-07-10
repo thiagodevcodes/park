@@ -1,10 +1,12 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-
-const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLWFwaSIsInN1YiI6InRoaWFnbyIsImV4cCI6MTcyMDUwNjI2NH0.as95pQJ3piEEBBykzYVjBbB3qZE0YCp4T3SV6Cnw8ig'
+import Cookies from "js-cookie";
+import jwt from "jsonwebtoken";
 
 export const fetchData = async (path) => {
     try {
+        const token = Cookies.get("auth_token");
+
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
@@ -19,6 +21,8 @@ export const fetchData = async (path) => {
 
 export const fetchDataPage = async (limit, currentPage, path) => {
     try {
+        const token = Cookies.get("auth_token");
+
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
@@ -33,6 +37,8 @@ export const fetchDataPage = async (limit, currentPage, path) => {
 
 export const fetchDataAll = async (path) => {
     try {
+        const token = Cookies.get("auth_token");
+
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -48,7 +54,14 @@ export const fetchDataAll = async (path) => {
 
 export const fetchDataById = async (id, path) => {
     try {
-        const response = await axios.get(`http://localhost:8080/api/orcamento/${path}/${id}`);
+        const token = Cookies.get("auth_token");
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+
+        const response = await axios.get(`http://localhost:8080/api/orcamento/${path}/${id}`, { headers });
         return response.data
     } catch (error) {
         console.error('Erro ao buscar dados:', error);
@@ -58,6 +71,8 @@ export const fetchDataById = async (id, path) => {
 
 export const handleCreate = async (data, path) => {
     try {
+        const token = Cookies.get("auth_token");
+
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
@@ -77,6 +92,8 @@ export const handleCreate = async (data, path) => {
 
 export const handleUpdate = async (id, path, data) => {
     try {
+        const token = Cookies.get("auth_token");
+
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
@@ -96,6 +113,8 @@ export const handleUpdate = async (id, path, data) => {
 
 export const handleDelete = async (id, path) => {
     try {
+        const token = Cookies.get("auth_token");
+
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 

@@ -1,7 +1,7 @@
 import "react-toastify/dist/ReactToastify.css";
 import styles from "../../styles/Mensalistas.module.css";
 import tableStyle from "../../components/Table/table.module.css"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,6 +17,7 @@ import Table from "@/components/Table";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import { useRouter } from "next/router";
+import UserContext from "@/contexts/UserContext";
 
 export default function Mensalistas() {
     const [width, setWidth] = useState(0)
@@ -25,8 +26,15 @@ export default function Mensalistas() {
     const [totalPages, setTotalPages] = useState(0);
     const [models, setModels] = useState({ customers: [] })
     const [formData, setFormData] = useState({ person: { name: null, cpf: null, email: null, phone: null }, paymentDay: null, idCustomerType: 2 })
+    const { authenticated } = useContext(UserContext)
 
     const router = useRouter()
+
+    if (!authenticated && typeof window !== "undefined") {
+        router.push("/");
+    }
+
+
 
     const handleInputChange = (column, event) => {
         const updatedFormData = {

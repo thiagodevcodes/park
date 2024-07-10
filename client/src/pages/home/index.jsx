@@ -1,8 +1,12 @@
+'use client'
+
 import Head from "next/head";
 import { useState, useEffect, useContext } from "react";
 import styles from "../../styles/Home.module.css";
-import Layout from "@/components/Layout";
 import { fetchData } from "@/services/axios";
+
+import { useRouter } from "next/router";
+
 
 import UserContext from "@/contexts/UserContext";
 
@@ -12,8 +16,17 @@ export default function Home() {
     const [ocuppied, setOcuppied] = useState(0)
     const [notOcuppied, setNotOcuppied] = useState(0)
     const [totalPrice, setTotalPrice] = useState(0)
+    const [isLoading, setIsLoading] = useState(true);
+    const { authenticated } = useContext(UserContext)
+    const router = useRouter()
+        
+    console.log(authenticated)
 
-    const { username, name } = useContext(UserContext)
+    useEffect(() => {
+        if (!authenticated) {
+            window.location.href = "/";
+        }
+    }, [authenticated, router])
 
     useEffect(() => {
         fetchData("vacancies").then((response) => {
@@ -53,9 +66,8 @@ export default function Home() {
                 <link rel="icon" href="/img/Parking.svg" />
             </Head>
 
-            
                 <div className={styles.container}>
-                    <h1>Bem-vindo, {name}</h1>
+                    <h1>Bem-vindo, User</h1>
 
                     <div className={styles.infoContainer}>
                         <div className={styles.info}>
