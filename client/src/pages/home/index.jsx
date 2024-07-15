@@ -19,12 +19,10 @@ export default function Home() {
     const [isLoading, setIsLoading] = useState(true);
     const { authenticated } = useContext(UserContext)
     const router = useRouter()
-        
-    console.log(authenticated)
 
     useEffect(() => {
         if (!authenticated) {
-            window.location.href = "/";
+            router.push("/")
         }
     }, [authenticated, router])
 

@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.sys.park.app.services.exceptions.AccessDeniedException;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
 import com.sys.park.app.services.exceptions.ConstraintException;
 import com.sys.park.app.services.exceptions.DataIntegrityException;
@@ -69,5 +70,10 @@ public class ControllerExceptionHandler {
     
         StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.BAD_REQUEST.value(), "Restrição de Dados", messagesList, request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAcessoNegadoException(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 }

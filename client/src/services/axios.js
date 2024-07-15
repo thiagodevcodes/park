@@ -1,7 +1,6 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
-import jwt from "jsonwebtoken";
 
 export const fetchData = async (path) => {
     try {

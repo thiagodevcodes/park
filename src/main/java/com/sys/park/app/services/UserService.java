@@ -181,7 +181,11 @@ public class UserService {
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
         var token = tokenService.generateToken((UserModel) auth.getPrincipal());
+        
+        LoginResponseDto loginResponseDto = new LoginResponseDto();
 
-        return new LoginResponseDto(token);
+        loginResponseDto.setToken(token);
+        loginResponseDto.setUsername(data.getUsername());
+        return loginResponseDto;
     }
 }

@@ -6,7 +6,6 @@ import { faHome, faCalendarDays, faCar, faUserGroup, faSquarePollHorizontal } fr
 
 export default function Aside({ active }) {
     const router = useRouter();
-
     return (
         <aside className={`${styles.aside} ${active ? `${styles.open}` : ""}`} >
             <ul>
