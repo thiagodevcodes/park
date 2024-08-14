@@ -42,7 +42,7 @@ public class CustomerController {
     }
 
     @GetMapping("find")
-    public ResponseEntity<CustomerDto> findById(@RequestParam("id") Integer id) {        
+    public ResponseEntity<CustomerDto> findById(@RequestParam("id") Long id) {        
         CustomerDto customerDto = customerService.findById(id);
         return ResponseEntity.ok().body(customerDto);
     }
@@ -63,7 +63,7 @@ public class CustomerController {
 
     @PutMapping
     public ResponseEntity<CustomerDto> updateById(@Valid @RequestBody
-        CustomerFormUpdate customerForm, @RequestParam("id") Integer id, BindingResult br) {
+        CustomerFormUpdate customerForm, @RequestParam("id") Long id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -79,7 +79,7 @@ public class CustomerController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteById(@RequestParam("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@RequestParam("id") Long id) {
         customerService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

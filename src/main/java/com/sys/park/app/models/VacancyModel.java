@@ -15,11 +15,11 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name="vacancy")
+@Table(name="tb_vacancy")
 public class VacancyModel {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "situation", nullable = false)
     private Boolean situation;

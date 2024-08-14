@@ -43,7 +43,7 @@ public class PersonController {
     }
 
     @GetMapping("find")
-    public ResponseEntity<PersonDto> findById(@RequestParam("id") Integer id) {        
+    public ResponseEntity<PersonDto> findById(@RequestParam("id") Long id) {        
         PersonDto personDto = personService.findById(id);
         return ResponseEntity.ok().body(personDto);
     }
@@ -65,7 +65,7 @@ public class PersonController {
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PersonDto> updateById(@Valid @RequestBody
-        PersonUpdateForm personForm, @RequestParam("id") Integer id, BindingResult br) {
+        PersonUpdateForm personForm, @RequestParam("id") Long id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -82,7 +82,7 @@ public class PersonController {
 
     @DeleteMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteById(@RequestParam("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@RequestParam("id") Long id) {
         personService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

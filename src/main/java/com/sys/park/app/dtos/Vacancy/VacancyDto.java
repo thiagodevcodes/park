@@ -12,6 +12,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class VacancyDto {
-    private Integer id;
+    private Long id;
     private Boolean situation;
 }

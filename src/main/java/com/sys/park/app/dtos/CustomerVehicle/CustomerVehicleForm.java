@@ -12,7 +12,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class CustomerVehicleForm {
-    private Integer id;
-    private Integer idVehicle;
-    private Integer idCustomer;
+    private Long id;
+    private Long idVehicle;
+    private Long idCustomer;
 }

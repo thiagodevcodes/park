@@ -1,7 +1,7 @@
-CREATE TABLE tb_customer_type (
+CREATE TABLE tb_roles (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(30) NOT NULL,
+    name VARCHAR(30),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    is_active BOOLEAN
+    CONSTRAINT UK_roleName UNIQUE (name)
 );

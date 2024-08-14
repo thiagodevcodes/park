@@ -41,7 +41,7 @@ public class PersonService {
         }
     }
 
-    public PersonDto findById(Integer id) {
+    public PersonDto findById(Long id) {
         try {
             PersonModel personModel = personRepository.findById(id).get();
             return modelMapper.map(personModel, PersonDto.class);
@@ -65,9 +65,9 @@ public class PersonService {
         }
     }
 
-    public PersonDto updateById(PersonUpdateForm personForm, Integer id) {
+    public PersonDto updateById(PersonUpdateForm personForm, Long long1) {
         try {
-            Optional<PersonModel> personExist = personRepository.findById(id);
+            Optional<PersonModel> personExist = personRepository.findById(long1);
             
             if (personExist.isPresent()) {
                 PersonModel personUpdated = personExist.get();
@@ -96,7 +96,7 @@ public class PersonService {
         }
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         try {
             if (personRepository.existsById(id)) {
                 personRepository.deleteById(id);

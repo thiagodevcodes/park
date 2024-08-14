@@ -39,7 +39,7 @@ public class VacancyService {
         }
     }
 
-    public VacancyDto findById(Integer id) {
+    public VacancyDto findById(Long id) {
         try {
             VacancyModel vacancyModel = vacancyRepository.findById(id).get();
             return modelMapper.map(vacancyModel, VacancyDto.class);
@@ -60,7 +60,7 @@ public class VacancyService {
         }
     }
 
-    public VacancyDto updateById(VacancyDto vacancyDto, Integer id) {
+    public VacancyDto updateById(VacancyDto vacancyDto, Long id) {
         try {
             System.out.println("Id vaga: " + id);
             Optional<VacancyModel> vacancyExist = vacancyRepository.findById(id);
@@ -83,7 +83,7 @@ public class VacancyService {
         }
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         try {
             if (vacancyRepository.existsById(id)) {
                 vacancyRepository.deleteById(id);

@@ -18,7 +18,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class CustomerFormUpdate {
-    private Integer id;
+    private Long id;
  
     @Valid
     @NotNull(message = "A pessoa não pode ser nula")
@@ -29,7 +29,7 @@ public class CustomerFormUpdate {
     private Integer paymentDay;
 
     @NotNull(message = "O tipo de cliente não pode ser nulo")
-    private Integer idCustomerType;
+    private Long idCustomerType;
     
     private Boolean isActive;
 }

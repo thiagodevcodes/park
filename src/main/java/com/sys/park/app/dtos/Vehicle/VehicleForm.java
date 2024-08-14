@@ -16,7 +16,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class VehicleForm {
-    private Integer id;
+    private Long id;
 
     @NotEmpty(message = "A placa não pode ser vazia")
     @NotBlank(message = "A placa não pode estar em branco")

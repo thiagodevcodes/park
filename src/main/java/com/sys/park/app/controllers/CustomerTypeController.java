@@ -41,7 +41,7 @@ public class CustomerTypeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerTypeDto> find(@PathVariable("id") Integer id) {        
+    public ResponseEntity<CustomerTypeDto> find(@PathVariable("id") Long id) {        
         CustomerTypeDto customerTypeDto = customerTypeService.findById(id);
         return ResponseEntity.ok().body(customerTypeDto);
     }
@@ -63,7 +63,7 @@ public class CustomerTypeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomerTypeDto> updateById(@Valid @RequestBody
-        CustomerTypeForm costumerTypeForm, @PathVariable("id") Integer id, BindingResult br) {
+        CustomerTypeForm costumerTypeForm, @PathVariable("id") Long id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -79,7 +79,7 @@ public class CustomerTypeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
         customerTypeService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

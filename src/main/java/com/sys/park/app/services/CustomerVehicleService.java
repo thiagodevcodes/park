@@ -49,7 +49,7 @@ public class CustomerVehicleService {
         }
     }
 
-    public CustomerVehicleDto findById(Integer id) {
+    public CustomerVehicleDto findById(Long id) {
         try {
             CustomerVehicleModel customerVehicleModel = customerVehicleRepository.findById(id).get();
             return modelMapper.map(customerVehicleModel, CustomerVehicleDto.class);
@@ -58,7 +58,7 @@ public class CustomerVehicleService {
         }
     }
 
-    public List<CustomerVehicleDto> findByIdCustomer(Integer idCustomer) {
+    public List<CustomerVehicleDto> findByIdCustomer(Long idCustomer) {
         try {
             List<CustomerVehicleModel> customerVehicleModel = customerVehicleRepository.findByIdCustomer(idCustomer);
             
@@ -70,7 +70,7 @@ public class CustomerVehicleService {
         }
     }   
   
-    public List<CustomerVehicleDto> findByIdVehicle(Integer idCustomer) {
+    public List<CustomerVehicleDto> findByIdVehicle(Long idCustomer) {
         try {
             List<CustomerVehicleModel> customerVehicleModel = customerVehicleRepository.findByIdCustomer(idCustomer);
             
@@ -82,7 +82,7 @@ public class CustomerVehicleService {
         }
     }  
 
-    public CustomerVehicleDto findByIdCustomerAndIdVehicle(Integer idCustomer, Integer idVehicle) {
+    public CustomerVehicleDto findByIdCustomerAndIdVehicle(Long idCustomer, Long idVehicle) {
         try {
             CustomerVehicleModel customerVehicleModel = customerVehicleRepository.findByIdCustomerAndIdVehicle(idCustomer, idVehicle).get();
             return modelMapper.map(customerVehicleModel, CustomerVehicleDto.class);
@@ -91,7 +91,7 @@ public class CustomerVehicleService {
         }
     }   
 
-    public Boolean vehicleCustomerExist(Integer idCustomer, Integer idVehicle) {
+    public Boolean vehicleCustomerExist(Long idCustomer, Long idVehicle) {
         try {
             Optional<CustomerVehicleModel> customerVehicle = customerVehicleRepository.findByIdCustomerAndIdVehicle(idCustomer, idVehicle);
 

@@ -57,7 +57,7 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto findById(Integer id) {
+    public CustomerDto findById(Long id) {
         try {
             CustomerModel customerModel = customerRepository.findById(id).get();
             return modelMapper.map(customerModel, CustomerDto.class);
@@ -66,7 +66,7 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto updateById(CustomerFormUpdate customerFormUpdate, Integer id) {
+    public CustomerDto updateById(CustomerFormUpdate customerFormUpdate, Long id) {
         try {
             Optional<CustomerModel> customerExist = customerRepository.findById(id);      
 
@@ -86,7 +86,7 @@ public class CustomerService {
         }
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         try {
             if (customerRepository.existsById(id)) {
                 customerRepository.deleteById(id);
@@ -165,7 +165,7 @@ public class CustomerService {
         return customerDto;
     }
 
-    public CustomerDto updateCustomer(CustomerFormUpdate customerForm, Integer id) {
+    public CustomerDto updateCustomer(CustomerFormUpdate customerForm, Long id) {
         Optional<CustomerModel> customerOld = customerRepository.findById(id);
         PersonForm personForm = customerForm.getPerson();
         

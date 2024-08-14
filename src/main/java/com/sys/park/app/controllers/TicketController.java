@@ -42,7 +42,7 @@ public class TicketController {
     }
 
     @GetMapping("find")
-    public ResponseEntity<TicketDto> findById(@RequestParam("id") Integer id) {        
+    public ResponseEntity<TicketDto> findById(@RequestParam("id") Long id) {        
         TicketDto personDto = ticketService.findById(id);
         return ResponseEntity.ok().body(personDto);
     }
@@ -64,7 +64,7 @@ public class TicketController {
 
     @PutMapping
     public ResponseEntity<TicketDto> updateById(@Valid @RequestBody
-        TicketDto ticketForm, @RequestParam("id") Integer id, BindingResult br) {
+        TicketDto ticketForm, @RequestParam("id") Long id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -81,7 +81,7 @@ public class TicketController {
 
     @PutMapping("/finish")
     public ResponseEntity<TicketDto> finishTicket(@Valid @RequestBody
-    TicketForm ticketForm, @RequestParam("id") Integer id, BindingResult br) {
+    TicketForm ticketForm, @RequestParam("id") Long id, BindingResult br) {
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
             br.getAllErrors().forEach(e -> {
@@ -96,7 +96,7 @@ public class TicketController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteById(@RequestParam("id") Integer id) {
+    public ResponseEntity<Void> deleteById(@RequestParam("id") Long id) {
         ticketService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

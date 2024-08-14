@@ -1,7 +1,6 @@
-CREATE TABLE vacancy (
-    id INTEGER AUTO_INCREMENT NOT NULL,
+CREATE TABLE tb_vacancy (
+    id BIGSERIAL PRIMARY KEY,
     situation BOOLEAN NOT NULL,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
-    CONSTRAINT PK_vacancy PRIMARY KEY (id)
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
 );

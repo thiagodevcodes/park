@@ -39,7 +39,7 @@ public class CustomerVehicleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerVehicleDto> findById(@PathVariable("id") Integer id) {        
+    public ResponseEntity<CustomerVehicleDto> findById(@PathVariable("id") Long id) {        
         CustomerVehicleDto customerVehicleDto = customerVehicleService.findById(id);
         return ResponseEntity.ok().body(customerVehicleDto);
     }

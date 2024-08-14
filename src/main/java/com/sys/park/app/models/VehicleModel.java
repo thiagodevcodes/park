@@ -15,11 +15,11 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name="vehicle")
+@Table(name="tb_vehicle")
 public class VehicleModel {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "plate", nullable = false, unique = true)
     private String plate;

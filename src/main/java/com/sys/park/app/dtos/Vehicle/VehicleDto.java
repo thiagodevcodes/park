@@ -12,7 +12,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class VehicleDto {
-    private Integer id;
+    private Long id;
     private String plate;
     private String make;
     private String model;

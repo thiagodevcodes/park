@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import com.sys.park.app.models.CustomerVehicleModel;
 
 @Repository
-public interface CustomerVehicleRepository extends JpaRepository<CustomerVehicleModel, Integer> {
-    List<CustomerVehicleModel> findByIdCustomer(Integer idCustomer);
-    Optional<CustomerVehicleModel> findByIdCustomerAndIdVehicle(Integer idCustomer, Integer idVehicle);
-    Boolean existsByIdCustomerAndIdVehicle(Integer idCustomer, Integer idVehicle);
+public interface CustomerVehicleRepository extends JpaRepository<CustomerVehicleModel, Long> {
+    List<CustomerVehicleModel> findByIdCustomer(Long idCustomer);
+    Optional<CustomerVehicleModel> findByIdCustomerAndIdVehicle(Long idCustomer, Long idVehicle);
+    Boolean existsByIdCustomerAndIdVehicle(Long idCustomer, Long idVehicle);
 }

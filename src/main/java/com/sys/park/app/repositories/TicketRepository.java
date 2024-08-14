@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.sys.park.app.models.TicketModel;
 
 @Repository
-public interface TicketRepository extends JpaRepository<TicketModel, Integer> {
+public interface TicketRepository extends JpaRepository<TicketModel, Long> {
     List<TicketModel> findByIdCustomerVehicle(Integer idCustomerVehicle);
     Page<TicketModel> findByIsActive(Boolean isActive, Pageable page);
     List<TicketModel> findByIsActive(Boolean isActive);

@@ -20,18 +20,18 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class CustomerForm {
-    private Integer id;
+    private Long id;
  
     @Valid
     @NotNull(message = "A pessoa não pode ser nula")
     private PersonForm person;
+
+    @NotNull(message = "O tipo de cliente não pode ser nulo")
+    private Long idCustomerType;
     
     @Max(value = 31, message = "O dia do pagamento tem que ser no máximo é 31")
     @Min(value = 1, message = "O dia do pagamento tem que ser no mínimo é 01")
     private Integer paymentDay;
 
-    @NotNull(message = "O tipo de cliente não pode ser nulo")
-    private Integer idCustomerType;
-    
     private Boolean isActive;
 }

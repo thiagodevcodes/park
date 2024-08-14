@@ -14,10 +14,10 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class CustomerDto {
-    private Integer id;
-    private Integer idPerson;
+    private Long id;
+    private Long idPerson;
+    private Long idCustomerType;
     private Integer paymentDay;
-    private Integer idCustomerType;
     private Boolean isActive;
     private PersonDto person;
 }

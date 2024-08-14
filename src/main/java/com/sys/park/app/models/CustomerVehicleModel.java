@@ -15,17 +15,17 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "vehicle_customer")
+@Table(name = "tb_vehicle_customer")
 public class CustomerVehicleModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "id_vehicle")
-    private Integer idVehicle;
+    private Long idVehicle;
 
     @Column(name = "id_customer")
-    private Integer idCustomer;
+    private Long idCustomer;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

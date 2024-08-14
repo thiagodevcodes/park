@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class TicketRotativoForm {
-    private Integer id;
+    private Long id;
 
     @NotNull(message = "O nome não pode ser nulo!")
     @NotBlank(message = "O nome não pode estar em branco!")
@@ -25,8 +25,8 @@ public class TicketRotativoForm {
     private String model;
 
     @NotNull(message = "A vaga não pode ser nula!")
-    private Integer idVacancy;
+    private Long idVacancy;
 
     @NotNull(message = "O tipo do cliente não pode ser nulo!")
-    private Integer idCustomerType;
+    private Long idCustomerType;
 }

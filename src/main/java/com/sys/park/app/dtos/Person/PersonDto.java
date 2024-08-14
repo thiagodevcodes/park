@@ -12,7 +12,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class PersonDto {
-    private Integer id;
+    private Long id;
     private String name;
     private String cpf;
     private String email;

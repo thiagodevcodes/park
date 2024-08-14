@@ -15,17 +15,18 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name="customer")
+@Table(name="tb_customer")
 public class CustomerModel {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "id_person", nullable = false)
-    private Integer idPerson;
+    private Long idPerson;
 
     @Column(name = "id_customer_type", nullable = false)
-    private Integer idCustomerType;
+    private Long idCustomerType;
 
     @Column(name = "payment_day")
     private Integer paymentDay;

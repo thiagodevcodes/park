@@ -1,11 +1,10 @@
-CREATE TABLE vehicle (
-    id INTEGER AUTO_INCREMENT NOT NULL,
-    plate VARCHAR(30) NOT NULL,
-    make VARCHAR(30) NULL,
+CREATE TABLE tb_vehicle (
+    id BIGSERIAL PRIMARY KEY,
+    plate VARCHAR(30) NOT NULL UNIQUE,
+    make VARCHAR(30),
     model VARCHAR(30) NOT NULL,
     monthly_vehicle BOOLEAN NOT NULL,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
-    CONSTRAINT PK_vehicle PRIMARY KEY (id),
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
     CONSTRAINT UK_vehiclePlate UNIQUE (plate)
 );

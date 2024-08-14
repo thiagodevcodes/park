@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.sys.park.app.models.CustomerTypeModel;
 
 @Repository
-public interface CustomerTypeRepository extends JpaRepository<CustomerTypeModel, Integer> {
+public interface CustomerTypeRepository extends JpaRepository<CustomerTypeModel, Long> {
     Optional<CustomerTypeModel> findByName(String name);
 }

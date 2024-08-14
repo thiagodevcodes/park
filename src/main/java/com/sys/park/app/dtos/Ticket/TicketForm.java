@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 public class TicketForm {
-    private Integer id;
+    private Long id;
 
     @NotNull(message = "Veiculo não pode ser nulo")
     @Valid
@@ -20,5 +20,5 @@ public class TicketForm {
     private CustomerForm customer;
 
     @NotNull(message = "A vaga não pode ser nula!")
-    private Integer idVacancy;
+    private Long idVacancy;
 }

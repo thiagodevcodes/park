@@ -16,17 +16,17 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name="ticket")
+@Table(name="tb_ticket")
 public class TicketModel {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "id_vacancy", nullable = false)
-    private Integer idVacancy;
+    private Long idVacancy;
 
     @Column(name = "id_customer_vehicle", nullable = false)
-    private Integer idCustomerVehicle;
+    private Long idCustomerVehicle;
 
     @Column(name = "entry_time", nullable = false)
     private LocalDateTime entryTime;

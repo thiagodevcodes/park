@@ -64,7 +64,7 @@ public class TicketService {
         }
     }
 
-    public TicketDto findById(Integer id) {
+    public TicketDto findById(Long id) {
         try {
             TicketModel ticketModel = ticketRepository.findById(id).get();
             return modelMapper.map(ticketModel, TicketDto.class);
@@ -73,7 +73,7 @@ public class TicketService {
         }
     }
 
-    public TicketDto updateById(TicketDto ticketDto, Integer id) {
+    public TicketDto updateById(TicketDto ticketDto, Long id) {
         try {
             Optional<TicketModel> ticketExist = ticketRepository.findById(id);
 
@@ -94,7 +94,7 @@ public class TicketService {
         }
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         try {
             if (ticketRepository.existsById(id)) {
                 TicketDto ticketDto = this.findById(id);
@@ -146,7 +146,7 @@ public class TicketService {
         }
     }
 
-    public TicketDto finishTicket(TicketForm ticketForm, Integer id) {
+    public TicketDto finishTicket(TicketForm ticketForm, Long id) {
         TicketModel ticketModel = ticketRepository.findById(id).get();
         ticketModel.setIsActive(false);
         
