@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import com.sys.park.app.dtos.Ticket.TicketDto;
-import com.sys.park.app.dtos.Ticket.TicketForm;
+import com.sys.park.app.dtos.Ticket.TicketRequest;
 import com.sys.park.app.services.TicketService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -48,7 +48,7 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<TicketDto> insert(@Valid @RequestBody TicketForm ticketForm, BindingResult br) {
+    public ResponseEntity<TicketDto> insert(@Valid @RequestBody TicketRequest ticketForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -81,7 +81,7 @@ public class TicketController {
 
     @PutMapping("/finish")
     public ResponseEntity<TicketDto> finishTicket(@Valid @RequestBody
-    TicketForm ticketForm, @RequestParam("id") Long id, BindingResult br) {
+    TicketRequest ticketForm, @RequestParam("id") Long id, BindingResult br) {
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
             br.getAllErrors().forEach(e -> {

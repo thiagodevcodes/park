@@ -12,11 +12,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
-import com.sys.park.app.dtos.Customer.CustomerForm;
-import com.sys.park.app.dtos.Customer.CustomerFormUpdate;
+import com.sys.park.app.dtos.Customer.CustomerRequest;
 import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.dtos.Person.PersonForm;
-import com.sys.park.app.dtos.Person.PersonUpdateForm;
+import com.sys.park.app.dtos.Person.PersonRequest;
 import com.sys.park.app.models.CustomerModel;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.CustomerRepository;
@@ -66,7 +64,7 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto updateById(CustomerFormUpdate customerFormUpdate, Long id) {
+    public CustomerDto updateById(CustomerRequest customerRequest, Long id) {
         try {
             Optional<CustomerModel> customerExist = customerRepository.findById(id);      
 
@@ -74,7 +72,7 @@ public class CustomerService {
                 CustomerModel customerUpdated = customerExist.get();
                 
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
-                modelMapper.map(customerFormUpdate, customerUpdated);
+                modelMapper.map(customerRequest, customerUpdated);
                 customerUpdated = this.customerRepository.save(customerUpdated);
                 
                 return modelMapper.map(customerUpdated, CustomerDto.class);
@@ -98,11 +96,9 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto createDataCustomer(CustomerForm customerForm, PersonForm personForm) {
+    public CustomerDto createDataCustomer(CustomerRequest customerForm, PersonRequest personForm) {
         PersonModel person = new PersonModel();
         CustomerModel customer = new CustomerModel();
-
-        System.out.println(personForm);
 
         if(personRepository.existsByCpf(personForm.getCpf())) {
             person = personRepository.findByCpf(personForm.getCpf()).get();
@@ -114,7 +110,6 @@ public class CustomerService {
         person.setEmail(personForm.getEmail());                      
         person.setPhone(personForm.getPhone());
         person.setName(personForm.getName());
-        System.out.println(person);
 
         person = personRepository.save(person);
 
@@ -129,26 +124,33 @@ public class CustomerService {
             customer = this.customerRepository.save(customer);
         }
 
-        System.out.println(customer);
-
-
         CustomerDto customerDto = modelMapper.map(customer, CustomerDto.class);
         customerDto.setPerson(modelMapper.map(person, PersonDto.class));
         return customerDto;
     }
 
-    public CustomerDto addCustomer(CustomerForm customerForm) {
+    public CustomerDto insert(CustomerModel customerModel) {
+        try {      
+            CustomerModel newCustomer = customerRepository.save(customerModel);
+            
+            return modelMapper.map(newCustomer, CustomerDto.class);
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Campo(s) obrigatório(s) da Pessoa não foi(foram) preenchido(s).");
+        }
+    }
+
+    public CustomerDto addCustomer(CustomerRequest customerRequest) {
         PersonModel person = new PersonModel();
         CustomerModel customer = new CustomerModel();
-        PersonForm personForm = customerForm.getPerson();
+        PersonRequest personForm = customerRequest.getPerson();
 
         if(this.personRepository.existsByCpf(personForm.getCpf()) && !personForm.getCpf().equals(null)) {
             person = personRepository.findByCpf(personForm.getCpf()).get();
-            personForm = modelMapper.map(person, PersonForm.class);
+            personForm = modelMapper.map(person, PersonRequest.class);
             
             if(customerRepository.existsByIdPerson(person.getId())) {
                 customer = customerRepository.findByIdPerson(person.getId()).get();
-                customerForm = modelMapper.map(customer, CustomerForm.class);
+                customerRequest = modelMapper.map(customer, CustomerRequest.class);
 
                 if(customer.getIsActive().equals(true)) {
                     throw new DataIntegrityException("Cliente com este CPF já existe");
@@ -161,20 +163,20 @@ public class CustomerService {
         }
 
 
-        CustomerDto customerDto = createDataCustomer(customerForm, personForm);
+        CustomerDto customerDto = createDataCustomer(customerRequest, personForm);
         return customerDto;
     }
 
-    public CustomerDto updateCustomer(CustomerFormUpdate customerForm, Long id) {
+    public CustomerDto updateCustomer(CustomerRequest customerRequest, Long id) {
         Optional<CustomerModel> customerOld = customerRepository.findById(id);
-        PersonForm personForm = customerForm.getPerson();
+        PersonRequest personForm = customerRequest.getPerson();
         
         if (customerOld.isPresent()) {
             CustomerModel customerExist = customerOld.get();
             PersonModel personOld = personRepository.findById(customerExist.getIdPerson()).get();
 
-            personService.updateById(modelMapper.map(personForm, PersonUpdateForm.class), customerExist.getIdPerson());
-            CustomerDto customerDto = this.updateById(customerForm, id);
+            personService.updateById(modelMapper.map(personForm, PersonRequest.class), customerExist.getIdPerson());
+            CustomerDto customerDto = this.updateById(customerRequest, id);
             customerDto.setPerson(modelMapper.map(personOld, PersonDto.class));
             return customerDto;
         } else {

@@ -11,7 +11,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CustomerVehicleForm {
+public class CustomerVehicleRequest {
     private Long id;
     private Long idVehicle;
     private Long idCustomer;

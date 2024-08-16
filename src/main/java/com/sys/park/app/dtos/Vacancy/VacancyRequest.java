@@ -12,7 +12,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class VacancyForm {
+public class VacancyRequest {
     @NotNull(message = "A situação da vaga não pode ser nula")
     private Boolean situation;
 }

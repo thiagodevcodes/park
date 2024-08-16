@@ -12,7 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
-import com.sys.park.app.dtos.Vehicle.VehicleForm;
+import com.sys.park.app.dtos.Vehicle.VehicleRequest;
 import com.sys.park.app.models.VehicleModel;
 import com.sys.park.app.repositories.VehicleRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -58,7 +58,7 @@ public class VehicleService {
         }
     }
 
-    public VehicleDto insert(VehicleForm vehicleForm) {
+    public VehicleDto insert(VehicleRequest vehicleForm) {
         try {
             VehicleModel newVehicle = modelMapper.map(vehicleForm, VehicleModel.class);
 

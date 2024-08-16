@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Vacancy.VacancyDto;
-import com.sys.park.app.dtos.Vacancy.VacancyForm;
+import com.sys.park.app.dtos.Vacancy.VacancyRequest;
 import com.sys.park.app.services.VacancyService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -47,7 +47,7 @@ public class VacancyController {
     }
 
     @PostMapping
-    public ResponseEntity<VacancyDto> insert(@Valid @RequestBody VacancyForm vacancyForm, BindingResult br) {
+    public ResponseEntity<VacancyDto> insert(@Valid @RequestBody VacancyRequest vacancyForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -63,7 +63,7 @@ public class VacancyController {
 
     @PutMapping("/{id}")
     public ResponseEntity<VacancyDto> updateById(@Valid @RequestBody
-        VacancyForm vacancyForm, @PathVariable("id") Long id, BindingResult br) {
+        VacancyRequest vacancyForm, @PathVariable("id") Long id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();

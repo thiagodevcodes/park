@@ -1,6 +1,7 @@
 package com.sys.park.app.controllers;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.User.LoginRequest;
 import com.sys.park.app.dtos.User.LoginResponse;
+import com.sys.park.app.models.PersonModel;
+import com.sys.park.app.models.RoleModel;
+import com.sys.park.app.models.UserModel;
 import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.repositories.RoleRepository;
 import com.sys.park.app.repositories.UserRepository;
@@ -40,19 +44,19 @@ public class TokenController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-
-        var user = userRepository.findByUsername(loginRequest.username());
-        var person = personRepository.findById(user.get().getIdPerson());
-        var role = roleRepository.findById(user.get().getIdRole());
+        Optional<UserModel> user = userRepository.findByUsername(loginRequest.username());
+        Optional<PersonModel> person = personRepository.findById(user.get().getIdPerson());
+        Optional<RoleModel> role = roleRepository.findById(user.get().getIdRole());
 
         if (user.isEmpty() || !user.get().isLoginCorrect(loginRequest, passwordEncoder)) {
             throw new BadCredentialsException("user or password is invalid!");
         }
 
-        var now = Instant.now();
-        var expiresIn = 7200L;
+        Instant now = Instant.now();
+        Long expiresIn = 7200L;
 
-        var scopes = user.get().getIdRole();
+        RoleModel roleModel = roleRepository.findById(user.get().getIdRole()).get();
+        var scopes = roleModel.getName();
 
         var claims = JwtClaimsSet.builder()
                 .issuer("mybackend")

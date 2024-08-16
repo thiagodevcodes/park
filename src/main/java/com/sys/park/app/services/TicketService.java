@@ -13,12 +13,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
-import com.sys.park.app.dtos.Customer.CustomerForm;
+import com.sys.park.app.dtos.Customer.CustomerRequest;
 import com.sys.park.app.dtos.Ticket.TicketDto;
-import com.sys.park.app.dtos.Ticket.TicketForm;
+import com.sys.park.app.dtos.Ticket.TicketRequest;
 import com.sys.park.app.dtos.Vacancy.VacancyDto;
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
-import com.sys.park.app.dtos.Vehicle.VehicleForm;
+import com.sys.park.app.dtos.Vehicle.VehicleRequest;
 import com.sys.park.app.models.CustomerModel;
 import com.sys.park.app.models.CustomerVehicleModel;
 import com.sys.park.app.models.TicketModel;
@@ -110,12 +110,12 @@ public class TicketService {
         }
     }
 
-    public TicketDto addNewTicket(TicketForm ticketForm) {
+    public TicketDto addNewTicket(TicketRequest ticketForm) {
         try {           
             modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
             TicketDto ticket = modelMapper.map(ticketForm, TicketDto.class);
-            CustomerForm customer = ticketForm.getCustomer();
-            VehicleForm vehicle = ticketForm.getVehicle(); 
+            CustomerRequest customer = ticketForm.getCustomer();
+            VehicleRequest vehicle = ticketForm.getVehicle(); 
 
             if(ticketRepository.existsActiveTicketByVehiclePlate(vehicle.getPlate())) {
                 throw new DataIntegrityException("Já existe um ticket ativo!");
@@ -146,7 +146,7 @@ public class TicketService {
         }
     }
 
-    public TicketDto finishTicket(TicketForm ticketForm, Long id) {
+    public TicketDto finishTicket(TicketRequest ticketForm, Long id) {
         TicketModel ticketModel = ticketRepository.findById(id).get();
         ticketModel.setIsActive(false);
         

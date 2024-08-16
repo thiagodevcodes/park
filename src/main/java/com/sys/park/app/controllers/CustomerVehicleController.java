@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
-import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleForm;
+import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleRequest;
 import com.sys.park.app.models.CustomerVehicleModel;
 import com.sys.park.app.services.CustomerVehicleService;
 import com.sys.park.app.services.exceptions.ConstraintException;
@@ -45,7 +45,7 @@ public class CustomerVehicleController {
     }
     
     @PostMapping
-    public ResponseEntity<CustomerVehicleDto> insert(@Valid @RequestBody CustomerVehicleForm customerVehicleForm, BindingResult br) {
+    public ResponseEntity<CustomerVehicleDto> insert(@Valid @RequestBody CustomerVehicleRequest customerVehicleForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()

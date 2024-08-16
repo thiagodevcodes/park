@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class TicketRotativoForm {
+public class TicketRotativoRequest {
     private Long id;
 
     @NotNull(message = "O nome não pode ser nulo!")

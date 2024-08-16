@@ -13,8 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.dtos.Person.PersonForm;
-import com.sys.park.app.dtos.Person.PersonUpdateForm;
+import com.sys.park.app.dtos.Person.PersonRequest;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -50,14 +49,13 @@ public class PersonService {
         }
     }
 
-    public PersonDto insert(PersonForm personForm) {
+    public PersonDto insert(PersonModel personModel) {
         try {       
-            this.validCpf(personForm.getCpf());
-            this.validEmail(personForm.getEmail());
+            this.validCpf(personModel.getCpf());
+            this.validEmail(personModel.getEmail());
             //this.validPerson(modelMapper.map(personForm, PersonDto.class));
 
-            PersonModel newPerson = modelMapper.map(personForm, PersonModel.class);
-            newPerson = personRepository.save(newPerson);
+            PersonModel newPerson = personRepository.save(personModel);
             
             return modelMapper.map(newPerson, PersonDto.class);
         } catch (DataIntegrityViolationException e) {
@@ -65,17 +63,14 @@ public class PersonService {
         }
     }
 
-    public PersonDto updateById(PersonUpdateForm personForm, Long long1) {
+    public PersonDto updateById(PersonRequest personForm, Long id ) {
         try {
-            Optional<PersonModel> personExist = personRepository.findById(long1);
+            Optional<PersonModel> personExist = personRepository.findById(id);
             
             if (personExist.isPresent()) {
                 PersonModel personUpdated = personExist.get();
-                System.out.println(personUpdated.getCpf());
-                System.out.println(personForm.getCpf());
-                System.out.println(!Objects.equals(personUpdated.getCpf(), personForm.getCpf()));
+               
                 if (!Objects.equals(personUpdated.getCpf(), personForm.getCpf())) {
-                    System.out.println("Entrei na validação de CPF");
                     this.validCpf(personForm.getCpf());
                 }
                 

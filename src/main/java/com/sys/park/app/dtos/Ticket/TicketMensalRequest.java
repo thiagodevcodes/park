@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class TicketMensalForm {
+public class TicketMensalRequest {
     private Long id;
 
     @NotNull(message = "A vaga não pode ser nula!")

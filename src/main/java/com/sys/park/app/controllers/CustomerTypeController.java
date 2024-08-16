@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.CustomerType.CustomerTypeDto;
-import com.sys.park.app.dtos.CustomerType.CustomerTypeForm;
+import com.sys.park.app.dtos.CustomerType.CustomerTypeRequest;
 import com.sys.park.app.services.CustomerTypeService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -47,7 +47,7 @@ public class CustomerTypeController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerTypeDto> insert(@Valid @RequestBody CustomerTypeForm customerTypeForm, BindingResult br) {
+    public ResponseEntity<CustomerTypeDto> insert(@Valid @RequestBody CustomerTypeRequest customerTypeForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -63,7 +63,7 @@ public class CustomerTypeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomerTypeDto> updateById(@Valid @RequestBody
-        CustomerTypeForm costumerTypeForm, @PathVariable("id") Long id, BindingResult br) {
+        CustomerTypeRequest costumerTypeForm, @PathVariable("id") Long id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();

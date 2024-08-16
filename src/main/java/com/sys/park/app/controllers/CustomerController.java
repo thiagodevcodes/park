@@ -19,9 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
-import com.sys.park.app.dtos.Customer.CustomerForm;
-import com.sys.park.app.dtos.Customer.CustomerFormUpdate;
+import com.sys.park.app.dtos.Customer.CustomerRequest;
+import com.sys.park.app.dtos.Person.PersonDto;
+import com.sys.park.app.models.CustomerModel;
+import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.services.CustomerService;
+import com.sys.park.app.services.PersonService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
 import jakarta.validation.Valid;
@@ -31,6 +34,9 @@ import jakarta.validation.Valid;
 public class CustomerController {
     @Autowired
     CustomerService customerService;
+
+    @Autowired
+    PersonService personService;
 
     @Autowired
     ModelMapper modelMapper;
@@ -48,7 +54,7 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerDto> insert(@Valid @RequestBody CustomerForm customerForm, BindingResult br) {       
+    public ResponseEntity<CustomerDto> insert(@Valid @RequestBody CustomerRequest customerRequest, BindingResult br) {       
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -57,13 +63,22 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        CustomerDto customerDto = customerService.addCustomer(customerForm);
-        return ResponseEntity.ok().body(customerDto);
+        CustomerModel customerModel = modelMapper.map(customerRequest, CustomerModel.class);
+        PersonModel personModel = modelMapper.map(customerRequest.getPerson(), PersonModel.class);
+        
+        PersonDto person = personService.insert(personModel);
+        customerModel.setIdPerson(person.getId());
+
+        CustomerDto customer = customerService.insert(customerModel);
+        customer.setPerson(person);
+
+        //CustomerDto customerDto = customerService.addCustomer(customerRequest);
+        return ResponseEntity.ok().body(customer);
     }
 
     @PutMapping
     public ResponseEntity<CustomerDto> updateById(@Valid @RequestBody
-        CustomerFormUpdate customerForm, @RequestParam("id") Long id, BindingResult br) {
+        CustomerRequest customerRequest, @RequestParam("id") Long id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
@@ -74,7 +89,7 @@ public class CustomerController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
      
-        CustomerDto costumerDto = customerService.updateCustomer(customerForm, id);
+        CustomerDto costumerDto = customerService.updateCustomer(customerRequest, id);
         return ResponseEntity.ok().body(costumerDto);
     }
 

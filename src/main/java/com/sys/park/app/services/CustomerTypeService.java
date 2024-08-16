@@ -12,7 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.CustomerType.CustomerTypeDto;
-import com.sys.park.app.dtos.CustomerType.CustomerTypeForm;
+import com.sys.park.app.dtos.CustomerType.CustomerTypeRequest;
 import com.sys.park.app.models.CustomerTypeModel;
 import com.sys.park.app.repositories.CustomerTypeRepository;
 import com.sys.park.app.services.exceptions.BusinessRuleException;
@@ -66,7 +66,7 @@ public class CustomerTypeService {
         }
     }
 
-    public CustomerTypeDto updateById(CustomerTypeForm customerTypeForm, Long id) {
+    public CustomerTypeDto updateById(CustomerTypeRequest customerTypeForm, Long id) {
         try {
             Optional<CustomerTypeModel> customerTypeExist = customerTypeRepository.findById(id);
 

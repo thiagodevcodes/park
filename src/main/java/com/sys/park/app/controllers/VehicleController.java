@@ -19,8 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
-import com.sys.park.app.dtos.Vehicle.VehicleForm;
-import com.sys.park.app.dtos.Vehicle.VehicleFormUpdate;
+import com.sys.park.app.dtos.Vehicle.VehicleRequest;
 import com.sys.park.app.services.VehicleService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -48,7 +47,7 @@ public class VehicleController {
     }
 
     @PostMapping
-    public ResponseEntity<VehicleDto> insert(@Valid @RequestBody VehicleForm vehicleForm, BindingResult br) {
+    public ResponseEntity<VehicleDto> insert(@Valid @RequestBody VehicleRequest vehicleForm, BindingResult br) {
             
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
@@ -64,7 +63,7 @@ public class VehicleController {
 
     @PutMapping
     public ResponseEntity<VehicleDto> updateById(@Valid @RequestBody
-        VehicleFormUpdate vehicleForm, @RequestParam("id") Integer id, BindingResult br) {
+        VehicleRequest vehicleForm, @RequestParam("id") Integer id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();

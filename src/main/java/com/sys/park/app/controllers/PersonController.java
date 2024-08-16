@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.dtos.Person.PersonForm;
-import com.sys.park.app.dtos.Person.PersonUpdateForm;
+import com.sys.park.app.dtos.Person.PersonRequest;
+import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.services.PersonService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -49,7 +49,7 @@ public class PersonController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonDto> insert(@Valid @RequestBody PersonForm personForm, BindingResult br) {
+    public ResponseEntity<PersonDto> insert(@Valid @RequestBody PersonRequest personForm, BindingResult br) {
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -58,14 +58,16 @@ public class PersonController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        PersonDto personDto = personService.insert(personForm);
+        PersonModel personModel = modelMapper.map(personForm, PersonModel.class);
+
+        PersonDto personDto = personService.insert(personModel);
         return ResponseEntity.ok().body(personDto);
     }
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PersonDto> updateById(@Valid @RequestBody
-        PersonUpdateForm personForm, @RequestParam("id") Long id, BindingResult br) {
+        PersonRequest personForm, @RequestParam("id") Long id, BindingResult br) {
        
         if (br.hasErrors()) {
             List<String> errors = new ArrayList<>();
