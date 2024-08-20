@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.User.CreateUserDto;
+import com.sys.park.app.dtos.User.UserDto;
 import com.sys.park.app.models.UserModel;
 import com.sys.park.app.repositories.PersonRepository;
 import com.sys.park.app.repositories.RoleRepository;
@@ -50,12 +51,14 @@ public class UserController {
         return ResponseEntity.ok().body(user);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @GetMapping
-    public ResponseEntity<List<UserModel>> listUsers() {
-        var users = userRepository.findAll();
+    public ResponseEntity<List<UserDto>> listUsers() {
+        var users = userService.findAll();
         return ResponseEntity.ok(users);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @GetMapping("find")
     public ResponseEntity<UserModel> findById(@RequestParam("id") Long id) {
         var users = userRepository.findById(id).get();

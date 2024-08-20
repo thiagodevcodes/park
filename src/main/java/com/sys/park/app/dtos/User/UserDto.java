@@ -5,26 +5,34 @@ import org.hibernate.validator.constraints.br.CPF;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public record UserDto(
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserDto {
     @NotBlank
-    String name,
+    private String name;
 
     @NotBlank
-    String username,
+    private String username;
 
     @NotBlank
-    String password,
+    private String password;
 
     @CPF
-    String cpf,
+    private String cpf;
 
     @NotBlank
-    String phone,
+    private String phone;
 
     @Email
-    String email,
+    private String email;
 
     @NotNull
-    Long role
-) {}
+    private Long role;
+}
