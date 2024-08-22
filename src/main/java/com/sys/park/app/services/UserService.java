@@ -1,10 +1,13 @@
 package com.sys.park.app.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,26 +39,21 @@ public class UserService {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
 
-    public List<UserDto> findAll() {
-        try {
-            List<UserModel> userModelList = userRepository.findAll();
+    public Page<UserDto> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable).map(user -> {
+            UserDto userDto = modelMapper.map(user, UserDto.class);
 
-            return userModelList.stream()
-                .map(user -> {
-                    UserDto userDto = modelMapper.map(user, UserDto.class);
+            Optional<PersonModel> personModelOptional = personRepository.findById(user.getIdPerson());
+            if (personModelOptional.isPresent()) {
+                PersonModel personModel = personModelOptional.get();
+                PersonDto personDto = modelMapper.map(personModel, PersonDto.class);
+                userDto.setName(personDto.getName());
+            } else {
+                throw new BusinessRuleException("Pessoa não encontrada!");
+            }
 
-                    PersonModel personModel = personRepository.findById(user.getIdPerson())
-                        .orElseThrow(() -> new BusinessRuleException("Pessoa não encontrada!"));
-
-                    PersonDto personDto = modelMapper.map(personModel, PersonDto.class);       
-                    userDto.setName(personDto.getName());
-
-                    return userDto;
-                })
-                .collect(Collectors.toList());
-        } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar a Pessoa!");
-        }
+            return userDto;
+        });
     }
 
     public UserModel newUser(CreateUserDto user) {
