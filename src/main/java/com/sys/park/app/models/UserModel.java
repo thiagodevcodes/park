@@ -6,7 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.sys.park.app.dtos.User.LoginRequest;
+import com.sys.park.app.dtos.Auth.LoginRequest;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

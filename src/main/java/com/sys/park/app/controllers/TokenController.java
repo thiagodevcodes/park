@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sys.park.app.dtos.User.LoginRequest;
-import com.sys.park.app.dtos.User.LoginResponse;
+import com.sys.park.app.dtos.Auth.LoginRequest;
+import com.sys.park.app.dtos.Auth.LoginResponse;
 import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.models.RoleModel;
 import com.sys.park.app.models.UserModel;
