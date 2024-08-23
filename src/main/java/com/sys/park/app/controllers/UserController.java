@@ -79,7 +79,7 @@ public class UserController {
     }
 
     @PutMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<UserDto> updateById(@Valid @RequestBody
         UpdateUserRequest userRequest, @RequestParam("id") Long id, BindingResult br) {
        
