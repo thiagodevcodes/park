@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.User.UserDto;
 import com.sys.park.app.dtos.Person.PersonDto;
+import com.sys.park.app.dtos.Person.PersonRequest;
 import com.sys.park.app.dtos.User.CreateUserRequest;
 import com.sys.park.app.dtos.User.UpdateUserRequest;
 import com.sys.park.app.models.PersonModel;
@@ -100,15 +101,20 @@ public class UserService {
     }
 
 
-    public UserDto updateById(UpdateUserRequest user, Long id ) {
+    public UserDto updateUser(UpdateUserRequest user, Long id ) {
         try {
             Optional<UserModel> userExist = userRepository.findById(id);
             
             if (userExist.isPresent()) {
                 UserModel userUpdated = userExist.get();
-                
+                PersonDto personUpdated = personService.findById(userExist.get().getIdPerson());  
+
                 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
                 modelMapper.map(user, userUpdated);
+                modelMapper.map(user.getPerson(), personUpdated);
+
+                PersonRequest personRequest = modelMapper.map(personUpdated, PersonRequest.class);
+                personService.updateById(personRequest, personUpdated.getId());
                 userUpdated = userRepository.save(userUpdated);
 
                 return modelMapper.map(userUpdated, UserDto.class);
@@ -117,6 +123,21 @@ public class UserService {
             }
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Campo(s) obrigatório(s) da Pessoa não foi(foram) preenchido(s).");
+        }
+    }
+
+    public void deleteById(Long id) {
+        try {
+            if (userRepository.existsById(id)) {
+                UserModel user = userRepository.findById(id).get();
+                userRepository.deleteById(id);
+                personService.deleteById(user.getIdPerson());
+
+            }else {
+                throw new DataIntegrityException("O Id do Usuário não existe na base de dados!");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityException("Não é possível excluir a Pessoa!");
         }
     }
 

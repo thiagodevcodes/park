@@ -18,9 +18,6 @@ public class UpdateUserRequest {
     @NotBlank(message = "O usuário não deve estar em branco")
     private String username;
 
-    @NotBlank(message = "A senha não deve estar em branco")
-    private String password;
-
     @NotNull(message = "A grupo de usuário não deve estar em branco")
     private Long role;
 
