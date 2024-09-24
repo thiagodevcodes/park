@@ -1,21 +1,23 @@
 package com.sys.park.app.services;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.sys.park.app.dtos.Customer.CustomerDto;
+import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleRequest;
+import com.sys.park.app.models.CustomerModel;
 import com.sys.park.app.models.VehicleModel;
 import com.sys.park.app.repositories.VehicleRepository;
-import com.sys.park.app.services.exceptions.BusinessRuleException;
 import com.sys.park.app.services.exceptions.DataIntegrityException;
 import com.sys.park.app.services.exceptions.NotFoundException;
 
@@ -23,21 +25,18 @@ import com.sys.park.app.services.exceptions.NotFoundException;
 public class VehicleService {
     @Autowired
     private VehicleRepository vehicleRepository;
+
    
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<VehicleDto> findAll() {
-        try {
-            List<VehicleModel> vehicleModelList = vehicleRepository.findAll();
+    public Page<VehicleDto> findAll(Pageable pageable) {
+        return vehicleRepository.findAll(pageable).map(vehicle -> {
+            VehicleDto vehicleDto = modelMapper.map(vehicle, VehicleDto.class);
 
-            return vehicleModelList.stream()
-                    .map(vehicle -> modelMapper.map(vehicle, VehicleDto.class))
-                    .collect(Collectors.toList());
-        } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar o Veiculo!");
-        }
-    }
+            return vehicleDto;
+        });
+    }    
 
     public VehicleDto findById(Integer id) {
         try {
@@ -58,17 +57,15 @@ public class VehicleService {
         }
     }
 
-    public VehicleDto insert(VehicleRequest vehicleForm) {
+    public VehicleDto insert(VehicleModel vehicleModel) {
         try {
-            VehicleModel newVehicle = modelMapper.map(vehicleForm, VehicleModel.class);
-
-            if(vehicleRepository.existsByPlate(vehicleForm.getPlate())) {
-                newVehicle = vehicleRepository.findByPlate(vehicleForm.getPlate()).get();
+            if(vehicleRepository.existsByPlate(vehicleModel.getPlate())) {
+                vehicleModel = vehicleRepository.findByPlate(vehicleModel.getPlate()).get();
             } else {
-                newVehicle = vehicleRepository.save(newVehicle);
+                vehicleModel = vehicleRepository.save(vehicleModel);
             }
         
-            return modelMapper.map(newVehicle, VehicleDto.class);
+            return modelMapper.map(vehicleModel, VehicleDto.class);
 
         } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityException("Campo(s) obrigatório(s) do Veiculo não foi(foram) preenchido(s).");
@@ -98,7 +95,7 @@ public class VehicleService {
 
     public void deleteById(Integer id) {
         try {
-            System.out.println(id);
+            System.out.println("Id: " + id);
             if (vehicleRepository.existsById(id)) {
                 vehicleRepository.deleteById(id);
             }else {
@@ -108,4 +105,5 @@ public class VehicleService {
             throw new DataIntegrityException("Não é possível excluir o Veiculo!");
         }
     }
+   
 }

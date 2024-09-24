@@ -47,20 +47,20 @@ public class TicketController {
         return ResponseEntity.ok().body(personDto);
     }
 
-    @PostMapping
-    public ResponseEntity<TicketDto> insert(@Valid @RequestBody TicketRequest ticketForm, BindingResult br) {
+    // @PostMapping
+    // public ResponseEntity<TicketDto> insert(@Valid @RequestBody TicketRequest ticketForm, BindingResult br) {
             
-        if (br.hasErrors()) {
-            List<String> errors = br.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
+    //     if (br.hasErrors()) {
+    //         List<String> errors = br.getAllErrors().stream()
+    //                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
+    //                 .collect(Collectors.toList());
 
-            throw new ConstraintException("Restrição de Dados", errors);
-        }
+    //         throw new ConstraintException("Restrição de Dados", errors);
+    //     }
 
-        TicketDto ticketDto = ticketService.addNewTicket(ticketForm);
-        return ResponseEntity.ok().body(ticketDto);
-    }
+    //     TicketDto ticketDto = ticketService.addNewTicket(ticketForm);
+    //     return ResponseEntity.ok().body(ticketDto);
+    // }
 
     @PutMapping
     public ResponseEntity<TicketDto> updateById(@Valid @RequestBody

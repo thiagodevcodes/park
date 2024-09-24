@@ -53,5 +53,4 @@ public class UserModel {
     public boolean isLoginCorrect(LoginRequest loginRequest, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(loginRequest.password(), this.password);
     }
-    
 }

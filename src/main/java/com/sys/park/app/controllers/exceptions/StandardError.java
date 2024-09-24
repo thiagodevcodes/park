@@ -1,6 +1,7 @@
 package com.sys.park.app.controllers.exceptions;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ public class StandardError implements Serializable {
     private Long timestamp;
     private Integer status;
     private String error;
-    private String message;
+    private List<String> messages;
     private String path;
 }
 

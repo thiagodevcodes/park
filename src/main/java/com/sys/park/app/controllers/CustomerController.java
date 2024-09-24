@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,9 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
 import com.sys.park.app.dtos.Customer.CustomerRequest;
-import com.sys.park.app.dtos.Person.PersonDto;
-import com.sys.park.app.models.CustomerModel;
-import com.sys.park.app.models.PersonModel;
 import com.sys.park.app.services.CustomerService;
 import com.sys.park.app.services.PersonService;
 import com.sys.park.app.services.exceptions.ConstraintException;
@@ -42,9 +42,14 @@ public class CustomerController {
     ModelMapper modelMapper;
 
     @GetMapping
-    public ResponseEntity<List<CustomerDto>> findAll() {
-        List<CustomerDto> customerDtoList = customerService.findAll();
-        return ResponseEntity.ok().body(customerDtoList);
+    public ResponseEntity<Page<CustomerDto>> listUsers(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<CustomerDto> usersPage = customerService.findAll(pageable);
+        return ResponseEntity.ok(usersPage);
     }
 
     @GetMapping("find")
@@ -57,23 +62,13 @@ public class CustomerController {
     public ResponseEntity<CustomerDto> insert(@Valid @RequestBody CustomerRequest customerRequest, BindingResult br) {       
         if (br.hasErrors()) {
             List<String> errors = br.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.toList());
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        CustomerModel customerModel = modelMapper.map(customerRequest, CustomerModel.class);
-        PersonModel personModel = modelMapper.map(customerRequest.getPerson(), PersonModel.class);
-        
-        PersonDto person = personService.insert(personModel);
-        customerModel.setIdPerson(person.getId());
-
-        CustomerDto customer = customerService.insert(customerModel);
-        customer.setPerson(person);
-
-        //CustomerDto customerDto = customerService.addCustomer(customerRequest);
-        return ResponseEntity.ok().body(customer);
+        CustomerDto customerDto = customerService.addCustomer(customerRequest);
+        return ResponseEntity.ok().body(customerDto);
     }
 
     @PutMapping

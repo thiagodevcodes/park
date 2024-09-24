@@ -7,10 +7,14 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sys.park.app.dtos.CustomerVehicle.CustomerVehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleDto;
 import com.sys.park.app.dtos.Vehicle.VehicleRequest;
+import com.sys.park.app.services.CustomerVehicleService;
 import com.sys.park.app.services.VehicleService;
 import com.sys.park.app.services.exceptions.ConstraintException;
 
@@ -31,13 +37,34 @@ public class VehicleController {
     @Autowired
     VehicleService vehicleService;
 
+    @Autowired 
+    CustomerVehicleService customerVehicleService;
+
     @Autowired
     ModelMapper modelMapper;
 
     @GetMapping
-    public ResponseEntity<List<VehicleDto>> findAll() {
-        List<VehicleDto> vehicleDtoList = vehicleService.findAll();
-        return ResponseEntity.ok().body(vehicleDtoList);
+    public ResponseEntity<Page<VehicleDto>> listUsers(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<VehicleDto> vehiclePage = vehicleService.findAll(pageable);
+        return ResponseEntity.ok(vehiclePage);
+    }
+
+
+    @GetMapping("/customer")
+    public ResponseEntity<Page<CustomerVehicleDto>> listVehiclesByIdCustomer(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam("id") Long id) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<CustomerVehicleDto> vehiclePage = customerVehicleService.findByIdCustomer(pageable, id);
+        return ResponseEntity.ok(vehiclePage);
     }
 
     @GetMapping("find")
@@ -57,7 +84,10 @@ public class VehicleController {
             throw new ConstraintException("Dados incorretos!", errors);
         }
 
-        VehicleDto vehicleDto = vehicleService.insert(vehicleForm);
+        VehicleDto vehicleDto = modelMapper.map(vehicleForm, VehicleDto.class);
+
+        vehicleDto = customerVehicleService.addVehicle(vehicleForm.getIdCustomer(), vehicleDto);
+
         return ResponseEntity.ok().body(vehicleDto);
     }
 

@@ -34,5 +34,7 @@ public class VehicleRequest {
     @Size(message = "O tamanho não pode ultrapassar 20 caracteres")
     private String model;
 
+    private Long idCustomer;
+
     private Boolean monthlyVehicle;
 }

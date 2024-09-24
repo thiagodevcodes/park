@@ -1,14 +1,14 @@
 package com.sys.park.app.services;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sys.park.app.dtos.Customer.CustomerDto;
@@ -37,28 +37,32 @@ public class CustomerService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<CustomerDto> findAll() {
-        try {
-            List<CustomerModel> customerModelList = customerRepository.findAll();
-            
-            return customerModelList.stream()
-                    .map(customer -> {
-                        CustomerDto customerDto = modelMapper.map(customer, CustomerDto.class);
-                        // Aqui você adiciona o atributo person ao CustomerDto
-                        PersonModel person = personRepository.findById(customer.getIdPerson()).get();
-                        customerDto.setPerson(modelMapper.map(person, PersonDto.class)); // Supondo que getPerson() retorna o atributo person
-                        return customerDto;
-                    })
-                    .collect(Collectors.toList());
-        } catch (BusinessRuleException e) {
-            throw new BusinessRuleException("Não é possível consultar os Clientes!");
-        }
+    public Page<CustomerDto> findAll(Pageable pageable) {
+        return customerRepository.findAll(pageable).map(user -> {
+            CustomerDto customerDto = modelMapper.map(user, CustomerDto.class);
+
+            Optional<PersonModel> personModelOptional = personRepository.findById(user.getIdPerson());
+            if (personModelOptional.isPresent()) {
+                PersonModel personModel = personModelOptional.get();
+                PersonDto personDto = modelMapper.map(personModel, PersonDto.class);
+                customerDto.setPerson(personDto);
+            } else {
+                throw new BusinessRuleException("Cliente não encontrado!");
+            }
+
+            return customerDto;
+        });
     }
 
     public CustomerDto findById(Long id) {
         try {
             CustomerModel customerModel = customerRepository.findById(id).get();
-            return modelMapper.map(customerModel, CustomerDto.class);
+            PersonDto personDto = personService.findById(customerModel.getIdPerson());
+
+            CustomerDto customerResponseDto= modelMapper.map(customerModel, CustomerDto.class);
+            customerResponseDto.setPerson(personDto);
+
+            return customerResponseDto;
         } catch (NoSuchElementException e) {
             throw new NotFoundException("Objeto não encontrado! Id: " + id + ", Tipo: " + CustomerDto.class.getName());
         }
@@ -96,41 +100,12 @@ public class CustomerService {
         }
     }
 
-    public CustomerDto createDataCustomer(CustomerRequest customerForm, PersonRequest personForm) {
-        PersonModel person = new PersonModel();
-        CustomerModel customer = new CustomerModel();
-
-        if(personRepository.existsByCpf(personForm.getCpf())) {
-            person = personRepository.findByCpf(personForm.getCpf()).get();
-            System.out.println("Person que existe: " + person);
-        } else {
-            person.setCpf(personForm.getCpf());
-        }
-  
-        person.setEmail(personForm.getEmail());                      
-        person.setPhone(personForm.getPhone());
-        person.setName(personForm.getName());
-
-        person = personRepository.save(person);
-
-        customer.setIsActive(true);
-        customer.setIdPerson(person.getId());
-        customer.setPaymentDay(customerForm.getPaymentDay());
-        customer.setIdCustomerType(customerForm.getIdCustomerType());
-
-        if(customerRepository.existsByIdPerson(customer.getIdPerson())) {
-            customer = this.customerRepository.findByIdPerson(customer.getIdPerson()).get();
-        } else {
-            customer = this.customerRepository.save(customer);
-        }
-
-        CustomerDto customerDto = modelMapper.map(customer, CustomerDto.class);
-        customerDto.setPerson(modelMapper.map(person, PersonDto.class));
-        return customerDto;
-    }
-
     public CustomerDto insert(CustomerModel customerModel) {
         try {      
+            if(customerRepository.existsByIdPerson(customerModel.getIdPerson())) {
+                throw new DataIntegrityException("Pessoa já existe");
+            }
+
             CustomerModel newCustomer = customerRepository.save(customerModel);
             
             return modelMapper.map(newCustomer, CustomerDto.class);
@@ -140,30 +115,18 @@ public class CustomerService {
     }
 
     public CustomerDto addCustomer(CustomerRequest customerRequest) {
-        PersonModel person = new PersonModel();
-        CustomerModel customer = new CustomerModel();
         PersonRequest personForm = customerRequest.getPerson();
 
-        if(this.personRepository.existsByCpf(personForm.getCpf()) && !personForm.getCpf().equals(null)) {
-            person = personRepository.findByCpf(personForm.getCpf()).get();
-            personForm = modelMapper.map(person, PersonRequest.class);
-            
-            if(customerRepository.existsByIdPerson(person.getId())) {
-                customer = customerRepository.findByIdPerson(person.getId()).get();
-                customerRequest = modelMapper.map(customer, CustomerRequest.class);
+        CustomerModel customerModel = modelMapper.map(customerRequest, CustomerModel.class);
+        PersonModel personModel = modelMapper.map(personForm, PersonModel.class);
+        
+        customerModel.setIsActive(true);
+        PersonDto personDto = personService.insert(personModel);
+        
+        customerModel.setIdPerson(personDto.getId());
+        CustomerDto customerDto = this.insert(customerModel);
 
-                if(customer.getIsActive().equals(true)) {
-                    throw new DataIntegrityException("Cliente com este CPF já existe");
-                }
-            } 
-        } else {
-            personService.validCpf(personForm.getCpf());
-            personService.validEmail(personForm.getEmail());
-            //personService.validPerson(modelMapper.map(personForm, PersonDto.class));
-        }
-
-
-        CustomerDto customerDto = createDataCustomer(customerRequest, personForm);
+        // CustomerDto customerDto = createDataCustomer(customerRequest, personForm);
         return customerDto;
     }
 

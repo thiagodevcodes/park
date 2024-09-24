@@ -60,7 +60,6 @@ public class UserController {
         return ResponseEntity.ok().body(user);
     }
 
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @GetMapping
     public ResponseEntity<Page<UserDto>> listUsers(
         @RequestParam(defaultValue = "0") int page,
@@ -72,7 +71,6 @@ public class UserController {
         return ResponseEntity.ok(usersPage);
     }
 
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @GetMapping("find")
     public ResponseEntity<UserDto> findById(@RequestParam("id") Long id) {
         var users = userService.findById(id);

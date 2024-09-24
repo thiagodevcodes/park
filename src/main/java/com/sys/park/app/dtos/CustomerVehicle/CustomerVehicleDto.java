@@ -13,6 +13,10 @@ import lombok.ToString;
 @ToString
 public class CustomerVehicleDto {
     private Long id;
+    private String plate;
+    private String make;
+    private String model; 
+    private Boolean isActive;
     private Long idVehicle;
     private Long idCustomer;
 }
