@@ -8,8 +8,8 @@
 
 ### Para o Backend :
 
-- Java: Execução de JavaScript no servidor;
-- Spring: Framework para APIs em Node.js;
+- Java: Linguagem de Programação;
+- Spring: Framework Java;
 - PostgreSQL: Banco de dados relacional;
 
 ### Para o Frontend :
