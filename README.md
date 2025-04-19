@@ -1,7 +1,13 @@
 <div align="center">
     <h1>
-        Sistema para Gestão de Estacionamento - Em Desenvolvimento...
+        Sistema para Gestão de Estacionamento 
     </h1>
+</div>
+
+<div align="center">
+    <h2> 
+        Em Desenvolvimento
+    </h2>
 </div>
 
 ## 🛠️ Tecnologias Utilizadas
